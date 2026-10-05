@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <title>Student Cloud Manager - AWS serverless architecture</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; }
+      .title { font-size: 15px; font-weight: 700; fill: #111827; }
+      .sub { font-size: 12px; fill: #4b5563; }
+      .tag { font-size: 11px; font-weight: 700; fill: #ffffff; letter-spacing: .04em; }
+      .edge { stroke: #4b5563; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke-dasharray: 6 5; }
+      .label { font-size: 11.5px; fill: #374151; }
+      .region { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 8 6; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="720" fill="#ffffff"/>
+  <text x="40" y="44" font-size="22" font-weight="700" fill="#111827">Student Cloud Manager: AWS serverless architecture</text>
+  <text x="40" y="68" class="sub">Cognito → API Gateway (JWT) → Lambda → DynamoDB / S3, website on S3 + CloudFront, monitoring with CloudWatch, permissions with IAM</text>
+
+  <!-- AWS region -->
+  <rect x="250" y="95" width="920" height="600" rx="14" class="region"/>
+  <text x="268" y="120" font-size="13" font-weight="700" fill="#475569">AWS Region (multi-AZ managed services)</text>
+
+  <!-- Browser -->
+  <rect x="30" y="300" width="180" height="120" rx="12" class="box"/>
+  <rect x="30" y="300" width="180" height="26" rx="12" fill="#1d4ed8"/><rect x="30" y="314" width="180" height="12" fill="#1d4ed8"/>
+  <text x="44" y="318" class="tag">CLIENT</text>
+  <text x="44" y="352" class="title">Student browser</text>
+  <text x="44" y="372" class="sub">React + Vite SPA</text>
+  <text x="44" y="390" class="sub">tokens in memory/storage</text>
+
+  <!-- CloudFront -->
+  <g>
+    <rect x="290" y="140" width="200" height="90" rx="12" class="box"/>
+    <rect x="290" y="140" width="200" height="26" rx="12" fill="#8C4FFF"/><rect x="290" y="154" width="200" height="12" fill="#8C4FFF"/>
+    <text x="304" y="158" class="tag">NETWORKING / CDN</text>
+    <text x="304" y="192" class="title">Amazon CloudFront</text>
+    <text x="304" y="212" class="sub">HTTPS, cache, security headers</text>
+  </g>
+
+  <!-- S3 web -->
+  <g>
+    <rect x="560" y="140" width="210" height="90" rx="12" class="box"/>
+    <rect x="560" y="140" width="210" height="26" rx="12" fill="#7AA116"/><rect x="560" y="154" width="210" height="12" fill="#7AA116"/>
+    <text x="574" y="158" class="tag">STORAGE</text>
+    <text x="574" y="192" class="title">S3: frontend bucket</text>
+    <text x="574" y="212" class="sub">private, read via OAC only</text>
+  </g>
+
+  <!-- Cognito -->
+  <g>
+    <rect x="290" y="255" width="200" height="90" rx="12" class="box"/>
+    <rect x="290" y="255" width="200" height="26" rx="12" fill="#DD344C"/><rect x="290" y="269" width="200" height="12" fill="#DD344C"/>
+    <text x="304" y="273" class="tag">SECURITY / IDENTITY</text>
+    <text x="304" y="307" class="title">Amazon Cognito</text>
+    <text x="304" y="327" class="sub">sign-up, verify, login, JWT</text>
+  </g>
+
+  <!-- API Gateway -->
+  <g>
+    <rect x="290" y="375" width="200" height="100" rx="12" class="box"/>
+    <rect x="290" y="375" width="200" height="26" rx="12" fill="#8C4FFF"/><rect x="290" y="389" width="200" height="12" fill="#8C4FFF"/>
+    <text x="304" y="393" class="tag">API</text>
+    <text x="304" y="427" class="title">API Gateway (HTTP)</text>
+    <text x="304" y="447" class="sub">JWT authorizer, CORS,</text>
+    <text x="304" y="463" class="sub">throttling, access logs</text>
+  </g>
+
+  <!-- Lambdas -->
+  <g>
+    <rect x="560" y="300" width="210" height="245" rx="12" class="box"/>
+    <rect x="560" y="300" width="210" height="26" rx="12" fill="#ED7100"/><rect x="560" y="314" width="210" height="12" fill="#ED7100"/>
+    <text x="574" y="318" class="tag">COMPUTE</text>
+    <text x="574" y="350" class="title">AWS Lambda (Node.js 22)</text>
+    <rect x="576" y="364" width="178" height="44" rx="8" fill="#fff7ed" stroke="#fdba74"/>
+    <text x="588" y="384" font-size="13" font-weight="600" fill="#9a3412">assignments</text>
+    <text x="588" y="400" class="sub">CRUD + complete</text>
+    <rect x="576" y="416" width="178" height="44" rx="8" fill="#fff7ed" stroke="#fdba74"/>
+    <text x="588" y="436" font-size="13" font-weight="600" fill="#9a3412">subjects</text>
+    <text x="588" y="452" class="sub">create, list, delete</text>
+    <rect x="576" y="468" width="178" height="60" rx="8" fill="#fff7ed" stroke="#fdba74"/>
+    <text x="588" y="488" font-size="13" font-weight="600" fill="#9a3412">files</text>
+    <text x="588" y="504" class="sub">metadata + presigned</text>
+    <text x="588" y="519" class="sub">upload/download URLs</text>
+  </g>
+
+  <!-- DynamoDB -->
+  <g>
+    <rect x="850" y="300" width="290" height="160" rx="12" class="box"/>
+    <rect x="850" y="300" width="290" height="26" rx="12" fill="#C925D1"/><rect x="850" y="314" width="290" height="12" fill="#C925D1"/>
+    <text x="864" y="318" class="tag">DATABASE</text>
+    <text x="864" y="350" class="title">Amazon DynamoDB (on-demand)</text>
+    <text x="864" y="374" class="sub">assignments: PK userId · SK assignmentId</text>
+    <text x="864" y="396" class="sub">subjects: PK userId · SK subjectId</text>
+    <text x="864" y="418" class="sub">files: PK userId · SK fileId (TTL)</text>
+    <text x="864" y="442" font-size="12" font-weight="600" fill="#86198f">owner is part of every key</text>
+  </g>
+
+  <!-- S3 files -->
+  <g>
+    <rect x="850" y="490" width="290" height="90" rx="12" class="box"/>
+    <rect x="850" y="490" width="290" height="26" rx="12" fill="#7AA116"/><rect x="850" y="504" width="290" height="12" fill="#7AA116"/>
+    <text x="864" y="508" class="tag">STORAGE</text>
+    <text x="864" y="542" class="title">S3: files bucket (private)</text>
+    <text x="864" y="562" class="sub">users/{userId}/files/{fileId}/{name}</text>
+  </g>
+
+  <!-- CloudWatch + IAM -->
+  <g>
+    <rect x="290" y="595" width="230" height="80" rx="12" class="box"/>
+    <rect x="290" y="595" width="230" height="26" rx="12" fill="#E7157B"/><rect x="290" y="609" width="230" height="12" fill="#E7157B"/>
+    <text x="304" y="613" class="tag">MONITORING</text>
+    <text x="304" y="645" class="title">Amazon CloudWatch</text>
+    <text x="304" y="663" class="sub">logs, alarms, dashboard</text>
+  </g>
+  <g>
+    <rect x="545" y="595" width="250" height="80" rx="12" class="box"/>
+    <rect x="545" y="595" width="250" height="26" rx="12" fill="#DD344C"/><rect x="545" y="609" width="250" height="12" fill="#DD344C"/>
+    <text x="559" y="613" class="tag">SECURITY</text>
+    <text x="559" y="645" class="title">AWS IAM</text>
+    <text x="559" y="663" class="sub">least-privilege role per Lambda</text>
+  </g>
+
+  <!-- Edges -->
+  <path class="edge" d="M210,330 C250,330 250,185 288,185"/>
+  <path class="edge" d="M490,185 L558,185"/>
+  <text x="508" y="177" class="label">OAC</text>
+  <path class="edge" d="M210,350 C245,350 255,300 288,300"/>
+  <path class="edge" d="M210,380 C250,380 255,425 288,425"/>
+  <path class="edge" d="M490,425 L558,425"/>
+  <path class="edge" d="M770,386 L848,386"/>
+  <path class="edge" d="M770,438 L848,420"/>
+  <path class="edge" d="M770,498 L848,520"/>
+  <text x="782" y="532" class="label">presign</text>
+  <path class="edge dashed" d="M120,420 L120,686 L995,686 L995,583"/>
+  <path class="edge dashed" d="M665,545 L665,565 L420,565 L420,593"/>
+  <path class="edge dashed" d="M390,475 L390,593"/>
+  <text x="428" y="585" class="label">logs</text>
+
+  <!-- Step badges -->
+  <g font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">
+    <circle cx="246" cy="262" r="11" fill="#1d4ed8"/><text x="246" y="266">1</text>
+    <circle cx="246" cy="326" r="11" fill="#1d4ed8"/><text x="246" y="330">2</text>
+    <circle cx="246" cy="400" r="11" fill="#1d4ed8"/><text x="246" y="404">3</text>
+    <circle cx="560" cy="686" r="11" fill="#1d4ed8"/><text x="560" y="690">4</text>
+  </g>
+
+  <!-- Legend -->
+  <g>
+    <rect x="30" y="450" width="200" height="132" rx="10" fill="#f8fafc" stroke="#d1d5db"/>
+    <text x="44" y="474" font-size="12.5" font-weight="700" fill="#111827">Request flow</text>
+    <text x="44" y="497" class="label">1  load the website</text>
+    <text x="44" y="518" class="label">2  log in, receive JWT</text>
+    <text x="44" y="539" class="label">3  call API with JWT</text>
+    <text x="44" y="560" class="label">4  upload / download files</text>
+    <text x="62" y="574" class="label">directly via presigned URLs</text>
+  </g>
+</svg>
