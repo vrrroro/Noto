@@ -1,0 +1,13 @@
+{
+  "name": "student-cloud-manager-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Headless-Chrome end-to-end check of the frontend (demo mode). Uses the locally installed Chrome/Edge.",
+  "type": "module",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.12.0"
+  }
+}
