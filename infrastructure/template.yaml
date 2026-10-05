@@ -1,0 +1,662 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Student Cloud Manager - serverless student assignment & notes platform.
+  Cognito (auth) + API Gateway HTTP API (JWT) + Lambda + DynamoDB + S3 + CloudFront + CloudWatch.
+
+# --------------------------------------------------------------------------
+# Parameters
+# --------------------------------------------------------------------------
+Parameters:
+  ProjectName:
+    Type: String
+    Default: student-cloud-manager
+    AllowedPattern: '^[a-z0-9-]+$'
+    Description: Prefix used for every resource name.
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+    Description: Deployment environment.
+  LocalDevOrigin:
+    Type: String
+    Default: http://localhost:5173
+    Description: Extra CORS origin for local frontend development (Vite dev server).
+  AlertEmail:
+    Type: String
+    Default: ''
+    Description: Optional email for error alarms and the monthly budget alert. Leave empty to skip.
+  MonthlyBudgetUsd:
+    Type: Number
+    Default: 5
+    MinValue: 1
+    Description: Monthly AWS cost budget (USD). You are emailed at 80% actual and 100% forecast.
+
+Conditions:
+  HasAlertEmail: !Not [!Equals [!Ref AlertEmail, '']]
+
+# --------------------------------------------------------------------------
+# Lambda defaults
+# --------------------------------------------------------------------------
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures: [arm64] # Graviton: cheaper per GB-second than x86
+    MemorySize: 256
+    Timeout: 10
+    CodeUri: ../backend
+    Environment:
+      Variables:
+        ASSIGNMENTS_TABLE: !Ref AssignmentsTable
+        SUBJECTS_TABLE: !Ref SubjectsTable
+        FILES_TABLE: !Ref FilesTable
+        FILES_BUCKET: !Ref FilesBucket
+        LOG_LEVEL: info
+
+Resources:
+  # ------------------------------------------------------------------------
+  # Authentication: Amazon Cognito
+  # ------------------------------------------------------------------------
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${ProjectName}-users-${Stage}
+      UserPoolTier: LITE
+      DeletionProtection: INACTIVE
+      UsernameAttributes: [email]
+      AutoVerifiedAttributes: [email]
+      UsernameConfiguration:
+        CaseSensitive: false
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+          TemporaryPasswordValidityDays: 7
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_CODE
+        EmailSubject: Your Student Cloud Manager verification code
+        EmailMessage: 'Your verification code is {####}'
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${ProjectName}-web-${Stage}
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false # browser apps cannot keep a secret
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+      EnableTokenRevocation: true
+      SupportedIdentityProviders: [COGNITO]
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+
+  # ------------------------------------------------------------------------
+  # Database: Amazon DynamoDB (on-demand, partition key = userId)
+  # ------------------------------------------------------------------------
+  AssignmentsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${ProjectName}-assignments-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: assignmentId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: assignmentId
+          KeyType: RANGE
+
+  SubjectsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${ProjectName}-subjects-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: subjectId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: subjectId
+          KeyType: RANGE
+
+  FilesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${ProjectName}-files-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: fileId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: fileId
+          KeyType: RANGE
+      TimeToLiveSpecification: # unconfirmed (PENDING) uploads expire automatically
+        AttributeName: expiresAt
+        Enabled: true
+
+  # ------------------------------------------------------------------------
+  # File storage: private S3 bucket, accessed only via presigned URLs
+  # ------------------------------------------------------------------------
+  FilesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-files-${Stage}-${AWS::AccountId}
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [POST]
+            AllowedOrigins:
+              - !Sub https://${WebDistribution.DomainName}
+              - !Ref LocalDevOrigin
+            AllowedHeaders: ['*']
+            MaxAge: 600
+      LifecycleConfiguration:
+        Rules:
+          - Id: abort-incomplete-multipart-uploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+
+  FilesBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FilesBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt FilesBucket.Arn
+              - !Sub ${FilesBucket.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  # ------------------------------------------------------------------------
+  # Frontend hosting: private S3 bucket behind CloudFront (Origin Access Control)
+  # ------------------------------------------------------------------------
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-web-${Stage}-${AWS::AccountId}
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${FrontendBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${WebDistribution}
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt FrontendBucket.Arn
+              - !Sub ${FrontendBucket.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  WebOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub ${ProjectName}-web-oac-${Stage}
+        Description: Lets CloudFront read the private frontend bucket
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  WebDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub ${ProjectName} frontend (${Stage})
+        Enabled: true
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_100 # cheapest edge locations only
+        Origins:
+          - Id: frontend-s3
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt WebOriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultCacheBehavior:
+          TargetOriginId: frontend-s3
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          CachedMethods: [GET, HEAD]
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
+          ResponseHeadersPolicyId: 67f7725c-6f97-4210-82d7-5512b31e9d03 # Managed-SecurityHeadersPolicy
+        # Single-page app: unknown paths (e.g. /assignments) serve index.html
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 10
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 10
+
+  # ------------------------------------------------------------------------
+  # API: API Gateway HTTP API with a Cognito JWT authorizer on every route
+  # ------------------------------------------------------------------------
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Description: !Sub ${ProjectName} REST API (${Stage})
+      Auth:
+        DefaultAuthorizer: CognitoJwt
+        Authorizers:
+          CognitoJwt:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
+              audience:
+                - !Ref UserPoolClient
+      CorsConfiguration:
+        AllowOrigins:
+          - !Sub https://${WebDistribution.DomainName}
+          - !Ref LocalDevOrigin
+        AllowHeaders: [authorization, content-type]
+        AllowMethods: [GET, POST, PUT, DELETE, OPTIONS]
+        MaxAge: 600
+      DefaultRouteSettings: # protects the budget from runaway clients
+        ThrottlingBurstLimit: 20
+        ThrottlingRateLimit: 10
+      AccessLogSettings:
+        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+        Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","time":"$context.requestTime","method":"$context.httpMethod","route":"$context.routeKey","status":"$context.status","latencyMs":"$context.responseLatency","integrationError":"$context.integrationErrorMessage","authorizerError":"$context.authorizer.error"}'
+
+  # ------------------------------------------------------------------------
+  # Backend: one Lambda per resource, each with least-privilege permissions
+  # ------------------------------------------------------------------------
+  AssignmentsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ProjectName}-assignments-${Stage}
+      Description: Assignment CRUD
+      Handler: src/lambdas/assignments.handler
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem]
+              Resource: !GetAtt AssignmentsTable.Arn
+            - Effect: Allow # validate that the subject exists
+              Action: dynamodb:Query
+              Resource: !GetAtt SubjectsTable.Arn
+      Events:
+        List:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: /assignments, Method: GET }
+        Create:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: /assignments, Method: POST }
+        Get:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/assignments/{id}', Method: GET }
+        Update:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/assignments/{id}', Method: PUT }
+        Delete:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/assignments/{id}', Method: DELETE }
+
+  SubjectsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ProjectName}-subjects-${Stage}
+      Description: Subject create/list/delete
+      Handler: src/lambdas/subjects.handler
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:DeleteItem]
+              Resource: !GetAtt SubjectsTable.Arn
+            - Effect: Allow # check whether a subject is still in use before deleting
+              Action: dynamodb:Query
+              Resource:
+                - !GetAtt AssignmentsTable.Arn
+                - !GetAtt FilesTable.Arn
+      Events:
+        List:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: /subjects, Method: GET }
+        Create:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: /subjects, Method: POST }
+        Delete:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/subjects/{id}', Method: DELETE }
+
+  FilesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ProjectName}-files-${Stage}
+      Description: File metadata + presigned S3 upload/download links
+      Handler: src/lambdas/files.handler
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem]
+              Resource: !GetAtt FilesTable.Arn
+            - Effect: Allow # validate that the subject exists
+              Action: dynamodb:Query
+              Resource: !GetAtt SubjectsTable.Arn
+            - Effect: Allow # presigned URLs act with these permissions, limited to users/*
+              Action: [s3:PutObject, s3:GetObject, s3:DeleteObject]
+              Resource: !Sub ${FilesBucket.Arn}/users/*
+      Events:
+        List:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: /files, Method: GET }
+        RequestUpload:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: /files, Method: POST }
+        CompleteUpload:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/files/{id}/complete', Method: POST }
+        Download:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/files/{id}/download', Method: GET }
+        Delete:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/files/{id}', Method: DELETE }
+
+  # ------------------------------------------------------------------------
+  # Monitoring: CloudWatch logs (14-day retention), alarms and a dashboard
+  # ------------------------------------------------------------------------
+  AssignmentsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ProjectName}-assignments-${Stage}
+      RetentionInDays: 14
+
+  SubjectsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ProjectName}-subjects-${Stage}
+      RetentionInDays: 14
+
+  FilesLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ProjectName}-files-${Stage}
+      RetentionInDays: 14
+
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${ProjectName}-${Stage}-access
+      RetentionInDays: 14
+
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Condition: HasAlertEmail
+    Properties:
+      TopicName: !Sub ${ProjectName}-alerts-${Stage}
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref AlertEmail
+
+  AssignmentsErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${ProjectName}-assignments-errors-${Stage}
+      AlarmDescription: Assignments Lambda reported errors
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref AssignmentsFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: !If [HasAlertEmail, [!Ref AlertsTopic], !Ref AWS::NoValue]
+
+  SubjectsErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${ProjectName}-subjects-errors-${Stage}
+      AlarmDescription: Subjects Lambda reported errors
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref SubjectsFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: !If [HasAlertEmail, [!Ref AlertsTopic], !Ref AWS::NoValue]
+
+  FilesErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${ProjectName}-files-errors-${Stage}
+      AlarmDescription: Files Lambda reported errors
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref FilesFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: !If [HasAlertEmail, [!Ref AlertsTopic], !Ref AWS::NoValue]
+
+  Api5xxAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${ProjectName}-api-5xx-${Stage}
+      AlarmDescription: The HTTP API returned server errors
+      Namespace: AWS/ApiGateway
+      MetricName: 5xx
+      Dimensions:
+        - Name: ApiId
+          Value: !Ref HttpApi
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: !If [HasAlertEmail, [!Ref AlertsTopic], !Ref AWS::NoValue]
+
+  MonitoringDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub ${ProjectName}-${Stage}
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric", "x": 0, "y": 0, "width": 12, "height": 6,
+              "properties": {
+                "title": "API requests and errors", "region": "${AWS::Region}", "stat": "Sum", "period": 300, "view": "timeSeries",
+                "metrics": [
+                  ["AWS/ApiGateway", "Count", "ApiId", "${HttpApi}"],
+                  [".", "4xx", ".", "."],
+                  [".", "5xx", ".", "."]
+                ]
+              }
+            },
+            {
+              "type": "metric", "x": 12, "y": 0, "width": 12, "height": 6,
+              "properties": {
+                "title": "API latency (p95, ms)", "region": "${AWS::Region}", "stat": "p95", "period": 300, "view": "timeSeries",
+                "metrics": [["AWS/ApiGateway", "Latency", "ApiId", "${HttpApi}"]]
+              }
+            },
+            {
+              "type": "metric", "x": 0, "y": 6, "width": 12, "height": 6,
+              "properties": {
+                "title": "Lambda invocations", "region": "${AWS::Region}", "stat": "Sum", "period": 300, "view": "timeSeries",
+                "metrics": [
+                  ["AWS/Lambda", "Invocations", "FunctionName", "${AssignmentsFunction}"],
+                  ["...", "${SubjectsFunction}"],
+                  ["...", "${FilesFunction}"]
+                ]
+              }
+            },
+            {
+              "type": "metric", "x": 12, "y": 6, "width": 12, "height": 6,
+              "properties": {
+                "title": "Lambda errors", "region": "${AWS::Region}", "stat": "Sum", "period": 300, "view": "timeSeries",
+                "metrics": [
+                  ["AWS/Lambda", "Errors", "FunctionName", "${AssignmentsFunction}"],
+                  ["...", "${SubjectsFunction}"],
+                  ["...", "${FilesFunction}"]
+                ]
+              }
+            },
+            {
+              "type": "log", "x": 0, "y": 12, "width": 24, "height": 6,
+              "properties": {
+                "title": "Recent Lambda warnings and errors", "region": "${AWS::Region}", "view": "table",
+                "query": "SOURCE '/aws/lambda/${ProjectName}-assignments-${Stage}' | SOURCE '/aws/lambda/${ProjectName}-subjects-${Stage}' | SOURCE '/aws/lambda/${ProjectName}-files-${Stage}' | fields @timestamp, level, message, route, statusCode, code | filter level = 'warn' or level = 'error' | sort @timestamp desc | limit 50"
+              }
+            }
+          ]
+        }
+
+  # ------------------------------------------------------------------------
+  # Cost safety: monthly budget email (account-wide)
+  # ------------------------------------------------------------------------
+  MonthlyBudget:
+    Type: AWS::Budgets::Budget
+    Condition: HasAlertEmail
+    Properties:
+      Budget:
+        BudgetName: !Sub ${ProjectName}-monthly-${Stage}
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit:
+          Amount: !Ref MonthlyBudgetUsd
+          Unit: USD
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref AlertEmail
+        - Notification:
+            NotificationType: FORECASTED
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref AlertEmail
+
+# --------------------------------------------------------------------------
+# Outputs (used by scripts/deploy.ps1 to configure the frontend)
+# --------------------------------------------------------------------------
+Outputs:
+  Region:
+    Value: !Ref AWS::Region
+  UserPoolId:
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Value: !Ref UserPoolClient
+  ApiUrl:
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
+  WebsiteUrl:
+    Value: !Sub https://${WebDistribution.DomainName}
+  DistributionId:
+    Value: !Ref WebDistribution
+  FrontendBucketName:
+    Value: !Ref FrontendBucket
+  FilesBucketName:
+    Value: !Ref FilesBucket
+  AssignmentsTableName:
+    Value: !Ref AssignmentsTable
+  SubjectsTableName:
+    Value: !Ref SubjectsTable
+  FilesTableName:
+    Value: !Ref FilesTable
+  DashboardUrl:
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${ProjectName}-${Stage}

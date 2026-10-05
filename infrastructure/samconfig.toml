@@ -1,0 +1,16 @@
+# AWS SAM CLI configuration. The region comes from your AWS CLI profile
+# (aws configure) unless you add region = "..." below.
+version = 0.1
+
+[default.global.parameters]
+stack_name = "student-cloud-manager-dev"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+parameter_overrides = "Stage=dev"
