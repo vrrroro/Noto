@@ -3,7 +3,7 @@
 | Suite | Tool | Command | Last result (2026-10-06) |
 | --- | --- | --- | --- |
 | Backend unit | `node:test` (built in, no dependency) | `cd backend && npm test` | **36 / 36 pass** |
-| Frontend unit | Vitest | `cd frontend && npm test` | **17 / 17 pass** |
+| Frontend unit | Vitest | `cd frontend && npm test` | **18 / 18 pass** (2026-10-08) |
 | Production build | Vite | `cd frontend && npm run build` | builds cleanly |
 | End-to-end (browser) | Headless Chrome via `puppeteer-core` against `npm run dev` (demo mode) | `cd e2e && npm test` | **30 / 30 checks pass**, no console errors |
 | Infrastructure | `cfn-lint` 1.57 (includes the SAM transform) | `cfn-lint infrastructure/template.yaml` | **0 findings** |

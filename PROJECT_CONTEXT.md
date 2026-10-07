@@ -112,6 +112,12 @@ CloudFront → private S3 web bucket (OAC). See ARCHITECTURE.md.
 
 ## Important Decisions
 
+- **UI name is "Noto"** (2026-10-08). Repository, AWS stack and resource names stay
+  `student-cloud-manager-*` (renaming them would recreate the stack). localStorage keys stay `scm.*`.
+- **Design system** (frontend/src/styles/global.css, tokens at the top): Botanical structure in the
+  Maximalism palette; orange `#FF6B35` is reserved for the Noto dot; spring easing via CSS
+  `linear()`. Plain CSS, no UI or icon library. Fonts from Google Fonts.
+
 - React 19 + Vite frontend; React Router; no UI library; no auth SDK (Cognito called with `fetch`)
 - Backend: Node.js 22 Lambdas (ES modules), AWS SDK v3; route logic is pure JS with injected deps
 - 3 Lambdas (one per resource) with per-function least-privilege IAM

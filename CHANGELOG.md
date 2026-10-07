@@ -5,6 +5,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Rebrand and redesign as "Noto"** (UI only; AWS resource names stay `student-cloud-manager-*`).
+  Botanical structure (Playfair Display + Source Sans 3, arches, pill controls, 1px vines, paper
+  grain, staggered grids) in the Maximalism palette (`#0D0D1A` void, `#2D1B4E` plum, magenta, cyan,
+  yellow, orange, violet). Dark "Night" is the native theme; light "Day" keeps the same accents.
+- Signature orange dot (`#FF6B35`, reserved for it): wordmark, nav indicator that springs between
+  links, completion toggle knob, dashboard completion meter, end of each page-title vine, loader.
+  Motion uses a closed-form spring (CSS `linear()`, about 8% overshoot); reduced motion respected.
+- Subjects get one accent each, rotating by creation order (`subjectColors` in `utils/format.js`);
+  used for assignment stems, chips, date arches and subject tiles. The dashboard now also loads
+  subjects for this.
+- Status and priority are shown as a coloured dot beside high-contrast text; file types as arch
+  tiles coloured by type.
+- Fonts load from Google Fonts (`index.html`); new favicon; e2e waits for the mobile menu animation
+  before its screenshot. Screenshots in `docs/screenshots/` regenerated.
+
 ### Added
 
 - `e2e/live-api.mjs`: 35-check live test against the deployed stack (Cognito sign-in, every API

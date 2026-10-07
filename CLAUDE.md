@@ -3107,7 +3107,7 @@ As of 2026-10-08 (see PROJECT_CONTEXT.md for the live state):
 ```text
 Phase: Backend deployed to AWS (ap-south-1); CloudFront pending account verification
 
-Frontend: Complete (React + Vite); runs locally against the live backend
+Frontend: Complete (React + Vite), redesigned and rebranded as "Noto"; runs locally against the live backend
 Backend: Deployed (3 Lambdas); live API test 35/35
 Authentication: Cognito deployed; live sign-in verified; UI sign-up with real email pending
 Database: DynamoDB deployed and verified
