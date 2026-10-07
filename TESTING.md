@@ -7,7 +7,8 @@
 | Production build | Vite | `cd frontend && npm run build` | builds cleanly |
 | End-to-end (browser) | Headless Chrome via `puppeteer-core` against `npm run dev` (demo mode) | `cd e2e && npm test` | **30 / 30 checks pass**, no console errors |
 | Infrastructure | `cfn-lint` 1.57 (includes the SAM transform) | `cfn-lint infrastructure/template.yaml` | **0 findings** |
-| Live AWS | manual checklist below | after `deploy.ps1` | **not run yet** (no AWS account connected) |
+| Live AWS API | `node` + AWS CLI against the deployed stack | `node e2e/live-api.mjs` | **35 / 35 pass** (2026-10-08) |
+| Live AWS UI | manual checklist below | `cd frontend && npm run dev` | page loads in live mode; manual run pending |
 
 ## Backend unit tests (`backend/test`)
 

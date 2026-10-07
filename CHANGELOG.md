@@ -5,9 +5,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `e2e/live-api.mjs`: 35-check live test against the deployed stack (Cognito sign-in, every API
+  route, real S3 upload/download, validation, cross-user isolation, S3 key tampering). Creates and
+  deletes its own temporary users.
+- `EnableCloudFront` template parameter and `deploy.ps1 -NoCloudFront`, because new AWS accounts
+  cannot create CloudFront resources until AWS verifies them.
+
 ### AWS
 
-- First deployment to AWS pending (see PROJECT_CONTEXT.md → Next Task).
+- **First deployment (2026-10-08)**: stack `student-cloud-manager-dev` in account 956519720747,
+  region ap-south-1 (Free plan), with `EnableCloudFront=false`. Created Cognito user pool and client,
+  3 DynamoDB tables, files and web S3 buckets, 3 Lambdas with their own IAM roles, the HTTP API with
+  its JWT authorizer, 5 log groups, 4 alarms and the dashboard. SAM also created its managed artifact
+  bucket stack `aws-sam-cli-managed-default`.
+- IAM user `scm-deployer` (AdministratorAccess, CLI access key) was created by hand for deployments.
+- The first attempt rolled back (CloudFront account verification) and its empty stack was deleted.
 
 ---
 

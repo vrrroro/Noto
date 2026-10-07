@@ -3102,21 +3102,21 @@ Impossible to explain
 
 # 107. CURRENT PROJECT STATUS
 
-As of 2026-10-06 (see PROJECT_CONTEXT.md for the live state):
+As of 2026-10-08 (see PROJECT_CONTEXT.md for the live state):
 
 ```text
-Phase: MVP implemented; awaiting first AWS deployment
+Phase: Backend deployed to AWS (ap-south-1); CloudFront pending account verification
 
-Frontend: Complete (React + Vite), verified locally in demo mode
-Backend: Complete (3 Lambdas), unit-tested
-Authentication: Implemented (Cognito via fetch); demo path verified, AWS path pending deploy
-Database: DynamoDB tables defined in infrastructure/template.yaml; not deployed
-File Storage: Presigned S3 flow implemented; not deployed
-API: HTTP API + JWT authorizer defined; not deployed
-Monitoring: Log retention, alarms, dashboard, budget defined; not deployed
-Deployment: Scripts ready (infrastructure/scripts/deploy.ps1); NOT run
-Testing: 36 backend + 17 frontend unit tests, 30-check E2E, cfn-lint, all passing
-Documentation: Complete (README, ARCHITECTURE, API, SECURITY, TESTING, presentation notes)
+Frontend: Complete (React + Vite); runs locally against the live backend
+Backend: Deployed (3 Lambdas); live API test 35/35
+Authentication: Cognito deployed; live sign-in verified; UI sign-up with real email pending
+Database: DynamoDB deployed and verified
+File Storage: S3 presigned upload/download verified live
+API: HTTP API + JWT authorizer deployed and verified
+Monitoring: Log groups, alarms, dashboard deployed; alert email/budget not yet configured
+Deployment: deploy.ps1 (-NoCloudFront until the account is verified)
+Testing: 36 backend + 17 frontend unit, 30-check demo E2E, 35-check live API, all passing
+Documentation: Complete; PROJECT_CONTEXT.md has the deployed resource list
 ```
 
 Note: AWS SAM (infrastructure as code) was adopted early, contrary to section 37. The reasoning is

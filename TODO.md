@@ -5,16 +5,18 @@ Legend: `[x]` done and verified locally · `[~]` implemented, awaiting verificat
 ## P0 - Must Have
 
 - [x] Initialize frontend
-- [~] Configure Cognito (in `template.yaml`)
+- [x] Configure Cognito (deployed, live sign-in verified)
 - [x] Implement login (demo mode verified; Cognito path awaiting AWS)
 - [x] Implement registration + email verification
-- [~] Create DynamoDB tables (in `template.yaml`)
+- [x] Create DynamoDB tables (deployed)
 - [x] Implement assignment CRUD
-- [~] Configure API Gateway (HTTP API + JWT authorizer in `template.yaml`)
-- [x] Implement S3 file upload (presigned POST; real S3 round-trip awaiting AWS)
+- [x] Configure API Gateway (deployed, JWT + CORS verified)
+- [x] Implement S3 file upload (real S3 round-trip verified)
 - [x] Implement dashboard
-- [ ] **Deploy to AWS**: `infrastructure/scripts/deploy.ps1`
-- [ ] **Run the live manual checklist** in TESTING.md
+- [x] **Deploy to AWS** (backend, 2026-10-08; live API 35/35)
+- [ ] Get the account verified for CloudFront, then redeploy with CloudFront + `-AlertEmail`
+- [ ] **Run the live manual UI checklist** in TESTING.md (sign-up with a real email)
+- [ ] Delete or restrict the `scm-deployer` access key after the demo
 - [ ] Capture AWS Console screenshots (docs/presentation/DEMO_SCRIPT.md)
 
 ## P1 - Important

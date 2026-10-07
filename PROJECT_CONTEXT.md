@@ -8,59 +8,61 @@ simple, secure, demonstrable and cheap.
 
 ## Current Phase
 
-**Phases 0–6 and 8–10 implemented and verified locally. Phase 7 (monitoring) is defined in IaC.
-Deployment to AWS (live verification of phases 2–7) is pending.**
+**Deployed to AWS (backend) on 2026-10-08. Live API verified. CloudFront hosting pending AWS account
+verification; the frontend runs locally against the live backend.**
 
 ## Current Status
 
-MVP feature-complete. All P0 features work in the browser in demo mode, and all automated suites
-pass. The AWS stack is written (SAM) and lint-clean but **has not been deployed**, because no AWS
-account or CLI was available when it was built.
+Backend stack `student-cloud-manager-dev` is `CREATE_COMPLETE` in account **956519720747**,
+region **ap-south-1**, deployed with `EnableCloudFront=false`. `frontend/.env.local` (git-ignored)
+points the app at it. The account is on the AWS **Free plan** ($100 credit, expires 2027-04-07).
 
 ## Working Features (verified)
 
-Verified by unit tests and the headless-Chrome E2E run (demo mode, which executes the real backend
-route handlers):
+Verified live against AWS by `node e2e/live-api.mjs` (35/35, 2026-10-08):
 
-- Register (+ email verification step), login, logout, session state, protected routes
-- Assignments: create, view, edit, delete, complete/pending, due date, priority, subject
-- Subjects: create, list with counts, delete (blocked when in use)
-- Files: upload (type and size validation, progress), list, download (byte-identical), delete
-- Dashboard: total / pending / completed / overdue, upcoming, recent files
-- Search, filters, sorting, dark mode, mobile layout
-- Cross-user isolation (`404` for other users' records)
+- Cognito sign-in with real tokens; wrong password rejected
+- JWT authorizer: no token / garbage token → 401; CORS preflight for `http://localhost:5173`
+- Subjects, assignments (CRUD, complete, validation) in DynamoDB
+- Files: presigned POST to S3, complete, list, byte-identical download, delete, type/size limits
+- Cross-user isolation (404 for B on A's assignment and file; S3 rejects a tampered key)
+
+Also verified locally earlier: full UI in demo mode (30-check E2E), 36 backend + 17 frontend unit tests.
 
 ## Implemented but NOT yet verified against AWS
 
-- Cognito sign-up, verification email, login and refresh with real tokens
-- API Gateway JWT authorizer + CORS
-- Lambda ↔ DynamoDB (adapter unit-tested with a fake client)
-- S3 presigned POST/GET (signing unit-tested offline; real S3 round-trip untested)
-- CloudFront hosting, CloudWatch alarms and dashboard, Budget
+- Sign-up and the Cognito verification email through the UI (needs a real inbox)
+- The UI's manual checklist in TESTING.md against the live backend
+- CloudFront hosting (blocked: account verification), CloudWatch alarm emails and the Budget
+  (no `AlertEmail` given yet)
 
 ## In Progress
 
-Nothing. Waiting for the first AWS deployment.
+Manual UI test by the developer at http://localhost:5173 (`cd frontend && npm run dev`).
 
 ## Known Issues
 
-- None found in local testing.
-- Limitations are listed in README → Known limitations.
+- New AWS accounts cannot create CloudFront resources until verified ("Your account must be verified
+  before you can add new CloudFront resources"). Open an AWS Support case (Account and billing,
+  free) quoting that message, then redeploy without `-NoCloudFront`.
+- The first AWS account tried ("Index Zero", 314113910114) is an organization member whose
+  service control policies deny Lambda, DynamoDB, S3, Cognito, CloudFormation, etc. It is not used.
 
 ## AWS Resources
 
-**None created yet.** `infrastructure/template.yaml` will create (stage `dev`):
+Account 956519720747, ap-south-1:
 
-| Type | Name |
+| Type | Name / ID |
 | --- | --- |
-| Cognito user pool / client | `student-cloud-manager-users-dev` / `student-cloud-manager-web-dev` |
+| CloudFormation stacks | `student-cloud-manager-dev`, `aws-sam-cli-managed-default` (SAM artifacts bucket) |
+| Cognito user pool / client | `ap-south-1_q2jzZYxX0` / `2ehumlq16o3kg94a3s0t23abqe` |
+| API (HTTP API) | `https://ym5l95nrc4.execute-api.ap-south-1.amazonaws.com` |
 | DynamoDB | `student-cloud-manager-{assignments,subjects,files}-dev` |
-| S3 | `student-cloud-manager-files-dev-<account>`, `student-cloud-manager-web-dev-<account>` |
-| Lambda | `student-cloud-manager-{assignments,subjects,files}-dev` |
-| API Gateway | HTTP API (`ApiUrl` output) |
-| CloudFront | distribution + OAC |
-| CloudWatch | 4 log groups (14 days), 4 alarms, dashboard `student-cloud-manager-dev` |
-| Optional | SNS topic `student-cloud-manager-alerts-dev`, budget `student-cloud-manager-monthly-dev` |
+| S3 | `student-cloud-manager-files-dev-956519720747`, `student-cloud-manager-web-dev-956519720747` (empty until CloudFront) |
+| Lambda | `student-cloud-manager-{assignments,subjects,files}-dev`, each with its own IAM role |
+| CloudWatch | log groups (14 days), 4 alarms, dashboard `student-cloud-manager-dev` |
+| IAM user | `scm-deployer` (AdministratorAccess, CLI key, created by hand; delete or restrict after the demo) |
+| Not created | CloudFront distribution, SNS topic, Budget |
 
 ## Current Architecture
 
@@ -86,6 +88,16 @@ See ARCHITECTURE.md.
 
 ## Next Task (exact)
 
+Superseded steps from before the deployment are kept below for reference. Current next steps:
+
+1. Developer: register with a real email at http://localhost:5173 and run TESTING.md's manual checklist.
+2. Open an AWS Support case to verify the account for CloudFront; then
+   `.\infrastructure\scripts\deploy.ps1 -AlertEmail <email>` (CloudFront on, alarms + budget).
+3. Capture the AWS Console screenshots in `docs/presentation/DEMO_SCRIPT.md`.
+4. After the demo: delete the `scm-deployer` access key (or the user).
+
+Previous plan:
+
 1. Install AWS CLI v2 + SAM CLI, then run `aws configure` (IAM user/SSO, not root; MFA on).
 2. Check current pricing and free-tier status for the services.
 3. `.\infrastructure\scripts\deploy.ps1 -AlertEmail <your email>` and confirm the SNS email.
@@ -95,4 +107,4 @@ See ARCHITECTURE.md.
 
 ## Last Updated
 
-2026-10-06
+2026-10-08
