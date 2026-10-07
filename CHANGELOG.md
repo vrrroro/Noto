@@ -7,6 +7,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **Industrial Noir polish of the Noto design** (palette, subject colours, arches, vine and grain kept):
+  - Three type voices: Playfair Display (titles, nav, buttons), Archivo extended (headlines, card
+    titles, numbers, body at normal width) and Geist Mono uppercase (labels, tags, spec rows).
+    Source Sans 3 removed.
+  - Two-tone headlines (claim in full colour, the rest of the sentence muted); mono orange labels;
+    5/7 label/headline section headers; spacing tokens (6/12/24/48/96) halved on phones.
+  - Squircle trays (`corner-shape: squircle` where supported) with a bevel hairline; glass for the
+    phone top bar, the page action bar and toasts; LED glow on the orange dot and primary button.
+  - Press physics on controls (hover 1.05/1.02, press 0.97/0.99, 200 ms); spring kept only for the dot.
+  - Tokens are `light-dark()` pairs; `.invert` flips one card per page (sign-in card, dashboard
+    "Next up") to the opposite theme.
+  - Dialogs are side sheets (bottom sheets on phones) with a label, close disc and pinned actions.
+  - New: a glass page bar that slides in after scrolling past the header; a black boot loader that
+    hides the font swap (max 1.2 s); SVG cursors (orange arrow on clickable things); phone haptics
+    (`utils/haptics.js`); staggered card entrances (reduced motion respected).
+  - Dashboard: dot-grid stat trays with LED labels; "Next up" card with **Mark complete** for the
+    most urgent pending assignment (`summarize().next`, unit-tested); lists in a graphite band.
+  - Subjects: giant input bar for adding a subject. Nav, cards and buttons drop decorative icons.
+  - e2e screenshots wait for the loader and entrance animations.
+
 - **Rebrand and redesign as "Noto"** (UI only; AWS resource names stay `student-cloud-manager-*`).
   Botanical structure (Playfair Display + Source Sans 3, arches, pill controls, 1px vines, paper
   grain, staggered grids) in the Maximalism palette (`#0D0D1A` void, `#2D1B4E` plum, magenta, cyan,

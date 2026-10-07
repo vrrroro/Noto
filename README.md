@@ -216,7 +216,7 @@ To run the local dev server against the deployed backend, run `deploy.ps1` once 
 | Suite | Command | Result |
 | --- | --- | --- |
 | Backend unit tests (validation, CRUD, ownership, errors, S3 presigning, DynamoDB expressions) | `cd backend && npm test` | 36 / 36 passing |
-| Frontend unit tests (dates, filters, dashboard maths, subject colours, demo backend) | `cd frontend && npm test` | 18 / 18 passing |
+| Frontend unit tests (dates, filters, dashboard maths and next-up pick, subject colours, demo backend) | `cd frontend && npm test` | 19 / 19 passing |
 | End-to-end browser run (headless Chrome, demo mode) | `cd e2e && npm test` (with `npm run dev` running) | 30 / 30 checks passing |
 | Live API against the deployed stack (Cognito, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 35 / 35 passing (2026-10-08) |
 | Infrastructure lint | `cfn-lint infrastructure/template.yaml` | 0 findings |

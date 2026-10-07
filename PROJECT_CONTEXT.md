@@ -114,9 +114,13 @@ CloudFront → private S3 web bucket (OAC). See ARCHITECTURE.md.
 
 - **UI name is "Noto"** (2026-10-08). Repository, AWS stack and resource names stay
   `student-cloud-manager-*` (renaming them would recreate the stack). localStorage keys stay `scm.*`.
-- **Design system** (frontend/src/styles/global.css, tokens at the top): Botanical structure in the
-  Maximalism palette; orange `#FF6B35` is reserved for the Noto dot; spring easing via CSS
-  `linear()`. Plain CSS, no UI or icon library. Fonts from Google Fonts.
+- **Design system** (frontend/src/styles/global.css, tokens at the top): Maximalism palette with
+  Botanical identity (arches, vine, grain, subject colours), polished in the Industrial Noir style:
+  Playfair / Archivo extended / Geist Mono, two-tone headlines, squircle trays with bevel hairlines,
+  glass chrome, LED glow. Orange `#FF6B35` is the signal (dot, primary action, active state,
+  labels, focus); subjects never use it. Role tokens are `light-dark()` pairs and `.invert` flips one
+  card per page. The spring easing is only used for the dot. Plain CSS, no UI or icon library.
+  Fonts from Google Fonts.
 
 - React 19 + Vite frontend; React Router; no UI library; no auth SDK (Cognito called with `fetch`)
 - Backend: Node.js 22 Lambdas (ES modules), AWS SDK v3; route logic is pure JS with injected deps
