@@ -26,6 +26,13 @@ Parameters:
     Type: String
     Default: ''
     Description: Optional email for error alarms and the monthly budget alert. Leave empty to skip.
+  EnableCloudFront:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: >
+      Create the CloudFront distribution for the website. New AWS accounts cannot create CloudFront
+      resources until AWS verifies them; deploy with 'false' until then and run the frontend locally.
   MonthlyBudgetUsd:
     Type: Number
     Default: 5
@@ -34,6 +41,7 @@ Parameters:
 
 Conditions:
   HasAlertEmail: !Not [!Equals [!Ref AlertEmail, '']]
+  HasCloudFront: !Equals [!Ref EnableCloudFront, 'true']
 
 # --------------------------------------------------------------------------
 # Lambda defaults
@@ -186,7 +194,7 @@ Resources:
         CorsRules:
           - AllowedMethods: [POST]
             AllowedOrigins:
-              - !Sub https://${WebDistribution.DomainName}
+              - !If [HasCloudFront, !Sub 'https://${WebDistribution.DomainName}', !Ref AWS::NoValue]
               - !Ref LocalDevOrigin
             AllowedHeaders: ['*']
             MaxAge: 600
@@ -237,6 +245,7 @@ Resources:
 
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
+    Condition: HasCloudFront
     Properties:
       Bucket: !Ref FrontendBucket
       PolicyDocument:
@@ -264,6 +273,7 @@ Resources:
 
   WebOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
+    Condition: HasCloudFront
     Properties:
       OriginAccessControlConfig:
         Name: !Sub ${ProjectName}-web-oac-${Stage}
@@ -274,6 +284,7 @@ Resources:
 
   WebDistribution:
     Type: AWS::CloudFront::Distribution
+    Condition: HasCloudFront
     Properties:
       DistributionConfig:
         Comment: !Sub ${ProjectName} frontend (${Stage})
@@ -325,7 +336,7 @@ Resources:
                 - !Ref UserPoolClient
       CorsConfiguration:
         AllowOrigins:
-          - !Sub https://${WebDistribution.DomainName}
+          - !If [HasCloudFront, !Sub 'https://${WebDistribution.DomainName}', !Ref AWS::NoValue]
           - !Ref LocalDevOrigin
         AllowHeaders: [authorization, content-type]
         AllowMethods: [GET, POST, PUT, DELETE, OPTIONS]
@@ -645,8 +656,10 @@ Outputs:
   ApiUrl:
     Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
   WebsiteUrl:
+    Condition: HasCloudFront
     Value: !Sub https://${WebDistribution.DomainName}
   DistributionId:
+    Condition: HasCloudFront
     Value: !Ref WebDistribution
   FrontendBucketName:
     Value: !Ref FrontendBucket

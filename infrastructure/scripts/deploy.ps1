@@ -14,12 +14,16 @@
   .\infrastructure\scripts\deploy.ps1
   .\infrastructure\scripts\deploy.ps1 -AlertEmail you@example.com
   .\infrastructure\scripts\deploy.ps1 -FrontendOnly
+  .\infrastructure\scripts\deploy.ps1 -NoCloudFront   # new accounts: CloudFront needs AWS verification first
 #>
 param(
   [string]$Stage = 'dev',
   [string]$AlertEmail = '',
   [string]$Region = '',
-  [switch]$FrontendOnly
+  [switch]$FrontendOnly,
+  # Skip the CloudFront distribution (EnableCloudFront=false). The frontend then runs locally
+  # (npm run dev) against the deployed backend.
+  [switch]$NoCloudFront
 )
 
 $ErrorActionPreference = 'Stop'
@@ -49,6 +53,7 @@ if (-not $FrontendOnly) {
     sam build
     Assert-Success 'sam build'
     $overrides = @("Stage=$Stage")
+    if ($NoCloudFront) { $overrides += 'EnableCloudFront=false' }
     if ($AlertEmail) { $overrides += "AlertEmail=$AlertEmail" }
     sam deploy --stack-name $stack --parameter-overrides $overrides --no-fail-on-empty-changeset @regionArgs
     Assert-Success 'sam deploy'
@@ -72,6 +77,14 @@ VITE_API_URL=$($outputs['ApiUrl'])
 "@
 Set-Content -Path (Join-Path $frontend '.env.local') -Value $envFile -Encoding ascii
 Write-Host 'Wrote frontend/.env.local'
+
+if (-not $outputs['DistributionId']) {
+  Write-Host "`nCloudFront is disabled for this stack, so the website is not uploaded." -ForegroundColor Yellow
+  Write-Host "Run it locally against the deployed backend:  cd frontend; npm run dev  ->  http://localhost:5173"
+  Write-Host "API:       $($outputs['ApiUrl'])"
+  Write-Host "Dashboard: $($outputs['DashboardUrl'])"
+  return
+}
 
 # ---- 3. Build and upload the frontend ---------------------------------------
 Write-Host "`n==> Building frontend" -ForegroundColor Cyan
