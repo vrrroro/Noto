@@ -7,6 +7,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Repository published as the private GitHub repo `vrrroro/Noto`; feature branches merged into `main`.
+
 - **Industrial Noir polish of the Noto design** (palette, subject colours, arches, vine and grain kept):
   - Three type voices: Playfair Display (titles, nav, buttons), Archivo extended (headlines, card
     titles, numbers, body at normal width) and Geist Mono uppercase (labels, tags, spec rows).
