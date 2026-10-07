@@ -54,3 +54,15 @@ export function greetingName(email = '') {
   const word = local.split(/[._\-+0-9]/).find(Boolean) || 'Student';
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
+
+// Each subject keeps one accent colour everywhere it appears. Colours rotate
+// in the order subjects were created, so the first four never collide and a
+// new subject does not recolour the others. Orange is left out on purpose:
+// it is reserved for Noto's dot.
+const SUBJECT_COLORS = ['var(--magenta)', 'var(--cyan)', 'var(--yellow)', 'var(--violet)'];
+
+export function subjectColors(subjects = []) {
+  const byAge = [...subjects].sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+  const colors = new Map(byAge.map((s, i) => [s.name.toLowerCase(), SUBJECT_COLORS[i % SUBJECT_COLORS.length]]));
+  return (name = '') => colors.get(name.toLowerCase()) ?? 'var(--violet)';
+}

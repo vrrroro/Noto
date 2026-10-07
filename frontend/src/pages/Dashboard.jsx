@@ -1,12 +1,13 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
 import Icon from '../components/Icon.jsx';
 import { LoadingState, ErrorState, EmptyState } from '../components/StatusViews.jsx';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { useResource } from '../hooks/useResource.js';
-import { assignmentsApi, filesApi } from '../services/api.js';
+import { assignmentsApi, filesApi, subjectsApi } from '../services/api.js';
 import { daysUntil, dueStatus, formatDateTime, formatShortDate } from '../utils/date.js';
-import { fileExtension, formatBytes, greetingName } from '../utils/format.js';
+import { fileExtension, formatBytes, greetingName, subjectColors } from '../utils/format.js';
 
 const UPCOMING_LIMIT = 5;
 const RECENT_FILES_LIMIT = 5;
@@ -39,20 +40,54 @@ function StatTile({ label, value, tone, icon }) {
   );
 }
 
+// The orange dot springs from 0 to the real completion figure once the data arrives.
+function CompletionMeter({ completed, total }) {
+  const percent = Math.round((completed / total) * 100);
+  const [shown, setShown] = useState(0);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setShown(percent));
+    return () => cancelAnimationFrame(frame);
+  }, [percent]);
+
+  return (
+    <div className="meter">
+      <div
+        className="meter-track"
+        role="progressbar"
+        aria-label="Assignments completed"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+        style={{ '--p': shown }}
+      >
+        <span className="meter-fill" />
+        <span className="meter-dot" />
+      </div>
+      <p className="meter-label">
+        <strong>{percent}%</strong> of assignments completed
+      </p>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { status, data, error, reload } = useResource(async () => {
-    const [assignments, files] = await Promise.all([assignmentsApi.list(), filesApi.list()]);
-    return summarize(assignments, files);
+    const [assignments, files, subjects] = await Promise.all([assignmentsApi.list(), filesApi.list(), subjectsApi.list()]);
+    return { ...summarize(assignments, files), colorOf: subjectColors(subjects) };
   });
 
   const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-  const percent = data?.total ? Math.round((data.completed / data.total) * 100) : 0;
 
   return (
     <>
       <PageHeader
-        title={`Hello, ${greetingName(user?.email)} 👋`}
+        title={
+          <>
+            Hello, <em>{greetingName(user?.email)}</em>
+          </>
+        }
         description={today}
         actions={
           <>
@@ -77,16 +112,11 @@ export default function Dashboard() {
             </h2>
             <div className="stats-grid">
               <StatTile label="Total" value={data.total} tone="neutral" icon="assignments" />
-              <StatTile label="Pending" value={data.pending} tone="info" icon="clock" />
+              <StatTile label="Pending" value={data.pending} tone="warning" icon="clock" />
               <StatTile label="Completed" value={data.completed} tone="success" icon="check" />
-              <StatTile label="Overdue" value={data.overdue} tone={data.overdue ? 'danger' : 'neutral'} icon="alert" />
+              <StatTile label="Overdue" value={data.overdue} tone={data.overdue ? 'danger' : 'success'} icon="alert" />
             </div>
-            {data.total > 0 && (
-              <div className="progress-row">
-                <progress className="progress" value={data.completed} max={data.total} aria-label="Completion" />
-                <span className="text-muted">{percent}% of assignments completed</span>
-              </div>
-            )}
+            {data.total > 0 && <CompletionMeter completed={data.completed} total={data.total} />}
           </section>
 
           <div className="dashboard-grid">
@@ -109,7 +139,7 @@ export default function Dashboard() {
                     const due = dueStatus(a.dueDate, false);
                     return (
                       <li key={a.assignmentId} className="list-row">
-                        <span className="date-chip">
+                        <span className="date-chip" style={{ '--subject': data.colorOf(a.subject) }}>
                           <span>{formatShortDate(a.dueDate).split(' ')[1]}</span>
                           <strong>{formatShortDate(a.dueDate).split(' ')[0]}</strong>
                         </span>

@@ -7,6 +7,7 @@ import { useResource } from '../hooks/useResource.js';
 import { useToast } from '../components/Toast.jsx';
 import { assignmentsApi, filesApi, subjectsApi } from '../services/api.js';
 import { LIMITS } from '@backend/shared/constants.js';
+import { subjectColors } from '../utils/format.js';
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -33,6 +34,8 @@ export default function Subjects() {
     for (const f of data.files) if (result[f.subject]) result[f.subject].files += 1;
     return result;
   }, [data]);
+
+  const colorOf = useMemo(() => subjectColors(data?.subjects), [data]);
 
   async function handleAdd(e) {
     e.preventDefault();
@@ -62,7 +65,14 @@ export default function Subjects() {
 
   return (
     <>
-      <PageHeader title="My subjects" description="Subjects organise your assignments and notes." />
+      <PageHeader
+        title={
+          <>
+            My <em>subjects</em>
+          </>
+        }
+        description="Subjects organise your assignments and notes."
+      />
 
       <form className="card inline-form" onSubmit={handleAdd} noValidate>
         <div className="field">
@@ -99,7 +109,7 @@ export default function Subjects() {
             {data.subjects.map((s) => {
               const c = counts[s.name];
               return (
-                <li key={s.subjectId} className="subject-card">
+                <li key={s.subjectId} className="subject-card" style={{ '--subject': colorOf(s.name) }}>
                   <span className="subject-initial" aria-hidden="true">
                     {s.name[0].toUpperCase()}
                   </span>

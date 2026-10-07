@@ -2,7 +2,7 @@ import Icon from './Icon.jsx';
 import { fileExtension, fileTypeLabel, formatBytes } from '../utils/format.js';
 import { formatDateTime } from '../utils/date.js';
 
-export default function FileCard({ file, onDownload, onDelete, busy }) {
+export default function FileCard({ file, color, onDownload, onDelete, busy }) {
   const ext = fileExtension(file.fileName);
 
   return (
@@ -15,7 +15,9 @@ export default function FileCard({ file, onDownload, onDelete, busy }) {
           {file.fileName}
         </h3>
         <p className="file-meta">
-          <span className="chip">{file.subject}</span>
+          <span className="chip" style={{ '--subject': color }}>
+            {file.subject}
+          </span>
           <span>{fileTypeLabel(file.fileName)}</span>
           <span>{formatBytes(file.fileSize)}</span>
           <span>

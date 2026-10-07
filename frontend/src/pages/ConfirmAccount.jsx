@@ -45,7 +45,11 @@ export default function ConfirmAccount() {
 
   return (
     <AuthLayout
-      title="Verify your email"
+      title={
+        <>
+          Verify your <em>email</em>
+        </>
+      }
       subtitle="Enter the verification code to activate your account."
       footer={
         <>

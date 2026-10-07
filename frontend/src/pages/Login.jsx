@@ -37,8 +37,12 @@ export default function Login() {
 
   return (
     <AuthLayout
-      title="Sign in"
-      subtitle="Welcome back. Sign in to see your assignments and notes."
+      title={
+        <>
+          Welcome <em>back</em>
+        </>
+      }
+      subtitle="Sign in to see your assignments and notes."
       footer={
         <>
           New here? <Link to="/register">Create an account</Link>

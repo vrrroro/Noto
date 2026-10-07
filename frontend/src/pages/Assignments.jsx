@@ -11,6 +11,7 @@ import { useResource } from '../hooks/useResource.js';
 import { useToast } from '../components/Toast.jsx';
 import { assignmentsApi, subjectsApi } from '../services/api.js';
 import { filterAssignments } from '../utils/filters.js';
+import { subjectColors } from '../utils/format.js';
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All' },
@@ -40,6 +41,7 @@ export default function Assignments() {
   }, [searchParams, setSearchParams, status, data]);
 
   const visible = useMemo(() => (data ? filterAssignments(data.assignments, filters) : []), [data, filters]);
+  const colorOf = useMemo(() => subjectColors(data?.subjects), [data]);
   const setFilter = (field) => (e) => setFilters((f) => ({ ...f, [field]: e.target.value }));
 
   const replace = (updated) =>
@@ -81,7 +83,11 @@ export default function Assignments() {
   return (
     <>
       <PageHeader
-        title="Assignments"
+        title={
+          <>
+            My <em>assignments</em>
+          </>
+        }
         description="Track deadlines and mark work complete."
         actions={
           hasSubjects && (
@@ -185,6 +191,7 @@ export default function Assignments() {
                   <AssignmentCard
                     key={a.assignmentId}
                     assignment={a}
+                    color={colorOf(a.subject)}
                     busy={busyId === a.assignmentId}
                     onToggleComplete={() => handleToggle(a)}
                     onEdit={() => setEditing(a)}

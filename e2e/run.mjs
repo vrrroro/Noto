@@ -286,7 +286,7 @@ try {
   check('No horizontal scroll on mobile', !overflow);
   await shot('app-09-mobile-assignments');
   await click('.menu-toggle');
-  await sleep(150);
+  await sleep(700); // let the menu sheet finish its spring before the screenshot
   await page.screenshot({ path: `${SHOTS}/app-10-mobile-menu.png` });
   await page.setViewport({ width: 1366, height: 860 });
 

@@ -11,7 +11,7 @@ import { useToast } from '../components/Toast.jsx';
 import { filesApi, subjectsApi } from '../services/api.js';
 import { downloadFile } from '../services/files.js';
 import { filterFiles } from '../utils/filters.js';
-import { FILE_TYPE_GROUPS, fileTypeLabel } from '../utils/format.js';
+import { FILE_TYPE_GROUPS, fileTypeLabel, subjectColors } from '../utils/format.js';
 
 export default function Notes() {
   const toast = useToast();
@@ -24,6 +24,7 @@ export default function Notes() {
   const [busyId, setBusyId] = useState(null);
 
   const visible = useMemo(() => (data ? filterFiles(data.files, filters, fileTypeLabel) : []), [data, filters]);
+  const colorOf = useMemo(() => subjectColors(data?.subjects), [data]);
   const setFilter = (field) => (e) => setFilters((f) => ({ ...f, [field]: e.target.value }));
 
   function handleUploaded(file) {
@@ -52,7 +53,14 @@ export default function Notes() {
 
   return (
     <>
-      <PageHeader title="My notes" description="Upload, organise and download your study files." />
+      <PageHeader
+        title={
+          <>
+            My <em>notes</em>
+          </>
+        }
+        description="Upload, organise and download your study files."
+      />
 
       {status === 'loading' && <LoadingState label="Loading files…" />}
       {status === 'error' && <ErrorState error={error} onRetry={reload} label="Failed to load files." />}
@@ -126,11 +134,12 @@ export default function Notes() {
               <p className="result-count text-muted">
                 Showing {visible.length} of {data.files.length}
               </p>
-              <div className="card-list">
+              <div className="card-list file-grid">
                 {visible.map((f) => (
                   <FileCard
                     key={f.fileId}
                     file={f}
+                    color={colorOf(f.subject)}
                     busy={busyId === f.fileId}
                     onDownload={() => handleDownload(f)}
                     onDelete={() => setDeleting(f)}

@@ -36,7 +36,11 @@ export default function Register() {
 
   return (
     <AuthLayout
-      title="Create your account"
+      title={
+        <>
+          Create your <em>account</em>
+        </>
+      }
       subtitle="Keep every assignment and set of notes in one place."
       footer={
         <>

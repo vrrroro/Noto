@@ -3,12 +3,16 @@ import { dueStatus, formatDate } from '../utils/date.js';
 
 const PRIORITY_LABEL = { HIGH: 'High', MEDIUM: 'Medium', LOW: 'Low' };
 
-export default function AssignmentCard({ assignment, onToggleComplete, onEdit, onDelete, busy }) {
+export default function AssignmentCard({ assignment, color, onToggleComplete, onEdit, onDelete, busy }) {
   const { title, subject, dueDate, priority, description, completed } = assignment;
   const status = dueStatus(dueDate, completed);
 
   return (
-    <article className={`assignment-card ${completed ? 'is-completed' : ''}`} aria-busy={busy || undefined}>
+    <article
+      className={`assignment-card ${completed ? 'is-completed' : ''}`}
+      style={{ '--subject': color }}
+      aria-busy={busy || undefined}
+    >
       <div className="assignment-main">
         <div className="assignment-title-row">
           <h3>{title}</h3>
@@ -17,7 +21,9 @@ export default function AssignmentCard({ assignment, onToggleComplete, onEdit, o
         <dl className="meta-list">
           <div>
             <dt>Subject</dt>
-            <dd>{subject}</dd>
+            <dd>
+              <span className="chip">{subject}</span>
+            </dd>
           </div>
           <div>
             <dt>Due</dt>
@@ -36,11 +42,14 @@ export default function AssignmentCard({ assignment, onToggleComplete, onEdit, o
       <div className="card-actions">
         <button
           type="button"
-          className={`btn btn-sm ${completed ? 'btn-secondary' : 'btn-success'}`}
+          className={`btn btn-sm btn-toggle ${completed ? 'is-on' : 'btn-success'}`}
           onClick={onToggleComplete}
           disabled={busy}
+          aria-pressed={completed}
         >
-          <Icon name={completed ? 'undo' : 'check'} size={16} />
+          <span className="toggle" aria-hidden="true">
+            <span className="toggle-knob" />
+          </span>
           {completed ? 'Mark pending' : 'Complete'}
         </button>
         <button type="button" className="btn btn-sm btn-secondary" onClick={onEdit} disabled={busy}>

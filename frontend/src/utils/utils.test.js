@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, daysUntil, dueStatus, formatDate, parseDate, todayString } from './date.js';
-import { checkFileBeforeUpload, fileTypeLabel, formatBytes, greetingName } from './format.js';
+import { checkFileBeforeUpload, fileTypeLabel, formatBytes, greetingName, subjectColors } from './format.js';
 import { filterAssignments, filterFiles } from './filters.js';
 import { passwordMeetsRules, isValidEmail } from './password.js';
 import { summarize } from '../pages/Dashboard.jsx';
@@ -61,6 +61,22 @@ describe('format utils', () => {
   it('builds a friendly greeting name from an email', () => {
     expect(greetingName('rohit.sharma@college.edu')).toBe('Rohit');
     expect(greetingName('')).toBe('Student');
+  });
+
+  it('rotates subject colours by creation order', () => {
+    const subjects = [
+      { name: 'OS', createdAt: '2026-10-02' },
+      { name: 'DBMS', createdAt: '2026-10-01' },
+      { name: 'AI', createdAt: '2026-10-03' },
+      { name: 'Maths', createdAt: '2026-10-04' },
+      { name: 'Cloud', createdAt: '2026-10-05' },
+    ];
+    const colorOf = subjectColors(subjects);
+    expect(new Set(['DBMS', 'OS', 'AI', 'Maths'].map(colorOf)).size).toBe(4);
+    expect(colorOf('Cloud')).toBe(colorOf('DBMS')); // the fifth wraps around
+    expect(colorOf('dbms')).toBe(colorOf('DBMS'));
+    expect(subjectColors(subjects.slice(0, 2))('DBMS')).toBe(colorOf('DBMS')); // adding subjects keeps colours
+    expect(colorOf('Unknown')).toBe('var(--violet)');
   });
 });
 
