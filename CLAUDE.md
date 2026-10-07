@@ -1130,6 +1130,9 @@ Commits should:
 - describe one logical change
 - avoid unrelated changes
 - be easy to revert
+- carry no AI attribution: never add `Co-Authored-By: Claude …` (or any other AI co-author
+  trailer) to commit messages, and no "Generated with Claude Code" line in PR descriptions.
+  The project owner does not want Claude listed as a contributor.
 
 Avoid:
 
