@@ -1,4 +1,3 @@
-import Icon from './Icon.jsx';
 import { fileExtension, fileTypeLabel, formatBytes } from '../utils/format.js';
 import { formatDateTime } from '../utils/date.js';
 
@@ -27,10 +26,10 @@ export default function FileCard({ file, color, onDownload, onDelete, busy }) {
       </div>
       <div className="card-actions">
         <button type="button" className="btn btn-sm btn-secondary" onClick={onDownload} disabled={busy}>
-          <Icon name="download" size={16} /> Download
+          Download
         </button>
         <button type="button" className="btn btn-sm btn-ghost-danger" onClick={onDelete} disabled={busy}>
-          <Icon name="trash" size={16} /> Delete
+          Delete
         </button>
       </div>
     </article>

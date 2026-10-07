@@ -25,7 +25,7 @@ export default function ConfirmDialog({ open, title, message, confirmLabel = 'De
   }
 
   return (
-    <Modal open={open} title={title} onClose={busy ? () => {} : onClose} size="sm">
+    <Modal open={open} title={title} label="Can't be undone" onClose={busy ? () => {} : onClose} size="sm">
       <p className="text-muted">{message}</p>
       {error && (
         <p className="alert alert-error" role="alert">

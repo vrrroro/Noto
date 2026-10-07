@@ -45,7 +45,12 @@ export default function FileUpload({ subjects, onUploaded }) {
 
   return (
     <form className="card upload-card" onSubmit={handleSubmit} noValidate>
-      <h2 className="card-title">Upload a file</h2>
+      <div className="section-head">
+        <p className="label">Upload</p>
+        <h2 className="section-title">
+          <span>Add a file.</span> <span className="quiet">It is stored privately, and only you can open it.</span>
+        </h2>
+      </div>
 
       <label
         htmlFor={inputId}
@@ -103,7 +108,6 @@ export default function FileUpload({ subjects, onUploaded }) {
           </select>
         </div>
         <button type="submit" className="btn btn-primary" disabled={uploading || !file}>
-          <Icon name="upload" size={16} />
           {uploading ? `Uploading ${Math.round(progress * 100)}%` : 'Upload'}
         </button>
       </div>

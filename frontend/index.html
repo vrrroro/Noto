@@ -2,20 +2,73 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Noto keeps your assignments, deadlines and notes in one place." />
     <meta name="theme-color" content="#0d0d1a" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Three voices: Playfair Display (display serif), Archivo (extended headlines + body), Geist Mono (labels). -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,700&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Geist+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap"
     />
+    <script>
+      // Apply the saved theme before the first paint so neither the loader nor the app flashes.
+      try {
+        var theme = localStorage.getItem('scm.theme');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
+    <style>
+      /* Boot loader: an empty screen in the page colour that hides the font swap. */
+      #boot-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: #0d0d1a;
+        pointer-events: none;
+        transition: opacity 200ms linear;
+      }
+      #boot-loader.is-done {
+        opacity: 0;
+      }
+      html[data-theme='light'] #boot-loader {
+        background: #faf8ff;
+      }
+      @media (prefers-color-scheme: light) {
+        html:not([data-theme='dark']) #boot-loader {
+          background: #faf8ff;
+        }
+      }
+    </style>
     <title>Noto</title>
   </head>
   <body>
+    <div id="boot-loader" aria-hidden="true"></div>
     <div id="root"></div>
+    <script>
+      // Lift the loader once the three typefaces are ready, or after 1.2 s at most.
+      (function () {
+        var loader = document.getElementById('boot-loader');
+        var lifted = false;
+        function lift() {
+          if (lifted) return;
+          lifted = true;
+          loader.classList.add('is-done');
+          setTimeout(function () {
+            loader.remove();
+          }, 250);
+        }
+        setTimeout(lift, 1200);
+        if (!document.fonts || !document.fonts.load) return lift();
+        Promise.all([
+          document.fonts.load('400 1em "Playfair Display"'),
+          document.fonts.load('400 1em "Archivo"'),
+          document.fonts.load('400 1em "Geist Mono"'),
+        ]).then(lift, lift);
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,9 +1,10 @@
 import { useEffect, useId, useRef } from 'react';
 import Icon from './Icon.jsx';
 
-// Accessible modal built on the native <dialog> element, which provides
-// focus trapping and Escape-to-close for free.
-export default function Modal({ open, title, onClose, children, size = 'md' }) {
+// Accessible side sheet built on the native <dialog> element: showModal() makes
+// the rest of the page inert, traps focus, closes on Escape and returns focus
+// to the trigger. Desktop: slides in from the right; phones: rises as a bottom sheet.
+export default function Modal({ open, title, label, onClose, children, size = 'md' }) {
   const ref = useRef(null);
   const titleId = useId();
 
@@ -30,9 +31,12 @@ export default function Modal({ open, title, onClose, children, size = 'md' }) {
       {open && (
         <div className="modal-body">
           <header className="modal-header">
-            <h2 id={titleId}>{title}</h2>
-            <button type="button" className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Close dialog">
-              <Icon name="close" />
+            <div className="modal-heading">
+              {label && <p className="label">{label}</p>}
+              <h2 id={titleId}>{title}</h2>
+            </div>
+            <button type="button" className="modal-close" onClick={onClose} aria-label="Close dialog">
+              <Icon name="close" size={20} />
             </button>
           </header>
           {children}

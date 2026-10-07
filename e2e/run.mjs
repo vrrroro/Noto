@@ -67,8 +67,9 @@ const waitText = (t, timeout = 8000) =>
 const click = (selector) => page.locator(selector).click();
 const fill = (selector, value) => page.locator(selector).fill(value);
 const shot = async (name) => {
+  await page.waitForFunction(() => !document.getElementById('boot-loader')); // the font loader has lifted
   await page.evaluate(() => { document.querySelectorAll('.toast-close').forEach((b) => b.click()); window.scrollTo(0, 0); });
-  await sleep(150);
+  await sleep(700); // let entrance animations settle
   await page.screenshot({ path: `${SHOTS}/${name}.png` });
 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

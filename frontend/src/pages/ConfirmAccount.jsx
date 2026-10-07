@@ -45,6 +45,7 @@ export default function ConfirmAccount() {
 
   return (
     <AuthLayout
+      label="Step 2 of 2"
       title={
         <>
           Verify your <em>email</em>

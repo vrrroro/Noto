@@ -7,17 +7,13 @@ import { useTheme } from '../hooks/useTheme.js';
 import { isDemoMode } from '../config.js';
 
 const LINKS = [
-  { to: '/', label: 'Dashboard', icon: 'dashboard', end: true },
-  { to: '/assignments', label: 'Assignments', icon: 'assignments' },
-  { to: '/notes', label: 'Notes', icon: 'notes' },
-  { to: '/subjects', label: 'Subjects', icon: 'subjects' },
+  { to: '/', label: 'Dashboard', end: true },
+  { to: '/assignments', label: 'Assignments' },
+  { to: '/notes', label: 'Notes' },
+  { to: '/subjects', label: 'Subjects' },
 ];
 
-const THEME_META = {
-  system: { icon: 'monitor', label: 'System theme' },
-  light: { icon: 'sun', label: 'Light theme' },
-  dark: { icon: 'moon', label: 'Dark theme' },
-};
+const THEME_LABEL = { system: 'System', light: 'Day', dark: 'Night' };
 
 export default function Sidebar() {
   const { user, signOut } = useAuth();
@@ -82,7 +78,6 @@ export default function Sidebar() {
             {LINKS.map((link) => (
               <li key={link.to}>
                 <NavLink to={link.to} end={link.end} className="nav-link">
-                  <Icon name={link.icon} />
                   {link.label}
                 </NavLink>
               </li>
@@ -98,8 +93,8 @@ export default function Sidebar() {
             </p>
           )}
           <button type="button" className="nav-link nav-button" onClick={cycleTheme}>
-            <Icon name={THEME_META[theme].icon} />
-            {THEME_META[theme].label}
+            <span className="nav-button-key">Theme</span>
+            {THEME_LABEL[theme]}
           </button>
           <div className="user-box">
             <span className="avatar" aria-hidden="true">
@@ -110,7 +105,6 @@ export default function Sidebar() {
             </span>
           </div>
           <button type="button" className="nav-link nav-button" onClick={handleSignOut}>
-            <Icon name="logout" />
             Sign out
           </button>
         </div>

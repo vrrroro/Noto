@@ -79,6 +79,8 @@ export default function Assignments() {
   }
 
   const hasSubjects = data?.subjects.length > 0;
+  const pendingCount = data ? data.assignments.filter((a) => !a.completed).length : 0;
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
   return (
     <>
@@ -89,10 +91,11 @@ export default function Assignments() {
           </>
         }
         description="Track deadlines and mark work complete."
+        summary={data && [plural(data.assignments.length, 'assignment'), `${pendingCount} pending`]}
         actions={
           hasSubjects && (
             <button type="button" className="btn btn-primary" onClick={() => setEditing('new')}>
-              <Icon name="plus" size={16} /> Create assignment
+              Create assignment
             </button>
           )
         }
@@ -171,7 +174,7 @@ export default function Assignments() {
               title="No assignments yet"
               action={
                 <button type="button" className="btn btn-primary" onClick={() => setEditing('new')}>
-                  <Icon name="plus" size={16} /> Create your first assignment
+                  Create your first assignment
                 </button>
               }
             >
@@ -186,7 +189,7 @@ export default function Assignments() {
               <p className="result-count text-muted">
                 Showing {visible.length} of {data.assignments.length}
               </p>
-              <div className="card-list">
+              <div className="card-list" data-reveal-cards>
                 {visible.map((a) => (
                   <AssignmentCard
                     key={a.assignmentId}
@@ -207,6 +210,7 @@ export default function Assignments() {
       <Modal
         open={Boolean(editing)}
         title={editing === 'new' ? 'Create assignment' : 'Edit assignment'}
+        label={editing === 'new' ? 'New' : 'Editing'}
         onClose={() => setEditing(null)}
       >
         {editing && (

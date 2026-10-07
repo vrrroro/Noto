@@ -19,7 +19,7 @@ function ArchIllustration() {
   );
 }
 
-export default function AuthLayout({ title, subtitle, children, footer }) {
+export default function AuthLayout({ label, title, subtitle, children, footer }) {
   return (
     <div className="auth-page">
       <section className="auth-intro" aria-hidden="true">
@@ -41,7 +41,8 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
         <div className="auth-brand brand brand-large">
           <Brand />
         </div>
-        <div className="auth-card">
+        <div className="auth-card invert">
+          {label && <p className="label">{label}</p>}
           <h1>{title}</h1>
           {subtitle && <p className="text-muted">{subtitle}</p>}
           {isDemoMode && (

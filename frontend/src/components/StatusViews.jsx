@@ -13,12 +13,14 @@ export function LoadingState({ label = 'Loading…' }) {
 export function ErrorState({ error, onRetry, label = 'Failed to load.' }) {
   return (
     <div className="state-view state-error" role="alert">
-      <Icon name="alert" size={28} />
+      <span className="state-icon">
+        <Icon name="alert" size={26} />
+      </span>
       <p className="state-title">{label}</p>
       {error?.message && <p className="text-muted">{error.message}</p>}
       {onRetry && (
         <button type="button" className="btn btn-secondary" onClick={onRetry}>
-          <Icon name="refresh" /> Retry
+          Retry
         </button>
       )}
     </div>

@@ -37,6 +37,7 @@ export default function Login() {
 
   return (
     <AuthLayout
+      label="Sign in"
       title={
         <>
           Welcome <em>back</em>

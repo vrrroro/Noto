@@ -83,71 +83,73 @@ export default function Notes() {
         <>
           <FileUpload subjects={data.subjects} onUploaded={handleUploaded} />
 
-          <div className="toolbar" role="search">
-            <div className="search-field">
-              <Icon name="search" size={16} />
-              <label htmlFor="file-search" className="visually-hidden">
-                Search files
-              </label>
-              <input
-                id="file-search"
-                type="search"
-                placeholder="Search files"
-                value={filters.query}
-                onChange={setFilter('query')}
-              />
-            </div>
-            <label className="visually-hidden" htmlFor="file-subject-filter">
-              Filter by subject
-            </label>
-            <select id="file-subject-filter" value={filters.subject} onChange={setFilter('subject')}>
-              <option value="">All subjects</option>
-              {data.subjects.map((s) => (
-                <option key={s.subjectId} value={s.name}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            <label className="visually-hidden" htmlFor="file-type-filter">
-              Filter by type
-            </label>
-            <select id="file-type-filter" value={filters.type} onChange={setFilter('type')}>
-              <option value="">All types</option>
-              {FILE_TYPE_GROUPS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {data.files.length === 0 ? (
-            <EmptyState icon="notes" title="No files yet">
-              Upload your first set of notes using the form above.
-            </EmptyState>
-          ) : visible.length === 0 ? (
-            <EmptyState icon="search" title="No matching files">
-              Try a different search or filter.
-            </EmptyState>
-          ) : (
-            <>
-              <p className="result-count text-muted">
-                Showing {visible.length} of {data.files.length}
-              </p>
-              <div className="card-list file-grid">
-                {visible.map((f) => (
-                  <FileCard
-                    key={f.fileId}
-                    file={f}
-                    color={colorOf(f.subject)}
-                    busy={busyId === f.fileId}
-                    onDownload={() => handleDownload(f)}
-                    onDelete={() => setDeleting(f)}
-                  />
-                ))}
+          <section className="band" aria-label="Your files">
+            <div className="toolbar" role="search">
+              <div className="search-field">
+                <Icon name="search" size={16} />
+                <label htmlFor="file-search" className="visually-hidden">
+                  Search files
+                </label>
+                <input
+                  id="file-search"
+                  type="search"
+                  placeholder="Search files"
+                  value={filters.query}
+                  onChange={setFilter('query')}
+                />
               </div>
-            </>
-          )}
+              <label className="visually-hidden" htmlFor="file-subject-filter">
+                Filter by subject
+              </label>
+              <select id="file-subject-filter" value={filters.subject} onChange={setFilter('subject')}>
+                <option value="">All subjects</option>
+                {data.subjects.map((s) => (
+                  <option key={s.subjectId} value={s.name}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              <label className="visually-hidden" htmlFor="file-type-filter">
+                Filter by type
+              </label>
+              <select id="file-type-filter" value={filters.type} onChange={setFilter('type')}>
+                <option value="">All types</option>
+                {FILE_TYPE_GROUPS.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {data.files.length === 0 ? (
+              <EmptyState icon="notes" title="No files yet">
+                Upload your first set of notes using the form above.
+              </EmptyState>
+            ) : visible.length === 0 ? (
+              <EmptyState icon="search" title="No matching files">
+                Try a different search or filter.
+              </EmptyState>
+            ) : (
+              <>
+                <p className="result-count text-muted">
+                  Showing {visible.length} of {data.files.length}
+                </p>
+                <div className="card-list file-grid" data-reveal-cards>
+                  {visible.map((f) => (
+                    <FileCard
+                      key={f.fileId}
+                      file={f}
+                      color={colorOf(f.subject)}
+                      busy={busyId === f.fileId}
+                      onDownload={() => handleDownload(f)}
+                      onDelete={() => setDeleting(f)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
         </>
       )}
 

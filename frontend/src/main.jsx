@@ -1,15 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
+import { installHaptics } from './utils/haptics.js';
 import './styles/global.css';
 
-// Apply the saved theme before the first render to avoid a flash.
-try {
-  const theme = localStorage.getItem('scm.theme');
-  if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
-} catch {
-  // storage unavailable: follow the system theme
-}
+// The saved theme is applied by an inline script in index.html before the first paint.
+installHaptics();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

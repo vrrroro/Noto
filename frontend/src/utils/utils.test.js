@@ -128,4 +128,11 @@ describe('dashboard summary', () => {
     expect(s.upcoming.map((a) => a.assignmentId)).toEqual(['3', '2']);
     expect(s.recentFiles.map((f) => f.fileId)).toEqual(['f2', 'f1']);
   });
+
+  it('picks the most urgent pending assignment as "next up", overdue first', () => {
+    expect(summarize(assignments, [], NOW).next.assignmentId).toBe('4');
+    const onlyFuture = assignments.filter((a) => a.assignmentId !== '4');
+    expect(summarize(onlyFuture, [], NOW).next.assignmentId).toBe('3');
+    expect(summarize([assignments[0]], [], NOW).next).toBeNull();
+  });
 });

@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import PageHeader from '../components/PageHeader.jsx';
-import Icon from '../components/Icon.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import { LoadingState, ErrorState, EmptyState } from '../components/StatusViews.jsx';
 import { useResource } from '../hooks/useResource.js';
@@ -74,9 +73,16 @@ export default function Subjects() {
         description="Subjects organise your assignments and notes."
       />
 
-      <form className="card inline-form" onSubmit={handleAdd} noValidate>
-        <div className="field">
-          <label htmlFor="subject-name">New subject</label>
+      <form className="inline-form" onSubmit={handleAdd} noValidate>
+        <div className="section-head">
+          <label className="label" htmlFor="subject-name">
+            New subject
+          </label>
+          <p className="section-title">
+            <span>Add a subject.</span> <span className="quiet">Assignments and notes are grouped by it.</span>
+          </p>
+        </div>
+        <div className="giant-bar">
           <input
             id="subject-name"
             value={name}
@@ -85,10 +91,10 @@ export default function Subjects() {
             maxLength={LIMITS.SUBJECT_NAME_MAX}
             disabled={status !== 'success'}
           />
+          <button type="submit" className="btn btn-primary" disabled={saving || status !== 'success'}>
+            {saving ? 'Adding…' : 'Add subject'}
+          </button>
         </div>
-        <button type="submit" className="btn btn-primary" disabled={saving || status !== 'success'}>
-          <Icon name="plus" size={16} /> {saving ? 'Adding…' : 'Add subject'}
-        </button>
         {formError && (
           <p className="alert alert-error inline-form-error" role="alert">
             {formError}
@@ -105,7 +111,7 @@ export default function Subjects() {
             Add the subjects you study this semester, such as DBMS or Operating Systems.
           </EmptyState>
         ) : (
-          <ul className="subject-grid">
+          <ul className="subject-grid" data-reveal-cards>
             {data.subjects.map((s) => {
               const c = counts[s.name];
               return (
@@ -125,7 +131,7 @@ export default function Subjects() {
                     onClick={() => setDeleting(s)}
                     aria-label={`Delete subject ${s.name}`}
                   >
-                    <Icon name="trash" size={16} /> Delete
+                    Delete
                   </button>
                 </li>
               );

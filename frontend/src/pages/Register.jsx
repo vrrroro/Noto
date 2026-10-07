@@ -36,6 +36,7 @@ export default function Register() {
 
   return (
     <AuthLayout
+      label="Step 1 of 2"
       title={
         <>
           Create your <em>account</em>
