@@ -3126,25 +3126,19 @@ recorded in PROJECT_CONTEXT.md → Important Decisions.
 
 # 108. IMMEDIATE NEXT ACTION
 
-Claude's first implementation task should be:
+The local foundation, the MVP and the first AWS deployment are done (2026-10-08).
+
+At the start of the next session:
 
 ```text
-1. Inspect repository.
-2. Initialize Git if necessary.
-3. Create project directory structure.
-4. Create frontend.
-5. Create initial React/Vite application OR plain frontend based on repository state.
-6. Create placeholder pages.
-7. Create documentation files.
-8. Update PROJECT_CONTEXT.md.
-9. Update CHANGELOG.md.
-10. Update TODO.md.
-11. Verify local application starts successfully.
+1. Read PROJECT_CONTEXT.md → "Resume Here" and "Next Task (exact)".
+2. Check git: work is on branch feature/aws-deployment, not yet merged into main.
+3. Check AWS access: aws sts get-caller-identity → account 956519720747.
+4. Continue with the first unfinished item in "Next Task (exact)".
 ```
 
-Do not create AWS resources yet.
-
-First establish the local application foundation.
+AWS resources now exist. Before changing or deleting them, follow §104 (ask first), and keep
+`-NoCloudFront` on deploys until the account is verified for CloudFront.
 
 ---
 

@@ -199,6 +199,12 @@ The script performs every deployment step:
 `-AlertEmail` is optional but recommended. AWS sends confirmation emails for the SNS
 subscription and the budget, and you must click the SNS confirmation link.
 
+**New AWS accounts:** CloudFront refuses to create resources until AWS verifies the account
+("Your account must be verified before you can add new CloudFront resources"). Until then deploy
+with `-NoCloudFront`: everything except CloudFront is created, and you run the website locally
+(`cd frontend && npm run dev`) against the deployed backend. Open a free AWS Support case
+(Account and billing) quoting the error, then deploy again without the switch.
+
 Re-deploy only the frontend: `deploy.ps1 -FrontendOnly`.
 Remove everything after the demo: `.\infrastructure\scripts\destroy.ps1` (asks for confirmation).
 
@@ -212,6 +218,7 @@ To run the local dev server against the deployed backend, run `deploy.ps1` once 
 | Backend unit tests (validation, CRUD, ownership, errors, S3 presigning, DynamoDB expressions) | `cd backend && npm test` | 36 / 36 passing |
 | Frontend unit tests (dates, filters, dashboard maths, demo backend) | `cd frontend && npm test` | 17 / 17 passing |
 | End-to-end browser run (headless Chrome, demo mode) | `cd e2e && npm test` (with `npm run dev` running) | 30 / 30 checks passing |
+| Live API against the deployed stack (Cognito, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 35 / 35 passing (2026-10-08) |
 | Infrastructure lint | `cfn-lint infrastructure/template.yaml` | 0 findings |
 
 What is **not yet verified** is a live run against real AWS resources. [TESTING.md](TESTING.md)

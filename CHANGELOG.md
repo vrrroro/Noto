@@ -23,6 +23,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - IAM user `scm-deployer` (AdministratorAccess, CLI access key) was created by hand for deployments.
 - The first attempt rolled back (CloudFront account verification) and its empty stack was deleted.
 
+### Changed
+
+- PROJECT_CONTEXT.md: "Resume Here" section (account, credentials, branch, exact commands), the
+  architecture as deployed, next steps, and notes on approaches that failed (`aws login`, the
+  restricted "Index Zero" account, browser automation on AWS sign-in pages).
+- CLAUDE.md: §107 status and §108 next action now reflect the deployed state.
+- README.md: `-NoCloudFront` deployment note and the live API test.
+
 ---
 
 ## [1.0.0] - 2026-10-06

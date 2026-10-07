@@ -1,5 +1,42 @@
 # Project Context
 
+## Resume Here (read first)
+
+Last session: 2026-10-08. The backend is **live on AWS**; the website runs **locally** against it.
+
+| Item | State |
+| --- | --- |
+| Git | Work is on branch **`feature/aws-deployment`** (3+ commits), **not merged into `main` yet** |
+| AWS account | **956519720747** (standalone, Free plan, $100 credit until 2027-04-07), region **ap-south-1** (Mumbai) |
+| CLI credentials | `~/.aws/credentials` default profile = IAM user `scm-deployer` in that account. Check with `aws sts get-caller-identity` |
+| Tools | AWS CLI 2.37 (`C:\Program Files\Amazon\AWSCLIV2`), SAM CLI 1.167 (`C:\Program Files\Amazon\AWSSAMCLI\bin`), Node 24. Both are on PATH in new terminals; add those folders if a shell says `aws` is not found |
+| Frontend config | `frontend/.env.local` (git-ignored) already points at the live stack |
+| CloudFront | **Off** (`EnableCloudFront=false`); blocked until AWS verifies the account |
+
+Start the app:
+
+```powershell
+cd C:\Users\rohit\Downloads\AWS\frontend
+npm run dev          # http://localhost:5173 (live AWS mode: no "Demo mode" banner)
+```
+
+Re-check that AWS works (creates and deletes its own test users, about 30 s):
+
+```powershell
+cd C:\Users\rohit\Downloads\AWS
+node e2e/live-api.mjs   # expect 35/35
+```
+
+Redeploy after backend/template changes. **Keep `-NoCloudFront` until the account is verified**,
+otherwise the update fails on CloudFront and rolls back:
+
+```powershell
+.\infrastructure\scripts\deploy.ps1 -NoCloudFront
+```
+
+SAM shows the change set and asks for confirmation (`confirm_changeset = true` in samconfig.toml).
+Review it before answering `y`.
+
 ## What are we building?
 
 Student Cloud Manager: a serverless AWS web app where students manage assignments (deadlines,
@@ -38,7 +75,7 @@ Also verified locally earlier: full UI in demo mode (30-check E2E), 36 backend +
 
 ## In Progress
 
-Manual UI test by the developer at http://localhost:5173 (`cd frontend && npm run dev`).
+Nothing running. Waiting on the developer's manual UI test and the decisions listed in Next Task.
 
 ## Known Issues
 
@@ -66,9 +103,12 @@ Account 956519720747, ap-south-1:
 
 ## Current Architecture
 
-Browser → CloudFront → S3 (web). Browser → Cognito (auth). Browser → API Gateway HTTP API
-(JWT) → 3 Lambdas → DynamoDB (3 tables) / S3 presign. Browser ↔ S3 files bucket via presigned URLs.
-See ARCHITECTURE.md.
+**Deployed now:** Browser (local Vite dev server, http://localhost:5173) → Cognito (auth).
+Browser → API Gateway HTTP API (JWT) → 3 Lambdas → DynamoDB (3 tables) / S3 presign.
+Browser ↔ S3 files bucket via presigned URLs.
+
+**Target (after CloudFront verification):** the same, with the website served by
+CloudFront → private S3 web bucket (OAC). See ARCHITECTURE.md.
 
 ## Important Decisions
 
@@ -88,22 +128,33 @@ See ARCHITECTURE.md.
 
 ## Next Task (exact)
 
-Superseded steps from before the deployment are kept below for reference. Current next steps:
+1. **Merge** `feature/aws-deployment` into `main` once the developer is happy
+   (`git switch main; git merge feature/aws-deployment`).
+2. **Developer UI test:** `npm run dev`, register with a real email at http://localhost:5173, enter
+   the emailed code, then run TESTING.md's manual checklist. Record results in TESTING.md.
+3. **Alert email (still undecided):** ask which address gets alarm and budget emails, then
+   `.\infrastructure\scripts\deploy.ps1 -NoCloudFront -AlertEmail <email>` and have the developer
+   click the SNS confirmation link.
+4. **CloudFront:** the developer opens an AWS Support case (Account and billing, free) quoting the
+   CloudFront verification error. After approval run
+   `.\infrastructure\scripts\deploy.ps1 -AlertEmail <email>` (no `-NoCloudFront`), then test on
+   the printed CloudFront URL.
+5. Capture the AWS Console screenshots in `docs/presentation/DEMO_SCRIPT.md`.
+6. **After the demo:** delete the `scm-deployer` access key (IAM → Users → scm-deployer → Security
+   credentials), or the whole user. Decide whether to keep the stack or run `destroy.ps1`.
 
-1. Developer: register with a real email at http://localhost:5173 and run TESTING.md's manual checklist.
-2. Open an AWS Support case to verify the account for CloudFront; then
-   `.\infrastructure\scripts\deploy.ps1 -AlertEmail <email>` (CloudFront on, alarms + budget).
-3. Capture the AWS Console screenshots in `docs/presentation/DEMO_SCRIPT.md`.
-4. After the demo: delete the `scm-deployer` access key (or the user).
+## Session Notes (2026-10-08): approaches that failed, do not retry
 
-Previous plan:
-
-1. Install AWS CLI v2 + SAM CLI, then run `aws configure` (IAM user/SSO, not root; MFA on).
-2. Check current pricing and free-tier status for the services.
-3. `.\infrastructure\scripts\deploy.ps1 -AlertEmail <your email>` and confirm the SNS email.
-4. Work through the **manual checklist in TESTING.md** on the CloudFront URL; record results.
-5. Capture the AWS Console screenshots listed in `docs/presentation/DEMO_SCRIPT.md`.
-6. Update this file, CHANGELOG.md and TODO.md with the verified state.
+- **`aws login`** (CLI sign-in through the browser console session) fails for this developer with
+  "Something went wrong" on AWS's page. Use the IAM access key instead.
+- **Browser automation on AWS sign-in pages** triggers AWS's automated-activity block, and the
+  Chrome extension has no permission for `console.aws.amazon.com`. Console steps (sign-in, creating
+  users or keys, support cases) must be done by the developer, guided one step at a time.
+- **Account "Index Zero" (314113910114)** is an organization member account. Its management account
+  (045058550507) applies SCPs that deny nearly every service. Its `scm-deployer` key is now invalid,
+  and the developer's console login (rohitsham50) lands there by default. Do not use it.
+- The first deploy rolled back on CloudFront; the empty `ROLLBACK_COMPLETE` stack was deleted.
+- The developer is new to AWS: give one concrete step at a time, with exact button names.
 
 ## Last Updated
 
