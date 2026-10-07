@@ -6,7 +6,7 @@ Last session: 2026-10-08. The backend is **live on AWS**; the website runs **loc
 
 | Item | State |
 | --- | --- |
-| Git | Work is on branch **`feature/aws-deployment`** (3+ commits), **not merged into `main` yet** |
+| Git | Latest work is on **`feature/noto-redesign`** (built on `feature/aws-deployment`); **neither is merged into `main` yet** |
 | AWS account | **956519720747** (standalone, Free plan, $100 credit until 2027-04-07), region **ap-south-1** (Mumbai) |
 | CLI credentials | `~/.aws/credentials` default profile = IAM user `scm-deployer` in that account. Check with `aws sts get-caller-identity` |
 | Tools | AWS CLI 2.37 (`C:\Program Files\Amazon\AWSCLIV2`), SAM CLI 1.167 (`C:\Program Files\Amazon\AWSSAMCLI\bin`), Node 24. Both are on PATH in new terminals; add those folders if a shell says `aws` is not found |
@@ -134,8 +134,8 @@ CloudFront → private S3 web bucket (OAC). See ARCHITECTURE.md.
 
 ## Next Task (exact)
 
-1. **Merge** `feature/aws-deployment` into `main` once the developer is happy
-   (`git switch main; git merge feature/aws-deployment`).
+1. **Merge** `feature/noto-redesign` (which includes `feature/aws-deployment`) into `main` once the
+   developer is happy (`git switch main; git merge feature/noto-redesign`).
 2. **Developer UI test:** `npm run dev`, register with a real email at http://localhost:5173, enter
    the emailed code, then run TESTING.md's manual checklist. Record results in TESTING.md.
 3. **Alert email (still undecided):** ask which address gets alarm and budget emails, then

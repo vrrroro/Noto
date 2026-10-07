@@ -3132,7 +3132,7 @@ At the start of the next session:
 
 ```text
 1. Read PROJECT_CONTEXT.md → "Resume Here" and "Next Task (exact)".
-2. Check git: work is on branch feature/aws-deployment, not yet merged into main.
+2. Check git: work is on branch feature/noto-redesign (includes feature/aws-deployment), not yet merged into main.
 3. Check AWS access: aws sts get-caller-identity → account 956519720747.
 4. Continue with the first unfinished item in "Next Task (exact)".
 ```
