@@ -49,6 +49,7 @@ flowchart LR
 | DynamoDB | Assignments, subjects, file metadata | Serverless NoSQL with predictable key lookups and on-demand billing |
 | S3 (files) | The uploaded documents themselves | Object storage built for files; DynamoDB items are limited to 400 KB |
 | S3 + CloudFront (web) | Hosts the React build over HTTPS | Static hosting plus a CDN, without a web server |
+| Amplify Hosting (fallback web) | Hosts the React build over HTTPS while the account is not verified for CloudFront | Managed static hosting with its own CDN; needs no CloudFront verification |
 | CloudWatch | Logs, metrics, alarms, dashboard | Native to Lambda and API Gateway |
 | IAM | One role per Lambda | Least privilege |
 | Budgets + SNS (optional) | Cost and error emails | Cost safety |

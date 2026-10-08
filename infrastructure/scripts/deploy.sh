@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 # Deploys Student Cloud Manager to AWS (macOS / Linux / Git Bash).
 # Same steps as deploy.ps1: sam build+deploy -> write frontend/.env.local ->
-# build frontend -> upload to S3 -> invalidate CloudFront.
+# build frontend -> upload to S3 + invalidate CloudFront (or, with --no-cloudfront, to Amplify Hosting).
 #
-# Usage: infrastructure/scripts/deploy.sh [--stage dev] [--alert-email you@example.com] [--frontend-only]
+# Usage: infrastructure/scripts/deploy.sh [--stage dev] [--alert-email you@example.com] [--frontend-only] [--no-cloudfront]
 set -euo pipefail
 
 STAGE=dev
 ALERT_EMAIL=""
 FRONTEND_ONLY=false
+NO_CLOUDFRONT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --stage) STAGE="$2"; shift 2 ;;
     --alert-email) ALERT_EMAIL="$2"; shift 2 ;;
     --frontend-only) FRONTEND_ONLY=true; shift ;;
+    --no-cloudfront) NO_CLOUDFRONT=true; shift ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
 done
@@ -29,6 +31,7 @@ if [[ "$FRONTEND_ONLY" == false ]]; then
   command -v sam >/dev/null || { echo "'sam' (AWS SAM CLI) not found." >&2; exit 1; }
   echo "==> Building and deploying stack $STACK"
   OVERRIDES=("Stage=$STAGE")
+  [[ "$NO_CLOUDFRONT" == true ]] && OVERRIDES+=("EnableCloudFront=false")
   [[ -n "$ALERT_EMAIL" ]] && OVERRIDES+=("AlertEmail=$ALERT_EMAIL")
   (cd "$ROOT/infrastructure" && sam build && sam deploy --stack-name "$STACK" --parameter-overrides "${OVERRIDES[@]}" --no-fail-on-empty-changeset)
 fi
@@ -49,15 +52,35 @@ EOF
 echo "Wrote frontend/.env.local"
 
 echo "==> Building frontend"
-(cd "$ROOT/frontend" && npm ci && npm run build)
+# npm ci wipes node_modules, which fails while a dev server holds its files; only run it when needed.
+(cd "$ROOT/frontend" && { [[ -d node_modules ]] || npm ci; } && npm run build)
+DIST="$ROOT/frontend/dist"
 
-BUCKET="s3://$(output FrontendBucketName)"
-echo "==> Uploading to $BUCKET"
-aws s3 sync "$ROOT/frontend/dist/assets" "$BUCKET/assets" --delete --cache-control 'public,max-age=31536000,immutable'
-aws s3 sync "$ROOT/frontend/dist" "$BUCKET" --delete --exclude 'assets/*' --cache-control 'no-cache'
+DISTRIBUTION_ID="$(output DistributionId)"
+if [[ -n "$DISTRIBUTION_ID" && "$DISTRIBUTION_ID" != "None" ]]; then
+  BUCKET="s3://$(output FrontendBucketName)"
+  echo "==> Uploading to $BUCKET"
+  aws s3 sync "$DIST/assets" "$BUCKET/assets" --delete --cache-control 'public,max-age=31536000,immutable'
+  aws s3 sync "$DIST" "$BUCKET" --delete --exclude 'assets/*' --cache-control 'no-cache'
 
-echo "==> Invalidating CloudFront cache"
-aws cloudfront create-invalidation --distribution-id "$(output DistributionId)" --paths '/*' --output text >/dev/null
+  echo "==> Invalidating CloudFront cache"
+  aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths '/*' --output text >/dev/null
+else
+  APP_ID="$(output AmplifyAppId)"
+  ZIP="$(mktemp -d)/site.zip"
+  echo "==> Uploading to Amplify app $APP_ID"
+  (cd "$DIST" && zip -qr "$ZIP" .)
+  read -r JOB_ID UPLOAD_URL < <(aws amplify create-deployment --app-id "$APP_ID" --branch-name main     --query '[jobId, zipUploadUrl]' --output text)
+  curl -sf -X PUT -H 'Content-Type: application/zip' --upload-file "$ZIP" "$UPLOAD_URL"
+  aws amplify start-deployment --app-id "$APP_ID" --branch-name main --job-id "$JOB_ID" >/dev/null
+  while :; do
+    sleep 3
+    STATUS="$(aws amplify get-job --app-id "$APP_ID" --branch-name main --job-id "$JOB_ID" --query 'job.summary.status' --output text)"
+    [[ "$STATUS" == PENDING || "$STATUS" == PROVISIONING || "$STATUS" == RUNNING ]] || break
+  done
+  rm -f "$ZIP"
+  [[ "$STATUS" == SUCCEED ]] || { echo "Amplify deployment ended with status $STATUS." >&2; exit 1; }
+fi
 
 echo
 echo "Deployment complete."

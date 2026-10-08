@@ -94,6 +94,11 @@ async function main() {
     headers: { Origin: ORIGIN, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'authorization,content-type' },
   });
   check('CORS preflight allows the local dev origin', pre.headers.get('access-control-allow-origin') === ORIGIN);
+  const sitePre = await fetch(API + '/assignments', {
+    method: 'OPTIONS',
+    headers: { Origin: outputs.WebsiteUrl, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'authorization,content-type' },
+  });
+  check('CORS preflight allows the hosted website origin', sitePre.headers.get('access-control-allow-origin') === outputs.WebsiteUrl);
 
   // ---- Subjects ------------------------------------------------------------
   const subj = await A('POST', '/subjects', { name: 'DBMS' });

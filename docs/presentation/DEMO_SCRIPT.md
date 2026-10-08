@@ -2,7 +2,8 @@
 
 Before the demo:
 
-- [ ] Stack deployed, website opens on the CloudFront URL.
+- [ ] Stack deployed, website opens on its URL (https://main.dg6fh880g1p8b.amplifyapp.com, or the CloudFront URL
+      once enabled). `node e2e/live-site.mjs` passes.
 - [ ] AWS Console open in tabs: Cognito → User pools, DynamoDB → Tables → *Explore items*,
       S3 → files bucket, CloudWatch → Dashboards + Log groups, IAM → Roles.
 - [ ] A small `DBMS_Unit_3.pdf` on the desktop.

@@ -7,8 +7,9 @@
 | Production build | Vite | `cd frontend && npm run build` | builds cleanly |
 | End-to-end (browser) | Headless Chrome via `puppeteer-core` against `npm run dev` (demo mode) | `cd e2e && npm test` | **30 / 30 checks pass**, no console errors |
 | Infrastructure | `cfn-lint` 1.57 (includes the SAM transform) | `cfn-lint infrastructure/template.yaml` | **0 findings** |
-| Live AWS API | `node` + AWS CLI against the deployed stack | `node e2e/live-api.mjs` | **35 / 35 pass** (2026-10-08) |
-| Live AWS UI | manual checklist below | `cd frontend && npm run dev` | page loads in live mode; manual run pending |
+| Live AWS API | `node` + AWS CLI against the deployed stack | `node e2e/live-api.mjs` | **36 / 36 pass** (2026-10-08) |
+| Live website | Headless Chrome via `puppeteer-core` against the hosted `WebsiteUrl`, temporary Cognito user | `node e2e/live-site.mjs` | **16 / 16 pass** (2026-10-08), no console errors |
+| Live AWS UI (manual) | manual checklist below | open the website | sign-up with a real email pending |
 
 ## Backend unit tests (`backend/test`)
 
@@ -68,7 +69,8 @@ cd e2e && npm install && npm test   # terminal 2 (set CHROME_PATH if Chrome is n
 
 ## Manual checklist for the live AWS deployment
 
-Run after `infrastructure/scripts/deploy.ps1`, using the CloudFront URL. Record the results here.
+Run after `infrastructure/scripts/deploy.ps1`, using the website URL (https://main.dg6fh880g1p8b.amplifyapp.com on
+Amplify, or the CloudFront URL once enabled). Record the results here.
 
 ### Authentication
 - [ ] Register with a real email; verification code arrives

@@ -14,6 +14,7 @@ Legend: `[x]` done and verified locally · `[~]` implemented, awaiting verificat
 - [x] Implement S3 file upload (real S3 round-trip verified)
 - [x] Implement dashboard
 - [x] **Deploy to AWS** (backend, 2026-10-08; live API 35/35)
+- [x] **Put the website online** (AWS Amplify Hosting, https://main.dg6fh880g1p8b.amplifyapp.com; live site 16/16)
 - [ ] Get the account verified for CloudFront, then redeploy with CloudFront + `-AlertEmail`
 - [ ] **Run the live manual UI checklist** in TESTING.md (sign-up with a real email)
 - [ ] Delete or restrict the `scm-deployer` access key after the demo

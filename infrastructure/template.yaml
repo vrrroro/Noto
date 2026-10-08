@@ -31,8 +31,9 @@ Parameters:
     Default: 'true'
     AllowedValues: ['true', 'false']
     Description: >
-      Create the CloudFront distribution for the website. New AWS accounts cannot create CloudFront
-      resources until AWS verifies them; deploy with 'false' until then and run the frontend locally.
+      Serve the website through CloudFront. New AWS accounts cannot create CloudFront resources until
+      AWS verifies them; deploy with 'false' until then and the website is hosted on AWS Amplify
+      Hosting instead (HTTPS, no verification needed).
   MonthlyBudgetUsd:
     Type: Number
     Default: 5
@@ -42,6 +43,7 @@ Parameters:
 Conditions:
   HasAlertEmail: !Not [!Equals [!Ref AlertEmail, '']]
   HasCloudFront: !Equals [!Ref EnableCloudFront, 'true']
+  HasAmplifyHosting: !Not [!Condition HasCloudFront]
 
 # --------------------------------------------------------------------------
 # Lambda defaults
@@ -195,6 +197,7 @@ Resources:
           - AllowedMethods: [POST]
             AllowedOrigins:
               - !If [HasCloudFront, !Sub 'https://${WebDistribution.DomainName}', !Ref AWS::NoValue]
+              - !If [HasAmplifyHosting, !Sub 'https://${WebBranch.BranchName}.${WebApp.DefaultDomain}', !Ref AWS::NoValue]
               - !Ref LocalDevOrigin
             AllowedHeaders: ['*']
             MaxAge: 600
@@ -318,6 +321,43 @@ Resources:
             ResponsePagePath: /index.html
             ErrorCachingMinTTL: 10
 
+  # Hosting while CloudFront is unavailable: AWS Amplify Hosting with manual deploys (no Git
+  # connection). deploy.ps1 uploads the built site as a zip; Amplify serves it over HTTPS.
+  WebApp:
+    Type: AWS::Amplify::App
+    Condition: HasAmplifyHosting
+    Properties:
+      Name: !Sub ${ProjectName}-web-${Stage}
+      Description: !Sub ${ProjectName} frontend (${Stage})
+      Platform: WEB
+      CustomRules:
+        # Single-page app: paths without a file extension (e.g. /assignments) serve index.html
+        - Source: '</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>'
+          Target: /index.html
+          Status: '200'
+      # The same security headers as CloudFront's Managed-SecurityHeadersPolicy
+      CustomHeaders: |
+        customHeaders:
+          - pattern: '**'
+            headers:
+              - key: Strict-Transport-Security
+                value: max-age=31536000
+              - key: X-Content-Type-Options
+                value: nosniff
+              - key: X-Frame-Options
+                value: SAMEORIGIN
+              - key: Referrer-Policy
+                value: strict-origin-when-cross-origin
+
+  WebBranch:
+    Type: AWS::Amplify::Branch
+    Condition: HasAmplifyHosting
+    Properties:
+      AppId: !GetAtt WebApp.AppId
+      BranchName: main
+      Stage: PRODUCTION
+      EnableAutoBuild: false
+
   # ------------------------------------------------------------------------
   # API: API Gateway HTTP API with a Cognito JWT authorizer on every route
   # ------------------------------------------------------------------------
@@ -337,6 +377,7 @@ Resources:
       CorsConfiguration:
         AllowOrigins:
           - !If [HasCloudFront, !Sub 'https://${WebDistribution.DomainName}', !Ref AWS::NoValue]
+          - !If [HasAmplifyHosting, !Sub 'https://${WebBranch.BranchName}.${WebApp.DefaultDomain}', !Ref AWS::NoValue]
           - !Ref LocalDevOrigin
         AllowHeaders: [authorization, content-type]
         AllowMethods: [GET, POST, PUT, DELETE, OPTIONS]
@@ -656,8 +697,13 @@ Outputs:
   ApiUrl:
     Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
   WebsiteUrl:
-    Condition: HasCloudFront
-    Value: !Sub https://${WebDistribution.DomainName}
+    Value: !If
+      - HasCloudFront
+      - !Sub https://${WebDistribution.DomainName}
+      - !Sub https://${WebBranch.BranchName}.${WebApp.DefaultDomain}
+  AmplifyAppId:
+    Condition: HasAmplifyHosting
+    Value: !GetAtt WebApp.AppId
   DistributionId:
     Condition: HasCloudFront
     Value: !Ref WebDistribution

@@ -6,9 +6,8 @@ download and delete their study files. All of this runs without managing a singl
 
 ![Dashboard](docs/screenshots/app-03-dashboard.png)
 
-> **Status:** Feature-complete MVP, tested locally (unit + end-to-end). The AWS stack is
-> defined as code and lint-validated but **has not been deployed yet** (no AWS account was
-> connected while it was built). See [Deployment](#deployment).
+> **Status:** Deployed to AWS and online at **https://main.dg6fh880g1p8b.amplifyapp.com**. The backend
+> and the hosted website are verified with live tests. See [Deployment](#deployment).
 
 ---
 
@@ -49,6 +48,7 @@ and a maximum file size of 10 MB.
 
 ```text
  Browser ──HTTPS──> CloudFront ──OAC──> S3 (frontend bucket, private)
+    │               (or AWS Amplify Hosting while CloudFront is unavailable)
     │
     ├──HTTPS──> Cognito User Pool        (sign-up, login, JWT tokens)
     │
@@ -75,6 +75,7 @@ Full details (data flows, security model, failure scenarios, scalability) are in
 | **Amazon DynamoDB** (on-demand) | Assignments, subjects and file metadata (partition key `userId`) |
 | **Amazon S3** | Private bucket for uploaded files + private bucket for the website |
 | **Amazon CloudFront** | HTTPS CDN for the website, security headers, SPA routing |
+| **AWS Amplify Hosting** | Hosts the website over HTTPS while the account is not yet verified for CloudFront |
 | **Amazon CloudWatch** | Logs (14-day retention), error alarms, monitoring dashboard |
 | **AWS IAM** | One least-privilege role per Lambda; no administrator access anywhere |
 | **AWS Budgets** / **SNS** (optional) | Monthly cost alert and alarm emails |
@@ -192,18 +193,20 @@ The script performs every deployment step:
    CloudWatch log groups, alarms and dashboard, plus (with an email) an SNS topic and a monthly
    budget. SAM shows a change set; review it and confirm.
 2. **Configure the frontend**: it reads the stack outputs and writes `frontend/.env.local`.
-3. **Build the frontend**: `npm ci && npm run build`.
+3. **Build the frontend**: `npm run build` (`npm ci` first if `node_modules` is missing).
 4. **Upload to S3**: hashed assets are cached for a year, while `index.html` is served `no-cache`.
 5. **Invalidate CloudFront** and print the website URL.
+
+With `-NoCloudFront`, steps 4 and 5 are replaced by a zip upload to AWS Amplify Hosting.
 
 `-AlertEmail` is optional but recommended. AWS sends confirmation emails for the SNS
 subscription and the budget, and you must click the SNS confirmation link.
 
 **New AWS accounts:** CloudFront refuses to create resources until AWS verifies the account
 ("Your account must be verified before you can add new CloudFront resources"). Until then deploy
-with `-NoCloudFront`: everything except CloudFront is created, and you run the website locally
-(`cd frontend && npm run dev`) against the deployed backend. Open a free AWS Support case
-(Account and billing) quoting the error, then deploy again without the switch.
+with `-NoCloudFront`: everything except CloudFront is created, and the website is hosted on
+AWS Amplify Hosting instead (HTTPS, `https://main.<app-id>.amplifyapp.com`). Open a free AWS
+Support case (Account and billing) quoting the error, then deploy again without the switch.
 
 Re-deploy only the frontend: `deploy.ps1 -FrontendOnly`.
 Remove everything after the demo: `.\infrastructure\scripts\destroy.ps1` (asks for confirmation).
@@ -218,11 +221,12 @@ To run the local dev server against the deployed backend, run `deploy.ps1` once 
 | Backend unit tests (validation, CRUD, ownership, errors, S3 presigning, DynamoDB expressions) | `cd backend && npm test` | 36 / 36 passing |
 | Frontend unit tests (dates, filters, dashboard maths and next-up pick, subject colours, demo backend) | `cd frontend && npm test` | 19 / 19 passing |
 | End-to-end browser run (headless Chrome, demo mode) | `cd e2e && npm test` (with `npm run dev` running) | 30 / 30 checks passing |
-| Live API against the deployed stack (Cognito, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 35 / 35 passing (2026-10-08) |
+| Live API against the deployed stack (Cognito, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 36 / 36 passing (2026-10-08) |
+| Live website in headless Chrome (sign-in, CRUD, S3 upload/download, sign-out) | `node e2e/live-site.mjs` | 16 / 16 passing (2026-10-08) |
 | Infrastructure lint | `cfn-lint infrastructure/template.yaml` | 0 findings |
 
-What is **not yet verified** is a live run against real AWS resources. [TESTING.md](TESTING.md)
-contains the manual checklist to run after the first deployment.
+Still to do by hand: sign-up with a real email inbox. [TESTING.md](TESTING.md) contains the
+manual checklist.
 
 ## Security
 
@@ -243,7 +247,8 @@ Full model and checklist: [SECURITY.md](SECURITY.md).
 The architecture is pay-per-use, with nothing running while idle:
 
 - Lambda, API Gateway, DynamoDB on-demand and S3 are billed per request and storage.
-- Cognito uses the **Lite** tier. CloudFront uses the cheapest price class.
+- Cognito uses the **Lite** tier. CloudFront uses the cheapest price class. Amplify Hosting
+  (the fallback host) charges only for storage and transfer, cents for this site.
 - Log retention is 14 days. API throttling (10 req/s, burst 20) caps runaway costs.
 - An optional **AWS Budget** emails you at 80 % of the monthly limit (default USD 5).
 - `destroy.ps1` removes everything after the demo.

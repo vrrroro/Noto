@@ -1,12 +1,13 @@
 <#
 .SYNOPSIS
-  Deploys Student Cloud Manager to AWS: backend stack (SAM) + frontend (S3/CloudFront).
+  Deploys Student Cloud Manager to AWS: backend stack (SAM) + frontend (CloudFront or Amplify).
 
 .DESCRIPTION
   1. sam build + sam deploy          (Cognito, API Gateway, Lambda, DynamoDB, S3, CloudFront, CloudWatch)
   2. Reads the stack outputs and writes frontend/.env.local
-  3. Builds the React app and uploads it to the private frontend bucket
-  4. Invalidates the CloudFront cache and prints the website URL
+  3. Builds the React app
+  4. CloudFront: uploads it to the private frontend bucket and invalidates the cache.
+     -NoCloudFront: uploads it to AWS Amplify Hosting instead. Then prints the website URL.
 
   Prerequisites: AWS CLI v2 (configured with `aws configure`), AWS SAM CLI, Node.js 22+.
 
@@ -14,15 +15,15 @@
   .\infrastructure\scripts\deploy.ps1
   .\infrastructure\scripts\deploy.ps1 -AlertEmail you@example.com
   .\infrastructure\scripts\deploy.ps1 -FrontendOnly
-  .\infrastructure\scripts\deploy.ps1 -NoCloudFront   # new accounts: CloudFront needs AWS verification first
+  .\infrastructure\scripts\deploy.ps1 -NoCloudFront   # new accounts: host on Amplify until CloudFront is verified
 #>
 param(
   [string]$Stage = 'dev',
   [string]$AlertEmail = '',
   [string]$Region = '',
   [switch]$FrontendOnly,
-  # Skip the CloudFront distribution (EnableCloudFront=false). The frontend then runs locally
-  # (npm run dev) against the deployed backend.
+  # Skip the CloudFront distribution (EnableCloudFront=false). The website is then hosted on
+  # AWS Amplify Hosting, which new accounts can use before AWS verifies them for CloudFront.
   [switch]$NoCloudFront
 )
 
@@ -78,38 +79,63 @@ VITE_API_URL=$($outputs['ApiUrl'])
 Set-Content -Path (Join-Path $frontend '.env.local') -Value $envFile -Encoding ascii
 Write-Host 'Wrote frontend/.env.local'
 
-if (-not $outputs['DistributionId']) {
-  Write-Host "`nCloudFront is disabled for this stack, so the website is not uploaded." -ForegroundColor Yellow
-  Write-Host "Run it locally against the deployed backend:  cd frontend; npm run dev  ->  http://localhost:5173"
-  Write-Host "API:       $($outputs['ApiUrl'])"
-  Write-Host "Dashboard: $($outputs['DashboardUrl'])"
-  return
-}
-
 # ---- 3. Build and upload the frontend ---------------------------------------
 Write-Host "`n==> Building frontend" -ForegroundColor Cyan
 Push-Location $frontend
 try {
-  npm ci
-  Assert-Success 'npm ci'
+  # npm ci wipes node_modules, which fails while a dev server holds its files; only run it when needed.
+  if (-not (Test-Path 'node_modules')) {
+    npm ci
+    Assert-Success 'npm ci'
+  }
   npm run build
   Assert-Success 'npm run build'
-
-  $bucket = "s3://$($outputs['FrontendBucketName'])"
-  Write-Host "`n==> Uploading to $bucket" -ForegroundColor Cyan
-  # Hashed assets never change: cache them for a year.
-  aws s3 sync dist/assets "$bucket/assets" --delete --cache-control 'public,max-age=31536000,immutable' @regionArgs
-  Assert-Success 's3 sync assets'
-  # index.html and other root files must always be revalidated.
-  aws s3 sync dist $bucket --delete --exclude 'assets/*' --cache-control 'no-cache' @regionArgs
-  Assert-Success 's3 sync root'
 }
 finally { Pop-Location }
 
-# ---- 4. CloudFront ----------------------------------------------------------
-Write-Host "`n==> Invalidating CloudFront cache" -ForegroundColor Cyan
-aws cloudfront create-invalidation --distribution-id $outputs['DistributionId'] --paths '/*' --output text | Out-Null
-Assert-Success 'create-invalidation'
+if ($outputs['DistributionId']) {
+  # ---- 4a. CloudFront: private bucket + cache invalidation ------------------
+  $bucket = "s3://$($outputs['FrontendBucketName'])"
+  $dist = Join-Path $frontend 'dist'
+  Write-Host "`n==> Uploading to $bucket" -ForegroundColor Cyan
+  # Hashed assets never change: cache them for a year.
+  aws s3 sync (Join-Path $dist 'assets') "$bucket/assets" --delete --cache-control 'public,max-age=31536000,immutable' @regionArgs
+  Assert-Success 's3 sync assets'
+  # index.html and other root files must always be revalidated.
+  aws s3 sync $dist $bucket --delete --exclude 'assets/*' --cache-control 'no-cache' @regionArgs
+  Assert-Success 's3 sync root'
+
+  Write-Host "`n==> Invalidating CloudFront cache" -ForegroundColor Cyan
+  aws cloudfront create-invalidation --distribution-id $outputs['DistributionId'] --paths '/*' --output text | Out-Null
+  Assert-Success 'create-invalidation'
+}
+else {
+  # ---- 4b. Amplify Hosting: zip upload (manual deploy) ----------------------
+  $appId = $outputs['AmplifyAppId']
+  $branch = 'main'
+  $dist = Join-Path $frontend 'dist'
+  $zip = Join-Path ([IO.Path]::GetTempPath()) "noto-web-$Stage.zip"
+  Write-Host "`n==> Uploading to Amplify app $appId" -ForegroundColor Cyan
+  if (Test-Path $zip) { Remove-Item $zip }
+  # Windows' built-in tar writes forward-slash paths, which Amplify needs (Compress-Archive may not).
+  $items = Get-ChildItem $dist -Name
+  tar -a -c -f $zip -C $dist @items
+  Assert-Success 'zip dist'
+
+  $deployment = (aws amplify create-deployment --app-id $appId --branch-name $branch --output json @regionArgs) -join "`n" | ConvertFrom-Json
+  Assert-Success 'amplify create-deployment'
+  Invoke-WebRequest -Uri $deployment.zipUploadUrl -Method Put -InFile $zip -ContentType 'application/zip' -UseBasicParsing | Out-Null
+  aws amplify start-deployment --app-id $appId --branch-name $branch --job-id $deployment.jobId @regionArgs | Out-Null
+  Assert-Success 'amplify start-deployment'
+
+  do {
+    Start-Sleep -Seconds 3
+    $status = aws amplify get-job --app-id $appId --branch-name $branch --job-id $deployment.jobId --query 'job.summary.status' --output text @regionArgs
+    Assert-Success 'amplify get-job'
+  } while ($status -in @('PENDING', 'PROVISIONING', 'RUNNING'))
+  Remove-Item $zip
+  if ($status -ne 'SUCCEED') { throw "Amplify deployment ended with status $status." }
+}
 
 Write-Host "`nDeployment complete." -ForegroundColor Green
 Write-Host "Website:   $($outputs['WebsiteUrl'])  (a new distribution can take a few minutes to go live)"

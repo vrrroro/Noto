@@ -2,7 +2,8 @@
 
 ## Resume Here (read first)
 
-Last session: 2026-10-08. The backend is **live on AWS**; the website runs **locally** against it.
+Last session: 2026-10-08. **Noto is online:** https://main.dg6fh880g1p8b.amplifyapp.com (AWS Amplify Hosting, HTTPS) against the live
+AWS backend.
 
 | Item | State |
 | --- | --- |
@@ -11,20 +12,28 @@ Last session: 2026-10-08. The backend is **live on AWS**; the website runs **loc
 | CLI credentials | `~/.aws/credentials` default profile = IAM user `scm-deployer` in that account. Check with `aws sts get-caller-identity` |
 | Tools | AWS CLI 2.37 (`C:\Program Files\Amazon\AWSCLIV2`), SAM CLI 1.167 (`C:\Program Files\Amazon\AWSSAMCLI\bin`), Node 24. Both are on PATH in new terminals; add those folders if a shell says `aws` is not found |
 | Frontend config | `frontend/.env.local` (git-ignored) already points at the live stack |
-| CloudFront | **Off** (`EnableCloudFront=false`); blocked until AWS verifies the account |
+| Website | **https://main.dg6fh880g1p8b.amplifyapp.com** on AWS Amplify Hosting (app `dg6fh880g1p8b`, branch `main`, manual zip deploys) |
+| CloudFront | **Off** (`EnableCloudFront=false`); blocked until AWS verifies the account. While off, the template hosts the site on Amplify |
 
-Start the app:
+Open the app: **https://main.dg6fh880g1p8b.amplifyapp.com**. For local development against the same backend:
 
 ```powershell
 cd C:\Users\rohit\Downloads\AWS\frontend
 npm run dev          # http://localhost:5173 (live AWS mode: no "Demo mode" banner)
 ```
 
-Re-check that AWS works (creates and deletes its own test users, about 30 s):
+Re-check that AWS works (each creates and deletes its own test user(s)):
 
 ```powershell
 cd C:\Users\rohit\Downloads\AWS
-node e2e/live-api.mjs   # expect 35/35
+node e2e/live-api.mjs    # the API, expect 36/36 (about 30 s)
+node e2e/live-site.mjs   # the hosted website in headless Chrome, expect 16/16 (about 40 s)
+```
+
+Publish frontend changes to the website (builds, uploads the zip to Amplify, waits for it):
+
+```powershell
+.\infrastructure\scripts\deploy.ps1 -FrontendOnly
 ```
 
 Redeploy after backend/template changes. **Keep `-NoCloudFront` until the account is verified**,
@@ -45,32 +54,39 @@ simple, secure, demonstrable and cheap.
 
 ## Current Phase
 
-**Deployed to AWS (backend) on 2026-10-08. Live API verified. CloudFront hosting pending AWS account
-verification; the frontend runs locally against the live backend.**
+**Fully deployed to AWS on 2026-10-08.** The backend is live and verified; the website is on AWS
+Amplify Hosting and verified in a browser. CloudFront hosting waits for AWS account verification.
 
 ## Current Status
 
-Backend stack `student-cloud-manager-dev` is `CREATE_COMPLETE` in account **956519720747**,
-region **ap-south-1**, deployed with `EnableCloudFront=false`. `frontend/.env.local` (git-ignored)
+Backend stack `student-cloud-manager-dev` is `UPDATE_COMPLETE` in account **956519720747**,
+region **ap-south-1**, deployed with `EnableCloudFront=false`, which also creates the Amplify
+Hosting app for the website. `frontend/.env.local` (git-ignored)
 points the app at it. The account is on the AWS **Free plan** ($100 credit, expires 2027-04-07).
 
 ## Working Features (verified)
 
-Verified live against AWS by `node e2e/live-api.mjs` (35/35, 2026-10-08):
+Verified live against AWS by `node e2e/live-api.mjs` (36/36, 2026-10-08):
 
 - Cognito sign-in with real tokens; wrong password rejected
-- JWT authorizer: no token / garbage token → 401; CORS preflight for `http://localhost:5173`
+- JWT authorizer: no token / garbage token → 401; CORS preflight for `http://localhost:5173` and
+  for the hosted website
 - Subjects, assignments (CRUD, complete, validation) in DynamoDB
 - Files: presigned POST to S3, complete, list, byte-identical download, delete, type/size limits
 - Cross-user isolation (404 for B on A's assignment and file; S3 rejects a tampered key)
 
-Also verified locally earlier: full UI in demo mode (30-check E2E), 36 backend + 17 frontend unit tests.
+Verified on the hosted website by `node e2e/live-site.mjs` (16/16, 2026-10-08): HTTPS deep links,
+sign-in redirect, live mode, wrong password, sign-in, subject, assignment create/complete/refresh,
+S3 upload, byte-identical download, deletes, sign-out, no console errors.
+
+Also verified locally earlier: full UI in demo mode (30-check E2E), 36 backend + 19 frontend unit tests.
 
 ## Implemented but NOT yet verified against AWS
 
 - Sign-up and the Cognito verification email through the UI (needs a real inbox)
 - The UI's manual checklist in TESTING.md against the live backend
-- CloudFront hosting (blocked: account verification), CloudWatch alarm emails and the Budget
+- CloudFront hosting (blocked: account verification; Amplify serves the site meanwhile),
+  CloudWatch alarm emails and the Budget
   (no `AlertEmail` given yet)
 
 ## In Progress
@@ -81,7 +97,8 @@ Nothing running. Waiting on the developer's manual UI test and the decisions lis
 
 - New AWS accounts cannot create CloudFront resources until verified ("Your account must be verified
   before you can add new CloudFront resources"). Open an AWS Support case (Account and billing,
-  free) quoting that message, then redeploy without `-NoCloudFront`.
+  free) quoting that message, then redeploy without `-NoCloudFront`. Until then the website is on
+  Amplify Hosting, which needs no verification.
 - The first AWS account tried ("Index Zero", 314113910114) is an organization member whose
   service control policies deny Lambda, DynamoDB, S3, Cognito, CloudFormation, etc. It is not used.
 
@@ -96,6 +113,7 @@ Account 956519720747, ap-south-1:
 | API (HTTP API) | `https://ym5l95nrc4.execute-api.ap-south-1.amazonaws.com` |
 | DynamoDB | `student-cloud-manager-{assignments,subjects,files}-dev` |
 | S3 | `student-cloud-manager-files-dev-956519720747`, `student-cloud-manager-web-dev-956519720747` (empty until CloudFront) |
+| Amplify Hosting | app `student-cloud-manager-web-dev` (`dg6fh880g1p8b`), branch `main` → https://main.dg6fh880g1p8b.amplifyapp.com |
 | Lambda | `student-cloud-manager-{assignments,subjects,files}-dev`, each with its own IAM role |
 | CloudWatch | log groups (14 days), 4 alarms, dashboard `student-cloud-manager-dev` |
 | IAM user | `scm-deployer` (AdministratorAccess, CLI key, created by hand; delete or restrict after the demo) |
@@ -103,12 +121,14 @@ Account 956519720747, ap-south-1:
 
 ## Current Architecture
 
-**Deployed now:** Browser (local Vite dev server, http://localhost:5173) → Cognito (auth).
+**Deployed now:** Browser → AWS Amplify Hosting (HTTPS, the React build; SPA rewrite to
+index.html; security headers). Browser → Cognito (auth).
 Browser → API Gateway HTTP API (JWT) → 3 Lambdas → DynamoDB (3 tables) / S3 presign.
 Browser ↔ S3 files bucket via presigned URLs.
 
 **Target (after CloudFront verification):** the same, with the website served by
-CloudFront → private S3 web bucket (OAC). See ARCHITECTURE.md.
+CloudFront → private S3 web bucket (OAC) instead of Amplify. Redeploying without `-NoCloudFront`
+creates CloudFront and removes the Amplify app. See ARCHITECTURE.md.
 
 ## Important Decisions
 
@@ -135,12 +155,16 @@ CloudFront → private S3 web bucket (OAC). See ARCHITECTURE.md.
   safest, most reproducible and most easily deleted way to create the stack, and the template is
   heavily commented for learning.
 - Cognito Lite tier; CloudFront PriceClass_100; log retention 14 days; API throttling 10 rps / burst 20
+- **Website on AWS Amplify Hosting while CloudFront is blocked** (2026-10-08, approved by the
+  developer). `EnableCloudFront=false` now means "host on Amplify" (HTTPS, managed CDN, no account
+  verification) instead of "no website". Manual zip deploys with no Git connection, so no build
+  minutes. Cost: cents per month, paid from the credit. It stays in the template as the fallback.
 
 ## Next Task (exact)
 
 1. ~~Merge the feature branches into `main`~~ Done 2026-10-08; pushed to the private repo
    https://github.com/vrrroro/Noto. New work: branch from `main`, push, merge back.
-2. **Developer UI test:** `npm run dev`, register with a real email at http://localhost:5173, enter
+2. **Developer UI test:** register with a real email at https://main.dg6fh880g1p8b.amplifyapp.com, enter
    the emailed code, then run TESTING.md's manual checklist. Record results in TESTING.md.
 3. **Alert email (still undecided):** ask which address gets alarm and budget emails, then
    `.\infrastructure\scripts\deploy.ps1 -NoCloudFront -AlertEmail <email>` and have the developer
@@ -148,7 +172,8 @@ CloudFront → private S3 web bucket (OAC). See ARCHITECTURE.md.
 4. **CloudFront:** the developer opens an AWS Support case (Account and billing, free) quoting the
    CloudFront verification error. After approval run
    `.\infrastructure\scripts\deploy.ps1 -AlertEmail <email>` (no `-NoCloudFront`), then test on
-   the printed CloudFront URL.
+   the printed CloudFront URL (`node e2e/live-site.mjs`). That update removes the Amplify app, so
+   the amplifyapp.com URL stops working.
 5. Capture the AWS Console screenshots in `docs/presentation/DEMO_SCRIPT.md`.
 6. **After the demo:** delete the `scm-deployer` access key (IAM → Users → scm-deployer → Security
    credentials), or the whole user. Decide whether to keep the stack or run `destroy.ps1`.
@@ -165,6 +190,9 @@ CloudFront → private S3 web bucket (OAC). See ARCHITECTURE.md.
   and the developer's console login (rohitsham50) lands there by default. Do not use it.
 - The first deploy rolled back on CloudFront; the empty `ROLLBACK_COMPLETE` stack was deleted.
 - The developer is new to AWS: give one concrete step at a time, with exact button names.
+- `deploy.ps1` used to run `npm ci`, which fails with EPERM while a Vite dev server holds
+  `node_modules` (rolldown binding) and leaves the folder half-deleted. It now runs `npm ci` only
+  when `node_modules` is missing. Stop the dev server first if you need a clean install.
 
 ## Last Updated
 

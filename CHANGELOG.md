@@ -5,6 +5,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### AWS
+
+- **The website is online:** https://main.dg6fh880g1p8b.amplifyapp.com (AWS Amplify Hosting, HTTPS). Stack update on
+  2026-10-08 added `WebApp` (`AWS::Amplify::App`) and `WebBranch` (`main`); the API and the files
+  bucket now allow that origin in CORS. Nothing was removed.
+
+### Added
+
+- Template: with `EnableCloudFront=false` the site is hosted on Amplify Hosting (SPA rewrite to
+  `index.html`, the same security headers as CloudFront). `WebsiteUrl` is always output;
+  `AmplifyAppId` is new.
+- `deploy.ps1` / `deploy.sh`: upload the build to Amplify as a zip when CloudFront is off
+  (`deploy.sh` gained `--no-cloudfront`).
+- `e2e/live-site.mjs`: headless-Chrome run against the hosted website with a temporary Cognito
+  user (16 checks). `e2e/live-api.mjs` also checks CORS for the hosted origin (36 checks).
+
+### Fixed
+
+- Deploy scripts no longer run `npm ci` when `node_modules` exists; it failed (EPERM) while a dev
+  server was running and left `node_modules` half-deleted.
+
 ### Changed
 
 - Repository published as the private GitHub repo `vrrroro/Noto`; feature branches merged into `main`.
