@@ -3110,7 +3110,7 @@ As of 2026-10-08 (see PROJECT_CONTEXT.md for the live state):
 ```text
 Phase: Deployed to AWS (ap-south-1); website online on Amplify Hosting; CloudFront pending account verification
 
-Frontend: Complete (React + Vite), rebranded "Noto" with an Industrial Noir polish; online at https://main.dg6fh880g1p8b.amplifyapp.com
+Frontend: Complete (React + Vite), rebranded "Noto" with an Industrial Noir polish and a public landing page; online at https://main.dg6fh880g1p8b.amplifyapp.com
 Backend: Deployed (3 Lambdas); live API test 35/35
 Authentication: Cognito deployed; live sign-in verified; UI sign-up with real email pending
 Database: DynamoDB deployed and verified
@@ -3118,7 +3118,7 @@ File Storage: S3 presigned upload/download verified live
 API: HTTP API + JWT authorizer deployed and verified
 Monitoring: Log groups, alarms, dashboard deployed; alert email/budget not yet configured
 Deployment: deploy.ps1 (-NoCloudFront until the account is verified; the site is then hosted on Amplify)
-Testing: 36 backend + 19 frontend unit, 30-check demo E2E, 36-check live API, 16-check live website, all passing
+Testing: 36 backend + 19 frontend unit, 32-check demo E2E, 36-check live API, 17-check live website, all passing
 Documentation: Complete; PROJECT_CONTEXT.md has the deployed resource list
 ```
 

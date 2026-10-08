@@ -5,10 +5,10 @@
 | Backend unit | `node:test` (built in, no dependency) | `cd backend && npm test` | **36 / 36 pass** |
 | Frontend unit | Vitest | `cd frontend && npm test` | **19 / 19 pass** (2026-10-08) |
 | Production build | Vite | `cd frontend && npm run build` | builds cleanly |
-| End-to-end (browser) | Headless Chrome via `puppeteer-core` against `npm run dev` (demo mode) | `cd e2e && npm test` | **30 / 30 checks pass**, no console errors |
+| End-to-end (browser) | Headless Chrome via `puppeteer-core` against `npm run dev` (demo mode) | `cd e2e && npm test` | **32 / 32 checks pass** (2026-10-08), no console errors |
 | Infrastructure | `cfn-lint` 1.57 (includes the SAM transform) | `cfn-lint infrastructure/template.yaml` | **0 findings** |
 | Live AWS API | `node` + AWS CLI against the deployed stack | `node e2e/live-api.mjs` | **36 / 36 pass** (2026-10-08) |
-| Live website | Headless Chrome via `puppeteer-core` against the hosted `WebsiteUrl`, temporary Cognito user | `node e2e/live-site.mjs` | **16 / 16 pass** (2026-10-08), no console errors |
+| Live website | Headless Chrome via `puppeteer-core` against the hosted `WebsiteUrl`, temporary Cognito user | `node e2e/live-site.mjs` | **17 / 17 pass** (2026-10-08), no console errors |
 | Live AWS UI (manual) | manual checklist below | open the website | sign-up with a real email pending |
 
 ## Backend unit tests (`backend/test`)
@@ -51,7 +51,8 @@ cd e2e && npm install && npm test   # terminal 2 (set CHROME_PATH if Chrome is n
 
 | # | Check | Result |
 | --- | --- | --- |
-| 1 | Unauthenticated user redirected to login | ✅ |
+| 0a–0b | Signed-out visitor sees the landing page; it links to sign-up and sign-in | ✅ |
+| 1 | Unauthenticated user redirected to login (from `/assignments`) | ✅ |
 | 2–3 | Register rejects mismatched / weak passwords | ✅ |
 | 4–5 | Register + verify works; duplicate email rejected | ✅ |
 | 6 | Wrong password rejected | ✅ |

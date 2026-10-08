@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import Brand from './Brand.jsx';
 import { isDemoMode } from '../config.js';
 
@@ -38,9 +39,9 @@ export default function AuthLayout({ label, title, subtitle, children, footer })
       </section>
 
       <main className="auth-main">
-        <div className="auth-brand brand brand-large">
+        <Link to="/" className="auth-brand brand brand-large" aria-label="Noto home">
           <Brand />
-        </div>
+        </Link>
         <div className="auth-card invert">
           {label && <p className="label">{label}</p>}
           <h1>{title}</h1>

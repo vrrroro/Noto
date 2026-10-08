@@ -104,8 +104,11 @@ try {
   check('Deep link /assignments serves the app over HTTPS', home.ok && SITE.startsWith('https://') && (await home.text()).includes('<title>Noto</title>'));
 
   await page.goto(SITE);
+  await page.waitForSelector('#l-hero-title');
+  check('Signed-out visitor sees the landing page', (await text()).includes('Noto can help.'));
+  await page.goto(SITE + '/assignments');
   await page.waitForSelector('#login-email');
-  check('Unauthenticated visitor lands on sign-in', page.url().endsWith('/login'));
+  check('Protected page redirects to sign-in', page.url().endsWith('/login'));
   check('Live mode (no demo banner)', !(await text()).includes('Demo mode'));
 
   await fill('#login-email', user.email);

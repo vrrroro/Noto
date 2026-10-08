@@ -27,7 +27,7 @@ Re-check that AWS works (each creates and deletes its own test user(s)):
 ```powershell
 cd C:\Users\rohit\Downloads\AWS
 node e2e/live-api.mjs    # the API, expect 36/36 (about 30 s)
-node e2e/live-site.mjs   # the hosted website in headless Chrome, expect 16/16 (about 40 s)
+node e2e/live-site.mjs   # the hosted website in headless Chrome, expect 17/17 (about 40 s)
 ```
 
 Publish frontend changes to the website (builds, uploads the zip to Amplify, waits for it):
@@ -75,11 +75,12 @@ Verified live against AWS by `node e2e/live-api.mjs` (36/36, 2026-10-08):
 - Files: presigned POST to S3, complete, list, byte-identical download, delete, type/size limits
 - Cross-user isolation (404 for B on A's assignment and file; S3 rejects a tampered key)
 
-Verified on the hosted website by `node e2e/live-site.mjs` (16/16, 2026-10-08): HTTPS deep links,
-sign-in redirect, live mode, wrong password, sign-in, subject, assignment create/complete/refresh,
+Verified on the hosted website by `node e2e/live-site.mjs` (17/17, 2026-10-08): HTTPS deep links,
+the landing page, sign-in redirect, live mode, wrong password, sign-in, subject, assignment create/complete/refresh,
 S3 upload, byte-identical download, deletes, sign-out, no console errors.
 
-Also verified locally earlier: full UI in demo mode (30-check E2E), 36 backend + 19 frontend unit tests.
+Also verified locally: full UI in demo mode (32-check E2E, including the landing page),
+36 backend + 19 frontend unit tests.
 
 ## Implemented but NOT yet verified against AWS
 
@@ -142,6 +143,14 @@ creates CloudFront and removes the Amplify app. See ARCHITECTURE.md.
   card per page. The spring easing is only used for the dot. Plain CSS, no UI or icon library.
   Fonts from Google Fonts.
 
+- **Landing page** (2026-10-08): signed-out visitors to `/` see `pages/Landing.jsx` (lazy chunk;
+  sections in `components/landing/`, copy in `components/landing/content.js`, styles in
+  `styles/landing.css`, motion in `hooks/useLandingMotion.js` + `hooks/useTyper.js`). Style: Noto's
+  palette and fonts staged like the "Lil Boxes" editorial-maximalism reference (dealt sticky panels,
+  margin notes with self-drawing arrows, condensed cropped wordmark, keycaps, ghost-stack list),
+  rebuilt without GSAP or any other dependency: CSS scroll-driven animations for the deal, sticky
+  positioning for the stack, a small rAF loop for heading lag and the cursor halo. Everything is off
+  under reduced motion. Copy must stay true to what the app does (it is checked against the code).
 - React 19 + Vite frontend; React Router; no UI library; no auth SDK (Cognito called with `fetch`)
 - Backend: Node.js 22 Lambdas (ES modules), AWS SDK v3; route logic is pure JS with injected deps
 - 3 Lambdas (one per resource) with per-function least-privilege IAM

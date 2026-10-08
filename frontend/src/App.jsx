@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth.jsx';
 import { ToastProvider } from './components/Toast.jsx';
@@ -12,6 +13,14 @@ import Notes from './pages/Notes.jsx';
 import Subjects from './pages/Subjects.jsx';
 import NotFound from './pages/NotFound.jsx';
 
+// The landing page is its own chunk: signed-in users never download it.
+const Landing = lazy(() => import('./pages/Landing.jsx'));
+const landing = (
+  <Suspense fallback={null}>
+    <Landing />
+  </Suspense>
+);
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -23,7 +32,7 @@ export default function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/confirm" element={<ConfirmAccount />} />
             </Route>
-            <Route element={<ProtectedRoute />}>
+            <Route element={<ProtectedRoute guest={landing} />}>
               <Route element={<Layout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="/assignments" element={<Assignments />} />

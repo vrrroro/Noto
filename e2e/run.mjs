@@ -94,8 +94,19 @@ async function login(email, password) {
 }
 
 try {
-  // --- Auth ---
+  // --- Landing ---
   await page.goto(BASE);
+  await page.waitForSelector('#l-hero-title');
+  check('Signed-out visitor sees the landing page', (await text()).includes('Noto can help.'));
+  const authLinks = await page.$$eval('.landing a[href="/register"], .landing a[href="/login"]', (links) => links.length);
+  check('Landing links to sign-up and sign-in', authLinks >= 4);
+  await sleep(3000); // let the opening sequence finish
+  await shot('app-00-landing');
+  await click('.l-header a[href="/login"]');
+  await page.waitForSelector('#login-email');
+
+  // --- Auth ---
+  await page.goto(`${BASE}/assignments`);
   await page.waitForSelector('#login-email');
   check('Unauthenticated user is redirected to login', page.url().endsWith('/login'));
   await shot('app-01-login');

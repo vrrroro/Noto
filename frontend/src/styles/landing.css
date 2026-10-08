@@ -1,0 +1,1781 @@
+/* ==========================================================================
+   Noto - landing page
+
+   Noto's palette and three type voices (Playfair Display, Archivo, Geist
+   Mono), staged as playful editorial maximalism:
+   - poster-scale type: light serif headlines with crushed leading, and a
+     condensed Archivo (wdth 62) wordmark cropped by the page edge;
+   - margin notes in the serif italic with hand-drawn arrows that draw once;
+   - full-bleed panels that stick and get dealt over each other like cards
+     (scale 0.9, a 0.7 degree tilt and rounded top corners that settle flat);
+   - corner-anchored radial fields built from the palette;
+   - keycap controls that press in, a trailing cursor halo, and one easter egg.
+   Orange stays the signal: primary actions, the dot, the halo.
+   Loaded only with the landing page (it is a separate chunk).
+   ========================================================================== */
+
+.landing {
+  --l-pad: clamp(20px, 7vw, 140px);
+  --l-hero: clamp(50px, 7.4vw, 150px);
+  --l-mega: clamp(50px, 10.5vw, 190px);
+  --l-word: clamp(60px, 14vw, 290px);
+  --l-sub: clamp(30px, 3.6vw, 60px);
+  --l-body: clamp(19px, 1.55vw, 27px);
+  --l-note: clamp(22px, 2.1vw, 34px);
+  --l-eyebrow: clamp(13px, 1.2vw, 18px);
+
+  --grad-hot: radial-gradient(at 10% 10%, var(--magenta), var(--violet) 62%, var(--plum));
+  --grad-paper: radial-gradient(at 10% 90%, #e6dcf8, #faf8ff 72%);
+  --grad-cyan: radial-gradient(at 90% 10%, color-mix(in srgb, var(--cyan) 40%, var(--white)), var(--cyan) 60%);
+  --paper: #faf8ff;
+  --shadow-float: 40px 40px 80px rgb(0 0 0 / 45%);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  position: relative;
+  overflow-x: clip;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:has(.landing) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ---------- Shared voices ---------- */
+
+.l-eyebrow {
+  display: block;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--l-eyebrow);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.l-mega {
+  display: block;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--l-mega);
+  font-stretch: normal;
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.l-sub {
+  margin-bottom: 20px;
+  font-family: var(--font-serif);
+  font-size: var(--l-sub);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.l-body {
+  max-width: 34em;
+  font-size: var(--l-body);
+  line-height: 1.35;
+  hyphens: auto;
+}
+
+.l-heading {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.4vh, 28px);
+}
+
+.l-card-heading {
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Keycap: outlined on the bottom edge only, pressed in on hover. */
+.keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  border-radius: var(--r-control);
+  background: transparent;
+  box-shadow: 0 1px 0 0 currentColor;
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    translate 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.keycap:hover {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .keycap:hover {
+    translate: 2px 2px;
+    border-bottom-color: transparent;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    box-shadow: -2px -2px 2px 1px rgb(0 0 0 / 10%);
+  }
+}
+
+.keycap:active,
+.keycap[aria-pressed='true'] {
+  translate: 2px 2px;
+  border-bottom-color: transparent;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  box-shadow: -2px -2px 2px 1px rgb(0 0 0 / 10%);
+}
+
+/* ---------- Margin notes and hand-drawn arrows ---------- */
+
+.l-note {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  font-family: var(--font-serif);
+  font-size: var(--l-note);
+  font-style: italic;
+  line-height: 0.95;
+  white-space: nowrap;
+}
+
+.l-note-text {
+  display: inline-block;
+  rotate: var(--note-rot, -23deg);
+}
+
+.l-arrow {
+  display: block;
+  width: clamp(64px, 7.5vw, 130px);
+  height: auto;
+  overflow: visible;
+  rotate: var(--arrow-rot, 0deg);
+  scale: var(--arrow-sx, 1) var(--arrow-sy, 1);
+}
+
+.l-arrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .l-arrow path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .landing.is-ready .is-in .l-arrow path {
+    animation: l-draw 0.9s var(--ease-enter) var(--draw-delay, 0.2s) forwards;
+  }
+
+  .landing.is-ready .is-in .l-arrow path + path {
+    animation-duration: 0.25s;
+    animation-delay: calc(var(--draw-delay, 0.2s) + 0.8s);
+  }
+
+  .l-note[data-reveal]:not(.is-in) .l-note-text {
+    opacity: 0;
+  }
+
+  .l-note .l-note-text {
+    transition: opacity 0.6s ease var(--draw-delay, 0.2s);
+  }
+}
+
+@keyframes l-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- Header ---------- */
+
+.l-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 14px clamp(16px, 2.6vw, 36px);
+  color: var(--text);
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.l-header > * {
+  pointer-events: auto;
+}
+
+.l-header[data-tone='dark'] {
+  color: var(--white);
+}
+
+.l-header[data-tone='light'] {
+  color: var(--void);
+}
+
+.l-brand {
+  color: inherit;
+}
+
+.l-brand-inner {
+  display: inline-flex;
+}
+
+.l-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.l-lets {
+  min-width: 15ch;
+  justify-content: flex-start;
+}
+
+.l-lets-typed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25ch;
+  white-space: pre;
+}
+
+.l-lets-short {
+  display: none;
+}
+
+.l-caret {
+  width: 2px;
+  height: 0.95em;
+  background: currentColor;
+  animation: l-blink 1s steps(1) infinite;
+}
+
+@keyframes l-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .l-caret {
+    display: none;
+  }
+}
+
+/* ---------- Panels: sticky, dealt over each other ---------- */
+
+.l-deck {
+  position: relative;
+}
+
+/* main must not create a box, so every panel (and the footer) shares one sticky container. */
+.l-main {
+  display: contents;
+}
+
+.l-panel {
+  position: sticky;
+  top: var(--stick, 0px);
+  min-height: 100svh;
+  padding: max(var(--l-pad), 96px) var(--l-pad) var(--l-pad);
+  overflow: hidden;
+}
+
+.l-footer.l-panel {
+  position: relative;
+  top: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .l-deal {
+      animation: l-deal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+@keyframes l-deal {
+  from {
+    scale: 0.9;
+    rotate: var(--deal-tilt, -0.7deg);
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+  }
+  to {
+    scale: 1;
+    rotate: 0deg;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+/* One-shot rise for paragraphs. */
+@media (prefers-reduced-motion: no-preference) {
+  .l-rise[data-reveal] {
+    transition:
+      opacity 0.8s var(--ease-enter),
+      translate 0.8s var(--ease-enter);
+  }
+
+  .l-rise[data-reveal]:not(.is-in) {
+    opacity: 0;
+    translate: 0 32px;
+  }
+}
+
+/* ---------- Hero ---------- */
+
+.l-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: clamp(104px, 19vh, 210px);
+  background: var(--bg);
+  color: var(--text);
+  text-align: center;
+}
+
+/* A highlighter swipe behind the headline; the first and last lines hang out of it. */
+.l-hero-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 1180px);
+  height: clamp(104px, 18vh, 200px);
+  border-radius: var(--r-card);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--magenta) 30%, transparent),
+    color-mix(in srgb, var(--violet) 30%, transparent)
+  );
+}
+
+.l-hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: var(--l-hero);
+  line-height: 0.8;
+  letter-spacing: -0.035em;
+}
+
+.l-hero-line {
+  display: block;
+}
+
+.l-hero-intro {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-top: clamp(52px, 8vh, 92px);
+}
+
+.l-hero-intro p {
+  max-width: 34em;
+  color: var(--text-muted);
+  font-size: clamp(17px, 1.3vw, 21px);
+  line-height: 1.35;
+}
+
+.l-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+}
+
+/* The giant condensed wordmark, cropped by the bottom of the hero. */
+.l-wordmark {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  margin-bottom: -0.2em;
+  translate: -50% 0;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: clamp(150px, 42vw, 720px);
+  font-stretch: 62%;
+  font-weight: 900;
+  line-height: 0.74;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.l-letter {
+  position: relative;
+  display: inline-block;
+  padding: 0 0.01em;
+  background-clip: text;
+  -webkit-background-clip: text;
+  transition:
+    color 0.3s ease,
+    scale 0.3s ease,
+    rotate 0.3s ease,
+    translate 0.3s ease;
+}
+
+/* N: ruled paper with a margin line. */
+.l-letter-1 {
+  --hover-rot: -3deg;
+  --hover-y: 0.08em;
+  background:
+    linear-gradient(90deg, transparent 21%, var(--magenta) 21% 22.5%, transparent 22.5%),
+    repeating-linear-gradient(transparent 0 0.075em, var(--cyan) 0.075em 0.083em),
+    var(--paper);
+}
+
+/* O: graph paper. */
+.l-letter-2 {
+  --hover-rot: 2deg;
+  --hover-y: 0.11em;
+  background:
+    linear-gradient(var(--violet) 2px, transparent 2px) 0 0 / 0.05em 0.05em,
+    linear-gradient(90deg, var(--violet) 2px, transparent 2px) 0 0 / 0.05em 0.05em,
+    var(--paper);
+}
+
+/* T: a ruled sticky note. */
+.l-letter-3 {
+  --hover-rot: -1deg;
+  --hover-y: 0.095em;
+  background:
+    repeating-linear-gradient(transparent 0 0.07em, rgb(13 13 26 / 20%) 0.07em 0.076em),
+    var(--yellow);
+}
+
+/* O: Noto's dot grid. */
+.l-letter-4 {
+  --hover-rot: 2deg;
+  --hover-y: 0.085em;
+  background:
+    radial-gradient(circle, var(--magenta) 0.011em, transparent 0.013em) 0 0 / 0.045em 0.045em,
+    var(--paper);
+}
+
+/* After the shorthands above, which reset background-clip. */
+.l-letter-1,
+.l-letter-2,
+.l-letter-3,
+.l-letter-4 {
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+@media (hover: hover) {
+  .l-letter:hover {
+    z-index: 1;
+    color: transparent;
+    scale: 1.5 1.05;
+    rotate: var(--hover-rot);
+    translate: 0 var(--hover-y);
+  }
+}
+
+/* Margin notes pointing at the wordmark. */
+.l-hero .l-note {
+  --draw-delay: 2.4s;
+  bottom: clamp(120px, 23vw, 390px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--magenta-text);
+}
+
+.l-note-hero-left {
+  left: 6%;
+}
+
+.l-hero .l-note-hero-right {
+  --draw-delay: 2.65s;
+  right: 6%;
+  color: var(--cyan-text);
+}
+
+.l-note-hero-right .l-note-text {
+  --note-rot: 23deg;
+}
+
+/* The easter egg. */
+.l-dot-wrap {
+  position: absolute;
+  left: calc(6% + clamp(150px, 15vw, 250px));
+  bottom: clamp(150px, 27vw, 450px);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+}
+
+.l-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+}
+
+.l-dot-core {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: var(--glow-dot);
+  transition: width 0.8s var(--ease-expo), height 0.8s var(--ease-expo);
+}
+
+.l-dot.is-awake .l-dot-core {
+  width: 40px;
+  height: 40px;
+}
+
+.l-badge {
+  position: absolute;
+  inset: 0;
+  width: 96px;
+  height: 96px;
+  overflow: visible;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: currentColor;
+  pointer-events: none;
+  animation: l-badge-in 0.9s var(--ease-expo) both;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .l-badge {
+    animation:
+      l-badge-in 0.9s var(--ease-expo) both,
+      l-spin 10s linear infinite;
+  }
+}
+
+@keyframes l-badge-in {
+  from {
+    scale: 0;
+  }
+}
+
+@keyframes l-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* Opening sequence, once the fonts are ready. */
+@media (prefers-reduced-motion: no-preference) {
+  .landing:not(.is-ready) :is(.l-hero-box, .l-hero-line, .l-letter, .l-hero-intro, .l-dot-wrap, .l-brand) {
+    opacity: 0;
+  }
+
+  .landing.is-ready .l-hero-box,
+  .landing.is-ready .l-hero-line-1 {
+    animation: l-fade-left 0.5s var(--ease-enter) both;
+  }
+
+  .landing.is-ready .l-hero-line-2 {
+    animation: l-slide-left 0.55s var(--ease-enter) 0.4s both;
+  }
+
+  .landing.is-ready .l-hero-line-3 {
+    animation: l-slide-right 0.55s var(--ease-enter) 0.8s both;
+  }
+
+  .landing.is-ready .l-letter {
+    animation: l-bounce-up 1.2s calc(0.9s + var(--i) * 0.1s) both;
+  }
+
+  .landing.is-ready .l-hero-intro {
+    animation: l-fade-up 0.7s var(--ease-enter) 1.3s both;
+  }
+
+  .landing.is-ready .l-brand {
+    animation: l-roll-in 0.9s var(--ease-enter) 1.7s both;
+  }
+
+  .landing.is-ready .l-dot-wrap {
+    animation: l-zoom-in 0.5s var(--ease-expo) 2.1s both;
+  }
+
+  /* The brand dot hops each time the header changes tone. */
+  .l-brand-inner .brand-dot {
+    animation: l-hop 0.7s var(--ease-spring) both;
+  }
+}
+
+@keyframes l-fade-left {
+  from {
+    opacity: 0;
+    transform: translate3d(-12%, 0, 0);
+  }
+}
+
+@keyframes l-slide-left {
+  from {
+    visibility: visible;
+    transform: translate3d(-100vw, 0, 0);
+  }
+}
+
+@keyframes l-slide-right {
+  from {
+    visibility: visible;
+    transform: translate3d(100vw, 0, 0);
+  }
+}
+
+@keyframes l-bounce-up {
+  0%,
+  60%,
+  75%,
+  90%,
+  to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 120%, 0) scaleY(4);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, -4%, 0) scaleY(0.9);
+  }
+  75% {
+    transform: translate3d(0, 2%, 0) scaleY(0.95);
+  }
+  90% {
+    transform: translate3d(0, -1%, 0) scaleY(0.985);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes l-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+}
+
+@keyframes l-roll-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-120%, 0, 0) rotate(-120deg);
+  }
+}
+
+@keyframes l-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+}
+
+@keyframes l-hop {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-0.5em) scale(0.9, 1.15);
+  }
+  70% {
+    transform: translateY(0) scale(1.2, 0.8);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* ---------- "Your semester is ___" ---------- */
+
+.l-roast {
+  display: flex;
+  align-items: center;
+  color-scheme: dark;
+  background: var(--grad-hot);
+  color: var(--white);
+}
+
+.l-roast-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 5vh, 64px);
+  width: calc(62% - 2rem);
+}
+
+.l-roast-heading {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 2vh, 24px);
+  font: inherit;
+  letter-spacing: normal;
+}
+
+/* The rotating roast: condensed, uppercase, with a hard void shadow. */
+.l-roast-word {
+  display: flex;
+  align-items: flex-end;
+  min-height: 1.6em;
+  font-family: var(--font-sans);
+  font-size: var(--l-word);
+  font-stretch: 62%;
+  font-weight: 900;
+  line-height: 0.8;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+  text-shadow: 0.05em 0.05em 0 var(--void);
+  overflow-wrap: anywhere;
+}
+
+/* 3D before/after card. */
+.l-flip {
+  position: absolute;
+  top: 0;
+  right: clamp(8px, 4vw, 80px);
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: calc(38% - 2rem);
+}
+
+.l-flip-tilt {
+  perspective: 1400px;
+}
+
+.l-flip-card {
+  display: block;
+  width: clamp(200px, 19vw, 320px);
+  aspect-ratio: 390 / 844;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  background: none;
+  transform: rotateX(40deg) rotateY(-18deg) rotateZ(20deg);
+  transform-style: preserve-3d;
+}
+
+.l-flip-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: rotate 1s var(--ease-expo);
+}
+
+.l-flip-card[aria-pressed='true'] .l-flip-inner {
+  rotate: y 180deg;
+}
+
+.l-flip-face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: var(--shadow-float);
+  backface-visibility: hidden;
+}
+
+.l-flip-back {
+  rotate: y 180deg;
+  background: var(--paper);
+}
+
+.l-flip-back img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* The "before": a drab downloads folder. */
+.l-mess {
+  padding: 22px 14px;
+  background: color-mix(in srgb, var(--void) 9%, var(--white));
+  color: color-mix(in srgb, var(--void) 78%, var(--white));
+  filter: saturate(0.3);
+  text-align: left;
+}
+
+.l-mess-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.l-mess-title span {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.l-mess-list {
+  display: block;
+}
+
+.l-mess-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgb(13 13 26 / 9%);
+  font-size: 11.5px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.l-mess-row .file-type-sm {
+  width: 30px;
+  height: 36px;
+  padding-bottom: 6px;
+  font-size: 7px;
+}
+
+.l-mess-sticky {
+  position: absolute;
+  right: 10px;
+  bottom: 56px;
+  padding: 10px 12px;
+  background: var(--yellow);
+  color: var(--void);
+  box-shadow: 0 6px 14px rgb(0 0 0 / 20%);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-style: italic;
+  rotate: -7deg;
+}
+
+.l-flip .l-note {
+  color: var(--cyan);
+  transition: opacity 0.3s ease;
+}
+
+.l-note-before {
+  top: 9%;
+  left: -14%;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.l-note-after {
+  top: 68%;
+  left: -3%;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  opacity: 0;
+}
+
+.l-note-after .l-note-text {
+  --note-rot: -12deg;
+}
+
+.l-flip.is-flipped .l-note-before {
+  opacity: 0;
+}
+
+.l-flip.is-flipped .l-note-after {
+  opacity: 1;
+}
+
+.l-flip-hint {
+  position: absolute;
+  bottom: clamp(16px, 4vh, 40px);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.l-hint-tap {
+  display: none;
+}
+
+@media (hover: none) {
+  .l-hint-hover {
+    display: none;
+  }
+
+  .l-hint-tap {
+    display: inline;
+  }
+}
+
+/* ---------- What's inside: the feature marquee ---------- */
+
+.l-features {
+  display: flex;
+  min-height: 115svh;
+  padding-right: 0;
+  color-scheme: light;
+  background: var(--grad-paper);
+  color: var(--void);
+}
+
+.l-features .l-eyebrow,
+.l-features .l-card-heading {
+  color: var(--magenta-text);
+}
+
+.l-features-copy .l-mega {
+  font-size: clamp(48px, 7.4vw, 140px);
+}
+
+.l-features-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4.5vh, 60px);
+  width: calc(50% - 2rem);
+  padding-top: clamp(10px, 5vh, 64px);
+}
+
+/* No mask or filter here: either would make the marquee a backdrop root, and the
+   glass cards could no longer blur the paragraph behind them. */
+.l-marquee {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.l-marquee-track {
+  animation: l-crawl 60s linear infinite;
+}
+
+.l-marquee:hover .l-marquee-track,
+.l-marquee:focus-within .l-marquee-track,
+.l-marquee.is-paused .l-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes l-crawl {
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.l-feature-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.l-feature {
+  position: relative;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+}
+
+.l-feature:hover,
+.l-feature:focus-within {
+  z-index: 3;
+}
+
+.l-feature-title {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.4vw, 24px);
+  width: 50%;
+  min-height: 1em;
+  padding: 0.04em 0 0.06em 10px;
+  border: 0;
+  border-radius: 8px 8px 0 8px;
+  background: none;
+  box-shadow: 0 1px 0 0 rgb(13 13 26 / 50%);
+  color: var(--void);
+  font-family: var(--font-serif);
+  font-size: var(--l-mega);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-align: left;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.l-feature-title span {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.l-asterisk {
+  flex-shrink: 0;
+  width: 0.26em;
+  height: 0.26em;
+  opacity: 0.5;
+  transition:
+    opacity 0.3s ease,
+    rotate 0.6s ease;
+}
+
+.l-asterisk path {
+  fill: none;
+  stroke: var(--violet);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+
+.l-feature:hover :is(.l-feature-title span, .l-asterisk),
+.l-feature:focus-within :is(.l-feature-title span, .l-asterisk) {
+  opacity: 1;
+}
+
+.l-feature:hover .l-asterisk,
+.l-feature:focus-within .l-asterisk {
+  rotate: 270deg;
+}
+
+/* Out of flow, so the rows stay as tall as their titles. */
+.l-feature-card {
+  position: absolute;
+  top: 33px;
+  left: 0;
+  width: 50%;
+  padding: clamp(28px, 4vw, 72px) clamp(24px, 4vw, 80px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.l-feature:hover .l-feature-card,
+.l-feature:focus-within .l-feature-card {
+  opacity: 1;
+}
+
+.l-feature-arrow {
+  position: absolute;
+  top: 0;
+  right: 2%;
+  z-index: 1;
+  width: 90px;
+  color: var(--magenta);
+  rotate: 94deg;
+}
+
+/* Glass: blurs the paragraph it lands on. */
+.l-glass {
+  padding: clamp(24px, 3vw, 52px);
+  border: 1px solid rgb(255 255 255 / 60%);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--surface-3) 55%, transparent);
+  box-shadow: 0 4px 30px rgb(0 0 0 / 10%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: clamp(17px, 1.35vw, 22px);
+  line-height: 1.35;
+  rotate: 2deg;
+}
+
+.l-marquee-toggle {
+  position: absolute;
+  right: var(--l-pad);
+  bottom: 22px;
+  z-index: 4;
+}
+
+.l-toggle-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tone-neutral);
+}
+
+.l-marquee-toggle[aria-pressed='true'] .l-toggle-led {
+  background: var(--orange);
+  box-shadow: var(--glow-dot);
+}
+
+/* ---------- Under the hood: the ghost stack ---------- */
+
+.l-stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 5vh, 80px);
+  min-height: 120svh;
+  color-scheme: light;
+  background: var(--grad-cyan);
+  color: var(--void);
+}
+
+.l-stack .l-card-heading {
+  color: var(--void);
+  opacity: 0.7;
+}
+
+.l-stack-body {
+  position: relative;
+  flex: 1;
+}
+
+.l-stack-list {
+  --stack-lh: 0.36;
+  position: relative;
+  margin: 0;
+  padding: 0.3em 0 0;
+  list-style: none;
+  font-family: var(--font-serif);
+  font-size: var(--l-mega);
+  line-height: var(--stack-lh);
+  letter-spacing: -0.03em;
+}
+
+.l-stack-list li {
+  height: calc(var(--stack-lh) * 1em);
+}
+
+.l-stack-name {
+  position: relative;
+  display: block;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgb(255 255 255 / 62%);
+  font: inherit;
+  font-weight: 400;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  white-space: nowrap;
+  transition:
+    color 0.25s ease,
+    font-weight 0.25s ease,
+    font-size 0.25s ease;
+}
+
+/* The glyphs overflow their 0.36em band; only the band itself takes the pointer,
+   otherwise the next name's letters would catch it. */
+.l-stack-name span {
+  pointer-events: none;
+}
+
+.l-stack-name[aria-expanded='true'] {
+  z-index: 3;
+  color: var(--void);
+  font-size: 0.8em;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  text-shadow: 1px 1px 0 var(--white);
+}
+
+@media (prefers-contrast: more) {
+  .l-stack-name {
+    color: var(--void);
+  }
+}
+
+.l-stack-hint {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.l-note-pick {
+  --draw-delay: 0.5s;
+  top: 2%;
+  left: min(62%, 760px);
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  color: var(--violet-text);
+}
+
+/* The tilted screen for the active service. */
+.l-stack-screen {
+  position: absolute;
+  top: 0;
+  right: 2%;
+  z-index: 2;
+  width: clamp(280px, 36vw, 620px);
+  perspective: 1400px;
+  pointer-events: none;
+}
+
+.l-stack-frame {
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: var(--shadow-float);
+  transform: rotateX(40deg) rotateY(-30deg) rotateZ(25deg);
+  transform-style: preserve-3d;
+  animation: l-pop 0.35s var(--ease-expo) both;
+}
+
+.l-stack-frame img {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: cover;
+  object-position: top left;
+}
+
+.l-stack-tag {
+  position: absolute;
+  top: -4%;
+  left: -6%;
+  z-index: 2;
+  font-family: var(--font-serif);
+  font-size: var(--l-note);
+  font-style: italic;
+  color: var(--violet-text);
+  rotate: -23deg;
+  animation: l-pop 0.35s var(--ease-expo) 0.1s both;
+}
+
+@keyframes l-pop {
+  from {
+    opacity: 0;
+    scale: 0;
+  }
+}
+
+/* CloudWatch's screen: real log lines. */
+.l-logs {
+  padding: 22px;
+  background: var(--void);
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.l-logs-title {
+  margin-bottom: 12px;
+  color: rgb(255 255 255 / 60%);
+}
+
+.l-logs-line {
+  overflow-wrap: anywhere;
+}
+
+/* The brief swings down on a hinge. */
+.l-stack-brief {
+  position: relative;
+  z-index: 2;
+  width: min(560px, 48%);
+  min-height: 15em;
+  margin-top: clamp(48px, 9vh, 120px);
+  perspective: 900px;
+  font-size: clamp(17px, 1.35vw, 22px);
+  line-height: 1.35;
+}
+
+.l-stack-brief-inner {
+  transform-origin: top center;
+  animation: l-hinge 0.6s var(--ease-expo) both;
+}
+
+.l-stack-brief-inner p + .l-card-heading {
+  margin-top: 22px;
+}
+
+@keyframes l-hinge {
+  from {
+    opacity: 0;
+    rotate: x -100deg;
+  }
+}
+
+/* ---------- Footer ---------- */
+
+.l-footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  padding-bottom: 0;
+  color-scheme: dark;
+  background: var(--void);
+  color: var(--white);
+}
+
+.l-footer .l-eyebrow {
+  color: var(--orange);
+}
+
+.l-footer-title {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-serif);
+  font-size: clamp(44px, 6.6vw, 116px);
+  font-stretch: normal;
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+}
+
+.l-footer-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: clamp(32px, 6vh, 64px);
+}
+
+.l-footer-primary {
+  min-height: 72px;
+  padding: 0 34px;
+  border-radius: var(--r-cta);
+  font-size: clamp(20px, 1.8vw, 26px);
+}
+
+.l-note-go {
+  --draw-delay: 0.4s;
+  position: relative;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+  color: var(--magenta-text);
+}
+
+.l-note-go .l-arrow {
+  --arrow-rot: 100deg;
+  width: clamp(56px, 6vw, 96px);
+}
+
+.l-note-go .l-note-text {
+  --note-rot: -10deg;
+  white-space: normal;
+  width: 6.5em;
+}
+
+.l-footer-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: var(--space-md);
+  margin-inline: calc(var(--l-pad) * -1);
+  padding: 0 clamp(16px, 3vw, 48px) clamp(16px, 2vw, 32px);
+}
+
+.l-footer-meta,
+.l-footer-links {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 70%);
+}
+
+.l-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.l-footer-links a {
+  padding: 4px 12px;
+  border-right: 1px solid rgb(255 255 255 / 35%);
+  color: inherit;
+  text-decoration: none;
+}
+
+.l-footer-links a:last-child {
+  border-right: 0;
+  padding-right: 0;
+}
+
+.l-footer-links a:hover {
+  color: var(--orange);
+  opacity: 1;
+}
+
+.l-footer-word {
+  margin-bottom: -0.22em;
+  color: var(--plum);
+  font-family: var(--font-sans);
+  font-size: clamp(120px, 34vw, 560px);
+  font-stretch: 62%;
+  font-weight: 900;
+  line-height: 0.74;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ---------- Floating bits ---------- */
+
+.l-top {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: var(--void);
+  box-shadow: var(--glow-button);
+  opacity: 0;
+  translate: 0 14px;
+  pointer-events: none;
+  transition:
+    opacity 0.8s ease,
+    translate 0.8s var(--ease-expo);
+}
+
+.l-top.is-visible {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+}
+
+.l-top:hover {
+  opacity: 1;
+}
+
+/* A soft orange halo that trails the pointer; the real cursor stays visible. */
+.l-halo {
+  position: fixed;
+  top: -6.5px;
+  left: -6.5px;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgb(255 107 53 / 25%);
+  opacity: 0;
+  pointer-events: none;
+  translate: -100px -100px;
+  transition: opacity 0.3s ease;
+}
+
+.l-halo span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+.l-halo.is-on {
+  opacity: 1;
+}
+
+@media not (pointer: fine) {
+  .l-halo {
+    display: none;
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1199px) {
+  .l-roast-copy {
+    width: calc(70% - 2rem);
+  }
+
+  .l-flip {
+    right: -4%;
+    width: 36%;
+  }
+
+  .l-note-before {
+    left: -6%;
+  }
+
+  /* The marquee becomes a still grid of glass cards. */
+  .l-features {
+    flex-direction: column;
+    gap: var(--space-lg);
+    padding-right: var(--l-pad);
+  }
+
+  .l-features-copy {
+    width: 100%;
+  }
+
+  .l-marquee {
+    position: static;
+    overflow: visible;
+    pointer-events: auto;
+  }
+
+  .l-marquee-track {
+    animation: none;
+  }
+
+  .l-feature-list[aria-hidden='true'],
+  .l-marquee-toggle,
+  .l-feature-arrow {
+    display: none;
+  }
+
+  .l-feature-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+
+  .l-feature {
+    flex-direction: column;
+  }
+
+  .l-feature-title {
+    width: 100%;
+    font-size: clamp(34px, 5.4vw, 60px);
+    white-space: normal;
+  }
+
+  .l-feature-title span,
+  .l-asterisk {
+    opacity: 1;
+  }
+
+  .l-feature-card {
+    position: relative;
+    top: auto;
+    width: 100%;
+    padding: 18px 0 0;
+    opacity: 1;
+  }
+
+  .l-glass {
+    rotate: none;
+  }
+
+  .l-stack-screen {
+    right: -10%;
+    width: 38vw;
+  }
+}
+
+@media (max-width: 960px) {
+  .l-hero .l-note,
+  .l-note-pick,
+  .l-note-go {
+    display: none;
+  }
+
+  .l-stack-hint {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .l-dot-wrap {
+    left: auto;
+    right: 6%;
+  }
+
+  .l-roast {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-lg);
+  }
+
+  .l-roast-copy {
+    width: 100%;
+  }
+
+  .l-flip {
+    position: relative;
+    right: auto;
+    width: 100%;
+    min-height: 560px;
+  }
+
+  .l-note-before {
+    left: 4%;
+  }
+
+  .l-note-after {
+    left: 4%;
+  }
+
+  .l-stack-screen {
+    top: auto;
+    bottom: 10%;
+    right: -14%;
+  }
+
+  .l-stack-brief {
+    width: min(560px, 62%);
+  }
+}
+
+@media (max-width: 768px) {
+  .l-header {
+    padding-block: 10px;
+    background: rgb(13 13 26 / 55%);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+
+  .l-header[data-tone='light'],
+  .l-header[data-tone='page'] {
+    background: color-mix(in srgb, var(--paper) 62%, transparent);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .l-header[data-tone='page'] {
+      background: rgb(13 13 26 / 55%);
+    }
+  }
+
+  :root[data-theme='dark'] .l-header[data-tone='page'] {
+    background: rgb(13 13 26 / 55%);
+  }
+
+  .l-panel {
+    padding-top: 92px;
+  }
+
+  /* Phones: the hero hugs its content, so the next panel peeks in from below. */
+  .l-hero {
+    min-height: 0;
+    padding-bottom: 46vw;
+  }
+
+  .l-wordmark {
+    margin-bottom: -0.12em;
+  }
+
+  .l-body {
+    hyphens: manual;
+  }
+
+  .l-hero-box {
+    height: auto;
+    padding: 26px 0;
+  }
+
+  .l-roast-word {
+    min-height: 1.6em;
+  }
+
+  .l-feature-list {
+    grid-template-columns: 1fr;
+  }
+
+  .l-stack-list {
+    --stack-lh: 0.9;
+    font-size: clamp(40px, 11vw, 80px);
+  }
+
+  .l-stack-name {
+    color: rgb(13 13 26 / 55%);
+  }
+
+  .l-stack-screen {
+    display: none;
+  }
+
+  .l-stack-brief {
+    width: 100%;
+    min-height: 14em;
+  }
+
+  .l-footer-bar {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .l-footer-word {
+    order: 3;
+    justify-self: center;
+  }
+
+  .l-footer-links {
+    justify-content: flex-start;
+  }
+
+  .l-footer-links a:first-child {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .l-lets {
+    min-width: 0;
+  }
+
+  .l-lets-typed {
+    display: none;
+  }
+
+  .l-lets-short {
+    display: inline;
+  }
+
+  .l-header .keycap {
+    padding: 0 12px;
+  }
+
+  .l-flip-card {
+    width: 200px;
+  }
+
+  .l-flip {
+    min-height: 480px;
+  }
+
+  .l-top {
+    left: 16px;
+    bottom: 16px;
+  }
+}

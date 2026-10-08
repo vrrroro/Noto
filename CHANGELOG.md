@@ -5,6 +5,35 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Landing page** for signed-out visitors at `/` (signed-in users still get the dashboard there).
+  Noto's palette and three type voices staged in the "playful editorial maximalism" style:
+  - Hero: "Because “I forgot” isn’t a study plan." over a magenta/violet highlighter swipe, a giant
+    condensed NOTO wordmark (Archivo wdth 62) cropped by the page edge whose letters turn into
+    windows onto ruled paper, graph paper, a sticky note and a dot grid on hover, margin notes with
+    hand-drawn arrows that draw once, and an opening sequence that waits for the fonts.
+  - Four panels that stick and get dealt over each other (scale 0.9, ±0.7°, rounded top corners;
+    CSS scroll-driven animations, so browsers without them simply skip it): "Your semester is ___"
+    with a rotating roast and a 3D before/after card (a messy downloads folder that flips to Noto);
+    "What's inside" with a slow vertical marquee of features whose glass cards blur the text behind
+    them (pausable, a still grid below 1200px); "Mind if we show our work?", the AWS services as a
+    ghost stack where each one tilts in the screen it powers (CloudWatch shows the backend's real
+    log lines); and a footer CTA over a cropped wordmark.
+  - Keycap controls, a header that changes colour with the panel beneath it, headings that trail
+    the scroll and settle, a trailing orange cursor halo, a back-to-top button, and an easter egg
+    (the orange dot gets more annoyed with each click and finally rings a synthesised school bell).
+  - Reduced motion turns all of it off; every hover reveal also works on focus and tap.
+  - No new dependencies. Lazy-loaded chunk: 22 kB JS + 24 kB CSS (gzip 7.5 + 6.2 kB) plus seven
+    WebP screenshots (12–35 kB each) in `src/assets/landing/`.
+- Auth pages: the Noto wordmark links back to the landing page.
+
+### Changed
+
+- Playfair Display now loads weights 400–900 (the AWS stack's active name uses 900).
+- `e2e/run.mjs` and `e2e/live-site.mjs` check the landing page (32 and 17 checks); `/assignments`
+  is now the protected-route check. New screenshot `docs/screenshots/app-00-landing.png`.
+
 ### AWS
 
 - **The website is online:** https://main.dg6fh880g1p8b.amplifyapp.com (AWS Amplify Hosting, HTTPS). Stack update on
