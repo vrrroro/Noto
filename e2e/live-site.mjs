@@ -105,7 +105,7 @@ try {
 
   await page.goto(SITE);
   await page.waitForSelector('#l-hero-title');
-  check('Signed-out visitor sees the landing page', (await text()).includes('Noto can help.'));
+  check('Signed-out visitor sees the landing page', (await text()).includes('sorted.'));
   await page.goto(SITE + '/assignments');
   await page.waitForSelector('#login-email');
   check('Protected page redirects to sign-in', page.url().endsWith('/login'));

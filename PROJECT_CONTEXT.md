@@ -28,6 +28,7 @@ Re-check that AWS works (each creates and deletes its own test user(s)):
 cd C:\Users\rohit\Downloads\AWS
 node e2e/live-api.mjs    # the API, expect 36/36 (about 30 s)
 node e2e/live-site.mjs   # the hosted website in headless Chrome, expect 17/17 (about 40 s)
+E2E_BASE_URL=https://main.dg6fh880g1p8b.amplifyapp.com node e2e/landing-motion.mjs   # landing motion, 19/19
 ```
 
 Publish frontend changes to the website (builds, uploads the zip to Amplify, waits for it):
@@ -143,14 +144,15 @@ creates CloudFront and removes the Amplify app. See ARCHITECTURE.md.
   card per page. The spring easing is only used for the dot. Plain CSS, no UI or icon library.
   Fonts from Google Fonts.
 
-- **Landing page** (2026-10-08): signed-out visitors to `/` see `pages/Landing.jsx` (lazy chunk;
-  sections in `components/landing/`, copy in `components/landing/content.js`, styles in
-  `styles/landing.css`, motion in `hooks/useLandingMotion.js` + `hooks/useTyper.js`). Style: Noto's
-  palette and fonts staged like the "Lil Boxes" editorial-maximalism reference (dealt sticky panels,
-  margin notes with self-drawing arrows, condensed cropped wordmark, keycaps, ghost-stack list),
-  rebuilt without GSAP or any other dependency: CSS scroll-driven animations for the deal, sticky
-  positioning for the stack, a small rAF loop for heading lag and the cursor halo. Everything is off
-  under reduced motion. Copy must stay true to what the app does (it is checked against the code).
+- **Landing page** (2026-10-08, rebuilt the same day): signed-out visitors to `/` see
+  `pages/Landing.jsx` (lazy chunk; sections in `components/landing/`, copy in
+  `components/landing/content.js`, styles in `styles/landing.css`). Style: "quiet precision"
+  (reference: Brilean) in Noto's palette and fonts: off-white page, void ink, Noto yellow as the
+  only signal, orange only on hover, no gradients or shadows in the UI, native cursor. All
+  scroll-linked motion runs through one rAF loop in `hooks/useScrollFrame.js` (read phase, then
+  write phase; stops when idle). No GSAP or Lenis: sticky positioning plus eased scrubs.
+  Everything is off under reduced motion. Copy must stay true to what the app does.
+  `node e2e/landing-motion.mjs` (19 checks) guards the motion.
 - React 19 + Vite frontend; React Router; no UI library; no auth SDK (Cognito called with `fetch`)
 - Backend: Node.js 22 Lambdas (ES modules), AWS SDK v3; route logic is pure JS with injected deps
 - 3 Lambdas (one per resource) with per-function least-privilege IAM

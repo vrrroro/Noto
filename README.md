@@ -39,7 +39,7 @@ download and delete their study files. All of this runs without managing a singl
 | Subjects | Create, list (with usage counts), delete (blocked while still in use) |
 | Dashboard | Total / pending / completed / overdue counts, completion bar, upcoming deadlines, recent files |
 | Extras | Search, filter by subject / status / file type, sort, light / dark theme, responsive mobile layout |
-| Landing page | Public front page at `/` for signed-out visitors: what Noto does, the AWS services behind it, sign-up and sign-in |
+| Landing page | Public front page at `/` for signed-out visitors: what Noto does, how it works, the AWS services behind it, sign-up and sign-in |
 
 Rules enforced by the backend: titles of 1–150 characters, descriptions up to 2000 characters, valid
 `YYYY-MM-DD` due dates, subjects that exist, file types `.pdf .doc .docx .ppt .pptx .txt .png .jpg .jpeg`,
@@ -224,6 +224,7 @@ To run the local dev server against the deployed backend, run `deploy.ps1` once 
 | End-to-end browser run (headless Chrome, demo mode) | `cd e2e && npm test` (with `npm run dev` running) | 32 / 32 checks passing |
 | Live API against the deployed stack (Cognito, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 36 / 36 passing (2026-10-08) |
 | Live website in headless Chrome (sign-in, CRUD, S3 upload/download, sign-out) | `node e2e/live-site.mjs` | 17 / 17 passing (2026-10-08) |
+| Landing page motion (nav, scroll scrubs, card stack, timeline, dialog, reduced motion) | `node e2e/landing-motion.mjs` | 19 / 19 passing (2026-10-08) |
 | Infrastructure lint | `cfn-lint infrastructure/template.yaml` | 0 findings |
 
 Still to do by hand: sign-up with a real email inbox. [TESTING.md](TESTING.md) contains the

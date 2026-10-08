@@ -1,85 +1,67 @@
-import { useState } from 'react';
-import MarginNote from './MarginNote.jsx';
-import { LOG_LINES, SERVICES } from './content.js';
+import { useRef } from 'react';
+import Icon from '../Icon.jsx';
+import IconButton from './IconButton.jsx';
+import { STACK } from './content.js';
+import { damp, requestScrollFrame, useScrollFrame } from '../../hooks/useScrollFrame.js';
 
-// CloudWatch has no Noto screen of its own, so it shows the backend's real log lines.
-function LogScreen() {
-  return (
-    <div className="l-logs">
-      <p className="l-logs-title">/aws/lambda/student-cloud-manager-assignments-dev</p>
-      {LOG_LINES.map(([level, message, route], i) => (
-        <p key={i} className="l-logs-line">
-          {`{"level":"${level}","message":"${message}","route":"${route}"}`}
-        </p>
-      ))}
-    </div>
-  );
-}
+// "Built on AWS": four frosted cards over a pair of mirrored Noto shapes that
+// turn as the pointer moves across the section (horizontal position only,
+// eased, resting in the middle). Through the glass they read as soft colour.
+export default function StackSection({ motion }) {
+  const sectionRef = useRef(null);
+  const pointer = useRef({ target: 0.5, current: 0.5 });
 
-// "Show your work": the AWS services behind Noto as a stack of ghost names.
-// Hovering, focusing or tapping one makes it the headline, tilts in the part
-// of Noto it powers, and swings down a short brief.
-export default function StackSection() {
-  const [active, setActive] = useState(null);
-  const service = active === null ? null : SERVICES[active];
+  useScrollFrame((dt) => {
+    const p = pointer.current;
+    return () => {
+      p.current = damp(p.current, p.target, 220, dt);
+      const section = sectionRef.current;
+      section?.style.setProperty('--m', p.current.toFixed(4));
+      section?.style.setProperty('--d', Math.abs(p.current - 0.5).toFixed(4));
+      return Math.abs(p.current - p.target) > 0.0005;
+    };
+  }, motion);
+
+  function onPointerMove(e) {
+    if (e.pointerType !== 'mouse') return;
+    const r = sectionRef.current.getBoundingClientRect();
+    pointer.current.target = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    requestScrollFrame();
+  }
 
   return (
     <section
-      className="l-panel l-deal l-stack"
-      data-tone="light"
-      style={{ '--deal-tilt': '-0.7deg' }}
-      aria-labelledby="l-stack-title"
+      id="aws"
+      ref={sectionRef}
+      className="l-section l-aws"
+      aria-labelledby="l-aws-title"
+      onPointerMove={motion ? onPointerMove : undefined}
     >
-      <div className="l-heading" data-lag>
-        <p className="l-eyebrow">Under the hood</p>
-        <h2 id="l-stack-title" className="l-mega">
-          Mind if we show our work?
+      <div className="l-container">
+        <h2 id="l-aws-title" className="l-h3 l-aws-title">
+          Built on AWS
         </h2>
-      </div>
-
-      <p className="l-stack-hint">Tap a service to see what it does</p>
-      <div
-        className="l-stack-body"
-        onMouseLeave={() => setActive(null)}
-        onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setActive(null)}
-      >
-        <ul className="l-stack-list">
-          {SERVICES.map((s, i) => (
-            <li key={s.name}>
-              <button
-                type="button"
-                className="l-stack-name"
-                aria-expanded={active === i}
-                aria-controls="l-stack-brief"
-                onMouseEnter={() => setActive(i)}
-                onFocus={() => setActive(i)}
-                onClick={() => setActive(i)}
-              >
-                <span>{s.name}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        {!service && <MarginNote className="l-note-pick" text="pick one" arrow={{ '--arrow-rot': '100deg' }} />}
-
-        {service && (
-          <div key={service.name} className="l-stack-screen" aria-hidden="true">
-            <p className="l-stack-tag">{service.nickname}</p>
-            <div className="l-stack-frame">{service.image ? <img src={service.image} alt="" /> : <LogScreen />}</div>
+        <p className="l-text-large l-aws-sub">Seven managed services, and not one server of our own to look after.</p>
+        <div className="l-aws-stage">
+          <div className="l-lens" aria-hidden="true">
+            <span className="is-a" />
+            <span className="is-b" />
           </div>
-        )}
-
-        <div id="l-stack-brief" className="l-stack-brief" aria-live="polite">
-          {service && (
-            <div key={service.name} className="l-stack-brief-inner">
-              <p className="l-card-heading">What {service.name} does in Noto</p>
-              <p>{service.does}</p>
-              <p className="l-card-heading">You meet it</p>
-              <p>{service.when}</p>
-              {service.alt && <p className="visually-hidden">Pictured: {service.alt}.</p>}
-            </div>
-          )}
+          <ul className="l-aws-cards">
+            {STACK.map((card) => (
+              <li key={card.title} className="l-aws-card">
+                <Icon name={card.icon} size={48} />
+                <div className="l-aws-card-text">
+                  <p className="l-aws-service">{card.service}</p>
+                  <h3 className="l-h6">{card.title}</h3>
+                  <p>{card.body}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="l-aws-cta">
+          <IconButton href="#app">See it in the app</IconButton>
         </div>
       </div>
     </section>

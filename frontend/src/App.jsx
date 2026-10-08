@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth.jsx';
 import { ToastProvider } from './components/Toast.jsx';
 import { ProtectedRoute, PublicOnlyRoute } from './components/RouteGuards.jsx';
@@ -21,9 +21,21 @@ const landing = (
   </Suspense>
 );
 
+// Every new page starts at the top. Without this, leaving a scrolled page
+// (the landing page, say) opened the next one part-way down. Links to an
+// in-page #anchor are left to the browser.
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname, hash]);
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <ToastProvider>
           <Routes>

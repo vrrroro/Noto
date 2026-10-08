@@ -1,0 +1,49 @@
+import { Link } from 'react-router-dom';
+import Icon from '../Icon.jsx';
+
+// The circle-to-pill button: a label followed by a 40px circle with an arrow.
+// On hover or focus the circle's background stretches left under the label.
+// Variants: "ink" (black circle, volt arrow), "volt" (volt circle, ink arrow),
+// "solid" (already a black pill; turns orange on hover). On a dark slab the
+// ink variant switches to volt by itself (see .l-dark in landing.css).
+export default function IconButton({ to, href, onClick, children, variant = 'ink', icon = 'arrowRight', className = '', ...rest }) {
+  const classes = `l-ib l-ib-${variant} ${className}`;
+  const content = (
+    <>
+      <span className="l-ib-label">{children}</span>
+      <span className="l-ib-icon" aria-hidden="true">
+        <Icon name={icon} size={17} />
+      </span>
+      <span className="l-ib-bg" aria-hidden="true" />
+    </>
+  );
+
+  if (to) {
+    return (
+      <Link to={to} className={classes} {...rest}>
+        {content}
+      </Link>
+    );
+  }
+  if (href) {
+    return (
+      <a href={href} className={classes} {...rest}>
+        {content}
+      </a>
+    );
+  }
+  return (
+    <button type="button" className={classes} onClick={onClick} {...rest}>
+      {content}
+    </button>
+  );
+}
+
+// The tiny uppercase section label in a grey chip. Sticky on desktop.
+export function UpperTitle({ children, dark = false }) {
+  return (
+    <div className="l-upper-wrap">
+      <p className={`l-upper ${dark ? 'is-dark' : ''}`}>{children}</p>
+    </div>
+  );
+}

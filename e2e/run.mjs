@@ -97,12 +97,11 @@ try {
   // --- Landing ---
   await page.goto(BASE);
   await page.waitForSelector('#l-hero-title');
-  check('Signed-out visitor sees the landing page', (await text()).includes('Noto can help.'));
+  check('Signed-out visitor sees the landing page', (await text()).includes('sorted.'));
   const authLinks = await page.$$eval('.landing a[href="/register"], .landing a[href="/login"]', (links) => links.length);
   check('Landing links to sign-up and sign-in', authLinks >= 4);
-  await sleep(3000); // let the opening sequence finish
   await shot('app-00-landing');
-  await click('.l-header a[href="/login"]');
+  await click('.l-nav-links a[href="/login"]');
   await page.waitForSelector('#login-email');
 
   // --- Auth ---

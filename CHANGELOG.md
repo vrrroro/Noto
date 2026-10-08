@@ -5,7 +5,40 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Landing page rebuilt** in a "quiet precision" style (reference: Brilean), still in Noto's palette
+  and fonts. Replaces the maximalist version below.
+  - Off-white page, void ink, a grey ramp mixed from the two; Noto yellow is the only signal colour
+    and Noto orange appears only on hover. No gradients or shadows in the UI, native cursor.
+  - Archivo at normal width for display (grey line resolving into an ink line), Geist Mono chips
+    that stick at 4rem, Playfair for the wordmark and the statement on the black slab.
+  - Nav: a wide bar that becomes a centred capsule plus a call-to-action pill after 50px, with a
+    light-on-dark state over the black sections (decided by the section actually under the bar).
+  - Black intro slab that pulls in from 105% to 95% wide; two Noto-dot orbs meet and part, then
+    the statement resolves word by word (scroll-scrubbed, eased).
+  - Feature cards that stick, stack 20px apart and shrink as they recede, capped by a volt card.
+  - A 400vh "How it works" timeline: steps open as you scroll, the volt line and marker follow the
+    active dot (measured with a ResizeObserver, so no lag), looping line diagrams per step.
+  - "Built on AWS": frosted cards over two glossy shapes that turn with the pointer.
+  - "Inside the app": rows with a pointer-following preview and a native `<dialog>` side panel
+    (focus trapped, Escape closes, focus returns). Volt footer with two-phase underline links.
+  - One shared requestAnimationFrame loop (`hooks/useScrollFrame.js`) does every scroll-linked
+    effect: all layout reads before any writes, and it stops when nothing is moving. No new
+    dependencies; reduced motion shows everything in place with nothing pinned.
+
+### Fixed
+
+- Leaving a scrolled page (for example the landing page) opened the next route part-way down. The
+  router now scrolls to the top on every route change (`ScrollToTop` in `App.jsx`).
+- The previous landing page's lagging headings jumped up to 160px off their place after a fast
+  scroll and drifted over the text below; that effect is gone with the rebuild.
+
 ### Added
+
+- `e2e/landing-motion.mjs`: 19 motion and interaction checks for the landing page.
+
+### Added (earlier, now replaced)
 
 - **Landing page** for signed-out visitors at `/` (signed-in users still get the dashboard there).
   Noto's palette and three type voices staged in the "playful editorial maximalism" style:

@@ -1,148 +1,136 @@
 // Copy for the landing page. Every claim here describes what Noto actually does.
-import login from '../../assets/landing/login.webp';
-import assignmentForm from '../../assets/landing/assignment-form.webp';
 import dashboard from '../../assets/landing/dashboard.webp';
 import assignments from '../../assets/landing/assignments.webp';
 import notes from '../../assets/landing/notes.webp';
-import phoneMenu from '../../assets/landing/phone-menu.webp';
+import subjects from '../../assets/landing/subjects.webp';
 
-// "Let's ___" in the header.
-export const HEADER_WORDS = ['plan', 'study', 'submit', 'get organised', 'ace this', 'do this'];
-
-// "Your semester is ___". Long ones wrap onto two crushed lines.
-export const ROAST_WORDS = [
-  'Scattered',
-  'Due tomorrow',
-  'In four apps',
-  'A group chat',
-  'Seven tabs deep',
-  'Final_final_v2',
-  'Overdue',
-  'Running on coffee',
-  'On fire',
-  'Untitled (3)',
-  'Due at 11:59',
-  'Vibes only',
-  'Cooked',
-  'In downloads',
-  'Sticky notes',
+export const NAV_LINKS = [
+  { href: '#features', label: 'Features' },
+  { href: '#how', label: 'How it works' },
+  { href: '#aws', label: 'Under the hood' },
 ];
 
-// The chaos on the front of the flip card: a phone's downloads folder.
-export const MESSY_FILES = [
-  ['pdf', 'DBMS_unit3_FINAL(2).pdf'],
-  ['docx', 'os notes NEW new.docx'],
-  ['png', 'Screenshot 2026-10-03 at 23.58.png'],
-  ['txt', 'assignment??.txt'],
-  ['pptx', 'Untitled presentation (4).pptx'],
-  ['pdf', 'DBMS_unit3_FINAL(2) copy.pdf'],
-  ['pdf', 'lecture 7 (1).pdf'],
-  ['jpg', 'IMG_4021.jpg'],
-  ['docx', 'ai-assignment-draft-OLD.docx'],
-];
+export const INTRO_STATEMENT =
+  'We built Noto for the student with five subjects, too many PDFs and a deadline they half remember: one place for every assignment, every note and whatever is due next.';
 
 export const FEATURES = [
   {
+    icon: 'assignments',
     title: 'Assignments',
-    body: 'Every assignment gets a title, a subject, a due date and a priority. Mark it complete when it is done and it gets out of your way.',
+    body: 'A title, a subject, a due date and a priority. Mark it complete when it is done.',
   },
   {
+    icon: 'clock',
     title: 'Deadlines',
-    body: 'Noto counts down for you: due today, due tomorrow, due in 3 days, overdue by 1 day. The dashboard puts the most urgent one first, with a button to finish it.',
+    body: 'Due today, due tomorrow, overdue by a day. The most urgent one is always first.',
   },
   {
+    icon: 'notes',
     title: 'Notes & files',
-    body: 'Upload lecture notes, slides, PDFs and photos up to 10 MB each. They go to private cloud storage, and only your account can open them.',
+    body: 'Lecture notes, slides, PDFs and photos up to 10 MB, stored privately for your account.',
   },
   {
+    icon: 'subjects',
     title: 'Subjects',
-    body: 'File everything by subject. Each subject gets its own colour, so DBMS never gets lost between Operating Systems and AI.',
+    body: 'File everything by subject. Each subject gets its own colour.',
   },
   {
+    icon: 'dashboard',
     title: 'Dashboard',
-    body: 'One screen with your total, pending, completed and overdue work, what is due next and what you uploaded last.',
+    body: 'Total, pending, completed and overdue work, what is due next and what you uploaded last.',
+  },
+  { icon: 'heart', title: 'Free, private, any browser.' },
+];
+
+export const STEPS = [
+  {
+    title: 'Sign up',
+    body: 'Create an account with your email. Cognito sends a six-digit code; enter it and you are in.',
+    diagram: 'code',
   },
   {
-    title: 'Day & Night',
-    body: 'A dark theme for 2 a.m. and a light one for the library. Noto follows your device, or remembers the one you pick.',
+    title: 'Add subjects',
+    body: 'DBMS, Operating Systems, AI. Each subject gets a colour that follows it everywhere.',
+    diagram: 'tags',
+  },
+  {
+    title: 'Track work',
+    body: 'Add the brief, the due date and a priority. Noto counts down and puts the most urgent first.',
+    diagram: 'check',
+  },
+  {
+    title: 'Keep notes',
+    body: 'Upload PDFs, slides and photos. They go straight to private storage, and only you can open them.',
+    diagram: 'upload',
   },
 ];
 
-// The AWS services behind Noto, for the "show our work" stack.
-export const SERVICES = [
+export const STACK = [
   {
-    name: 'Cognito',
-    nickname: 'the bouncer',
-    image: login,
-    alt: 'The Noto sign-in page',
-    does: 'Handles sign-up, the emailed verification code and sign-in. Your password goes to Cognito and nowhere else; Noto’s own code never stores it.',
-    when: 'Every time you create an account or sign in.',
+    icon: 'lock',
+    title: 'Sign-in, handled',
+    service: 'Amazon Cognito',
+    body: 'Sign-up, the emailed code and sign-in. Your password goes to Cognito and nowhere else.',
   },
   {
-    name: 'API Gateway',
-    nickname: 'the front door',
-    image: assignmentForm,
-    alt: 'The new assignment form',
-    does: 'The one HTTPS address the app talks to. It checks your sign-in token on every request and turns away anything without one before any code runs.',
-    when: 'Whenever Noto loads or saves anything.',
+    icon: 'bolt',
+    title: 'Logic on demand',
+    service: 'API Gateway + Lambda',
+    body: 'Every request is checked for a valid token, then three small functions do the work and stop.',
   },
   {
-    name: 'Lambda',
-    nickname: 'the brains',
+    icon: 'database',
+    title: 'Data and files',
+    service: 'DynamoDB + S3',
+    body: 'Assignments live under your user ID; the files themselves sit in a private bucket.',
+  },
+  {
+    icon: 'activity',
+    title: 'Served and watched',
+    service: 'Amplify + CloudWatch',
+    body: 'This site is served over HTTPS; logs and error alarms keep an eye on the rest.',
+  },
+];
+
+export const SCREENS = [
+  {
+    icon: 'dashboard',
+    title: 'Dashboard',
+    tags: ['Overview', 'Next up'],
+    tagline: 'Totals, the next deadline and recent files on one screen.',
     image: dashboard,
-    alt: 'The Noto dashboard with assignment totals and the next deadline',
-    does: 'Three small functions, for assignments, subjects and files. They check what you send and that the data is yours. They only run when called, and each has its own narrow IAM role.',
-    when: 'Behind every number on your dashboard.',
+    alt: 'The Noto dashboard with assignment totals, a completion line and the next deadline',
+    does: 'Counts your total, pending, completed and overdue assignments, shows how much is done, and puts the most urgent pending assignment in a card with a button to finish it. Upcoming deadlines and your latest uploads sit underneath.',
+    helps: 'You open Noto and know in one look what needs doing tonight.',
   },
   {
-    name: 'DynamoDB',
-    nickname: 'the memory',
+    icon: 'assignments',
+    title: 'Assignments',
+    tags: ['Deadlines', 'Priority'],
+    tagline: 'Create, filter, sort and complete, with a countdown on every card.',
     image: assignments,
-    alt: 'The assignments page with filters and assignment cards',
-    does: 'Stores your assignments, subjects and file details, filed under your user ID, so another account’s request can never reach them.',
-    when: 'When an assignment is still there after a refresh.',
+    alt: 'The assignments page with search, filters and assignment cards',
+    does: 'Create an assignment with a title, subject, due date, priority and description. Search, filter by subject or status, sort by due date, edit, delete, and toggle complete.',
+    helps: 'Nothing lives only in the group chat any more, and nothing sneaks past its due date.',
   },
   {
-    name: 'S3',
-    nickname: 'the filing cabinet',
+    icon: 'notes',
+    title: 'Notes',
+    tags: ['Files', 'Up to 10 MB'],
+    tagline: 'Upload PDFs, slides and photos; download or delete them any time.',
     image: notes,
-    alt: 'The notes page with uploaded files',
-    does: 'Holds the files themselves. Your browser uploads straight into a private bucket with a short-lived signed link, and downloads work the same way.',
-    when: 'Uploading or opening your notes.',
+    alt: 'The notes page with uploaded files filed by subject',
+    does: 'Upload PDF, Word, PowerPoint, text and image files up to 10 MB each, filed by subject. Your browser sends them straight to a private S3 bucket with a short-lived signed link.',
+    helps: 'The slides you need are next to the assignment they are for, on any device.',
   },
   {
-    name: 'CloudWatch',
-    nickname: 'the night watch',
-    image: null,
-    does: 'Collects every function’s logs and watches for errors with alarms and a dashboard, so problems show up before anyone has to report them.',
-    when: 'Hopefully never.',
+    icon: 'subjects',
+    title: 'Subjects',
+    tags: ['Colours', 'Organise'],
+    tagline: 'Group everything by subject, each with its own colour.',
+    image: subjects,
+    alt: 'The subjects page with a coloured card per subject',
+    does: 'Add the subjects you take this semester. Each gets a colour that marks its assignments and files, and a subject cannot be deleted while work still uses it.',
+    helps: 'DBMS never gets lost between Operating Systems and AI.',
   },
-  {
-    name: 'Amplify',
-    nickname: 'the shop window',
-    image: phoneMenu,
-    alt: 'Noto’s menu on a phone',
-    does: 'Serves this website over HTTPS through a content delivery network, with the same security headers on every page.',
-    when: 'Right now.',
-  },
-];
-
-// What the CloudWatch "screen" shows: the backend's real log lines (IDs shortened).
-export const LOG_LINES = [
-  ['info', 'Assignment creation started', 'POST /assignments'],
-  ['info', 'Assignment created successfully', 'POST /assignments'],
-  ['info', 'Upload authorized', 'POST /files'],
-  ['info', 'Upload confirmed', 'POST /files/{id}/complete'],
-  ['info', 'Download link created', 'GET /files/{id}/download'],
-  ['info', 'Assignment updated', 'PUT /assignments/{id}'],
-];
-
-// The mystery dot's escalation. The last step rings the school bell.
-export const DOT_STEPS = [
-  { text: 'What’s that?', cursor: 'pointer' },
-  { text: 'Stop clicking it!', cursor: 'not-allowed' },
-  { text: 'It’s just a dot.', cursor: 'grab' },
-  { text: 'No homework today?', cursor: 'grabbing' },
-  { text: 'Last chance!', cursor: 'pointer' },
-  { text: 'Happy now? Ding!', cursor: 'pointer' },
 ];

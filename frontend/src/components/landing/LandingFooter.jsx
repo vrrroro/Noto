@@ -1,40 +1,73 @@
 import { Link } from 'react-router-dom';
-import MarginNote from './MarginNote.jsx';
+import Brand from '../Brand.jsx';
+import { NAV_LINKS } from './content.js';
 
+// Volt footer. Links use the two-phase underline: it draws in from the left
+// on hover and leaves to the right.
 export default function LandingFooter() {
   return (
-    <footer className="l-panel l-deal l-footer" data-tone="dark" style={{ '--deal-tilt': '0.7deg' }}>
-      <div className="l-footer-cta">
-        <div className="l-heading" data-lag>
-          <p className="l-eyebrow">Ready when you are</p>
-          <h2 className="l-footer-title">
-            <span>Got a deadline?</span> <span className="quiet">Good. Now it has a home.</span>
-          </h2>
+    <footer className="l-footer" aria-labelledby="l-footer-title">
+      <div className="l-container l-grid l-footer-grid">
+        <h2 id="l-footer-title" className="l-h4 l-footer-statement">
+          Built for deadlines,
+          <br />
+          notes and the night before.
+        </h2>
+        <div className="l-footer-brand">
+          <Brand />
+          <p>
+            Student workspace
+            <br />
+            In the cloud, on AWS
+          </p>
         </div>
-        <div className="l-footer-actions">
-          <Link to="/register" className="btn btn-primary l-footer-primary">
-            Create your free account
-          </Link>
-          <Link to="/login" className="keycap">
-            Sign in
-          </Link>
-          <MarginNote className="l-note-go" text="go on… it takes a minute" arrow={{}} />
-        </div>
-      </div>
 
-      <div className="l-footer-bar">
-        <p className="l-footer-meta">
-          © 2026 Noto
-          <br />A student cloud project on AWS
-        </p>
-        <p className="l-footer-word" aria-hidden="true">
-          Noto
-        </p>
-        <nav className="l-footer-links" aria-label="Footer">
-          <Link to="/login">Sign in</Link>
-          <Link to="/register">Create account</Link>
-          <a href="#top">Back to top</a>
+        <nav className="l-footer-col" aria-label="Sections">
+          <p className="l-footer-label">Product</p>
+          <ul>
+            {NAV_LINKS.map((link) => (
+              <li key={link.href}>
+                <a className="l-uline" href={link.href}>
+                  {link.label}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a className="l-uline" href="#app">
+                Inside the app
+              </a>
+            </li>
+          </ul>
         </nav>
+        <nav className="l-footer-col" aria-label="Account">
+          <p className="l-footer-label">Account</p>
+          <ul>
+            <li>
+              <Link className="l-uline" to="/register">
+                Create account
+              </Link>
+            </li>
+            <li>
+              <Link className="l-uline" to="/login">
+                Sign in
+              </Link>
+            </li>
+          </ul>
+        </nav>
+        <div className="l-footer-col is-wide">
+          <p className="l-footer-label">The project</p>
+          <p>
+            A college cloud computing project. Cognito, API Gateway, Lambda, DynamoDB, S3, CloudWatch and Amplify.
+          </p>
+        </div>
+
+        <div className="l-footer-credits">
+          <p>© {new Date().getFullYear()} Noto. All rights reserved.</p>
+          <p>A student cloud project</p>
+          <a className="l-uline" href="#top">
+            Back to top
+          </a>
+        </div>
       </div>
     </footer>
   );
