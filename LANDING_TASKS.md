@@ -37,9 +37,9 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
   letters spread and drift away seamlessly (fade out), with no cut edges.
 - [x] **T6. Ambient cursor glow.** A very faint purple light follows the cursor on the landing
   page (mouse only, extremely subtle, both themes).
-- [ ] **T7. Roomier, fluid scrolled HUD.** The capsule nav shown after scrolling gets more
+- [x] **T7. Roomier, fluid scrolled HUD.** The capsule nav shown after scrolling gets more
   spacing, a sliding hover highlight, and a better place for the Day/Night switch.
-- [ ] **T8. HUD logo animation.** No "Noto" text in the landing HUD at the top of the page, only
+- [x] **T8. HUD logo animation.** No "Noto" text in the landing HUD at the top of the page, only
   the orange ball (the big hero wordmark is the logo). After scrolling down a bit, the ball draws
   a line (like the vine on the sign-in page) and the small "Noto" wordmark appears in the HUD.
 - [ ] **T9. Underglow.** "Create account" and "Sign in" on the landing page get a soft glowing
@@ -108,3 +108,17 @@ mouse through the shared loop and fades in/out on enter/leave. `.landing` got
 `isolation: isolate` so the glow's `z-index: -1` puts it on the flow but under all content.
 Mouse only; off under reduced motion. Checked in both themes; 0 animation frames once the pointer
 stops.
+
+**T7 + T8 (done together, same component).** `LandingNav.jsx` rewritten; nav CSS in
+`landing.css` ("Navigation") rewritten. Top bar: the orange ball alone on the left, the section
+links, a hairline, then the actions group (Sign in, Day/Night switch, Create account). After 50px
+on desktop the HUD rises in (spring) as two glass pills (`.l-glass`, blur + 70% paper): the centre
+one holds the brand and the section links with a glider (`.l-pill-glider`) that slides under the
+hovered/focused link and otherwise rests on the section in view (scroll spy, `is-current`,
+`aria-current`); the right one holds the same actions group, so the switch always sits between
+Sign in and Create account. New `HudBrand.jsx`: only the ball until 160px of scroll, then the word
+slot opens (grid 0fr→1fr) while an orange vine draws and carries the ball along, "Noto" rises in
+and the vine fades; it reverses when scrolling back. On phones the bar keeps the ball/brand,
+the switch and the menu (glass chips). Checked in both themes: top, HUD, mid-draw, drawn, hover
+glider, section glider. (Note for screenshots: puppeteer `clip` scrolls the page; use full
+viewport shots.)

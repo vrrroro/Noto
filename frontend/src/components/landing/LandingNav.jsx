@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Brand from '../Brand.jsx';
 import Icon from '../Icon.jsx';
 import IconButton from './IconButton.jsx';
+import HudBrand from './HudBrand.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 import { NAV_LINKS } from './content.js';
 import { useScrollFrame } from '../../hooks/useScrollFrame.js';
@@ -19,27 +19,74 @@ function useMediaQuery(query) {
   return matches;
 }
 
-// Two navs in one fixed header. At the top: a wide bar (wordmark left, links
-// right). After 50px of scroll on desktop it lifts away and a compact centred
-// capsule rises in, with the call to action as a separate pill. Phones keep
-// the bar and use a menu button.
+const HUD_AT = 50; // px of scroll before the desktop bar turns into the HUD
+const BRAND_AT = 160; // px of scroll before the small wordmark draws itself in
+const SECTION_IDS = NAV_LINKS.map((link) => link.href.slice(1));
+
+// Sign in, the Day/Night switch and Create account: the same group in the
+// top bar and in the HUD.
+function Actions({ night, onTheme, solid, className = '' }) {
+  return (
+    <div className={`l-nav-actions ${className}`}>
+      <Link className="l-signin" to="/login">
+        Sign in
+      </Link>
+      <ThemeToggle night={night} onChange={onTheme} />
+      <IconButton to="/register" variant={solid ? 'solid' : 'ink'} className="l-nav-cta">
+        Create account
+      </IconButton>
+    </div>
+  );
+}
+
+// Two navs in one fixed header. At the top of the page: a wide bar (the
+// orange ball alone on the left, the section links, then the actions).
+// After 50px on desktop it lifts away and the HUD rises in: a glass pill in
+// the centre with the brand and the section links, and the actions in a
+// glass pill on the right. A glider slides under the link you point at and
+// otherwise rests on the section you are reading. After 160px the brand
+// draws itself in (HudBrand). Phones keep the bar, with the switch and a menu.
 export default function LandingNav() {
   const desktop = useMediaQuery('(min-width: 992px)');
   const [scrolled, setScrolled] = useState(false);
+  const [branded, setBranded] = useState(false);
+  const [current, setCurrent] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
-  const shown = useRef(false);
+  const last = useRef({ scrolled: false, branded: false, current: '' });
   const headerRef = useRef(null);
+  const pillRef = useRef(null);
+  const hovered = useRef(null);
   const { theme, setTheme } = useTheme();
   const night = isNight(theme);
 
   useScrollFrame(() => {
-    const isScrolled = scrollY > 50;
+    const y = scrollY;
+    const mid = innerHeight * 0.4;
+    let section = '';
+    for (const id of SECTION_IDS) {
+      const r = document.getElementById(id)?.getBoundingClientRect();
+      if (r && r.top <= mid && r.bottom > mid) section = id;
+    }
     return () => {
-      if (isScrolled === shown.current) return;
-      shown.current = isScrolled;
-      setScrolled(isScrolled);
+      const s = last.current;
+      if ((y > HUD_AT) !== s.scrolled) setScrolled((s.scrolled = y > HUD_AT));
+      if ((y > BRAND_AT) !== s.branded) setBranded((s.branded = y > BRAND_AT));
+      if (section !== s.current) setCurrent((s.current = section));
     };
   });
+
+  // The glider: under the hovered link, else under the current section's link, else hidden.
+  const placeGlider = useCallback(() => {
+    const pill = pillRef.current;
+    if (!pill) return;
+    const link = hovered.current ?? pill.querySelector('.l-nav-link.is-current');
+    pill.classList.toggle('has-glider', Boolean(link));
+    if (!link) return;
+    pill.style.setProperty('--gx', `${link.offsetLeft}px`);
+    pill.style.setProperty('--gw', `${link.offsetWidth}px`);
+  }, []);
+
+  useLayoutEffect(placeGlider, [current, desktop, placeGlider]);
 
   // The phone menu closes on Escape, on a click outside the header, and when a link is used.
   useEffect(() => {
@@ -60,6 +107,10 @@ export default function LandingNav() {
 
   const morphed = desktop && scrolled;
   const close = () => setMenuOpen(false);
+  const hover = (link) => () => {
+    hovered.current = link;
+    placeGlider();
+  };
 
   return (
     <header ref={headerRef} className={`l-nav ${morphed ? 'is-morphed' : ''} ${scrolled ? 'is-scrolled' : ''}`}>
@@ -68,23 +119,15 @@ export default function LandingNav() {
       </a>
 
       <div className="l-nav-primary" inert={morphed || undefined}>
-        <a href="#top" className="brand l-nav-brand" aria-label="Noto, back to top">
-          <Brand />
-        </a>
+        <HudBrand shown={!desktop && branded} className="l-nav-brand" />
         <nav className="l-nav-links" aria-label="Main">
           {NAV_LINKS.map((link) => (
             <a key={link.href} className="l-nav-link" href={link.href}>
               {link.label}
             </a>
           ))}
-          <Link className="l-nav-link" to="/login">
-            Sign in
-          </Link>
-          <IconButton to="/register" className="l-nav-cta">
-            Create account
-          </IconButton>
-          <ThemeToggle night={night} onChange={setTheme} />
         </nav>
+        <Actions night={night} onTheme={setTheme} />
         <div className="l-nav-tools">
           <ThemeToggle night={night} onChange={setTheme} />
           <button
@@ -103,25 +146,27 @@ export default function LandingNav() {
 
       {desktop && (
         <div className="l-nav-secondary" inert={!morphed || undefined}>
-          <div className="l-capsule">
-            <a href="#top" className="l-disc" aria-label="Noto, back to top">
-              <span className="l-disc-dot" />
-            </a>
-            <nav className="l-pill" aria-label="Sections">
+          <div className="l-glass l-capsule">
+            <HudBrand shown={morphed && branded} />
+            <span className="l-capsule-rule" aria-hidden="true" />
+            <nav ref={pillRef} className="l-pill" aria-label="Sections" onPointerLeave={hover(null)}>
+              <span className="l-pill-glider" aria-hidden="true" />
               {NAV_LINKS.map((link) => (
-                <a key={link.href} className="l-nav-link" href={link.href}>
+                <a
+                  key={link.href}
+                  className={`l-nav-link ${current === link.href.slice(1) ? 'is-current' : ''}`}
+                  href={link.href}
+                  aria-current={current === link.href.slice(1) ? 'location' : undefined}
+                  onPointerEnter={(e) => hover(e.currentTarget)()}
+                  onFocus={(e) => hover(e.currentTarget)()}
+                  onBlur={hover(null)}
+                >
                   {link.label}
                 </a>
               ))}
-              <Link className="l-nav-link" to="/login">
-                Sign in
-              </Link>
             </nav>
-            <ThemeToggle night={night} onChange={setTheme} />
           </div>
-          <IconButton to="/register" variant="solid" className="l-nav-pill-cta">
-            Create account
-          </IconButton>
+          <Actions night={night} onTheme={setTheme} solid className="l-glass" />
         </div>
       )}
 

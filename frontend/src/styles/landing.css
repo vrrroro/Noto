@@ -413,9 +413,17 @@
   }
 }
 
-/* ---------- Navigation ---------- */
+/* ---------- Navigation ----------
+   Top of the page: a wide bar (brand left, section links, then the actions:
+   Sign in, the Day/Night switch, Create account). After 50px on desktop it
+   lifts away and the HUD rises in: two roomy glass pills, the brand and the
+   section links in the centre (a glider slides under the link you point at
+   and otherwise rests on the section you are in), the actions on the right. */
 
 .l-nav {
+  --l-glass-bg: color-mix(in srgb, var(--l-canvas) 70%, transparent);
+  --l-glass-line: color-mix(in srgb, var(--l-ink) 10%, transparent);
+  --l-glide: color-mix(in srgb, var(--l-purple) 14%, transparent);
   position: fixed;
   inset: 0 0 auto;
   z-index: 100;
@@ -424,7 +432,7 @@
 }
 
 .l-nav-primary,
-.l-nav-secondary,
+.l-nav-secondary > *,
 .l-menu {
   pointer-events: auto;
 }
@@ -432,144 +440,360 @@
 .l-nav-primary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--l-gap);
+  gap: 2rem;
   max-width: 100rem;
   margin: 0 auto;
   padding: 2rem var(--l-gutter);
   transition:
-    margin 0.2s ease-in-out,
-    opacity 0.2s ease-in-out,
-    background-color 0.3s ease-in-out,
-    color 0.3s ease-in-out;
+    translate 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.3s ease,
+    background-color 0.3s ease;
 }
 
 .l-nav.is-morphed .l-nav-primary {
-  margin-top: -2rem;
+  translate: 0 -1.5rem;
   opacity: 0;
   pointer-events: none;
 }
 
 .l-nav-brand {
   color: inherit;
+  text-decoration: none;
 }
 
 .l-nav-links {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.35rem;
+  margin-left: auto;
 }
 
 .l-nav-link {
-  padding: 0.625rem 1.125rem;
-  border-radius: 4px;
+  position: relative;
+  z-index: 1;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
   color: inherit;
   font-size: 1rem;
   text-decoration: none;
+  white-space: nowrap;
   transition:
-    color 0.2s ease-in-out,
-    background-color 0.2s ease-in-out;
+    color 0.25s ease,
+    background-color 0.25s ease;
 }
 
-.l-nav-link:hover {
-  background: var(--l-hot);
-  color: #0d0d1a;
+.l-nav-links .l-nav-link:hover {
+  background: var(--l-glide);
 }
 
-.l-nav-cta {
-  margin-left: 0.75rem;
+/* The small wordmark (HudBrand.jsx): only the orange ball at first; when
+   shown, the word slot opens, the ball rides a vine line that draws itself,
+   "Noto" rises in behind it and the line fades, leaving "Noto" and its dot. */
+.l-hud-brand {
+  --dot: 0.34em;
+  display: inline-flex;
+  align-items: baseline;
+  flex-shrink: 0;
+  padding: 0.3rem 0.5rem 0.3rem 0.7rem;
+  color: inherit;
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-decoration: none;
 }
 
-/* After 50px: a centred capsule rises in, the call to action sits on the right. */
+.l-hud-brand.is-shown {
+  --dot: 0.22em;
+}
+
+.l-hud-slot {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0fr;
+}
+
+.l-hud-brand.is-shown .l-hud-slot {
+  grid-template-columns: 1fr;
+}
+
+.l-hud-word {
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.04em 0.04em 0.06em 0.06em;
+  opacity: 0;
+  translate: 0 0.4em;
+}
+
+.l-hud-brand.is-shown .l-hud-word {
+  opacity: 1;
+  translate: 0;
+}
+
+.l-hud-vine {
+  position: absolute;
+  left: 0;
+  bottom: -0.3em;
+  width: 100%;
+  height: 0.45em;
+  overflow: visible;
+}
+
+.l-hud-vine path {
+  fill: none;
+  stroke: var(--l-hot);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.l-hud-brand.is-shown .l-hud-vine path {
+  stroke-dashoffset: 0;
+  opacity: 0;
+}
+
+.l-hud-dot {
+  flex-shrink: 0;
+  align-self: center;
+  width: var(--dot);
+  height: var(--dot);
+  margin-left: 0.07em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #ffc2a3 0, var(--l-hot) 50%, #d9541f 100%);
+}
+
+.l-hud-brand.is-shown .l-hud-dot {
+  align-self: baseline;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Hiding: the word goes first, then the slot closes and the line retracts. */
+  .l-hud-slot {
+    transition: grid-template-columns 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.1s;
+  }
+
+  .l-hud-word {
+    transition:
+      opacity 0.2s ease,
+      translate 0.3s ease;
+  }
+
+  .l-hud-vine path {
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.1s;
+  }
+
+  .l-hud-dot {
+    transition:
+      width 0.5s var(--ease-spring),
+      height 0.5s var(--ease-spring);
+  }
+
+  /* Showing: the slot opens as the line draws and carries the ball along,
+     then the word rises in and the line fades. */
+  .l-hud-brand.is-shown .l-hud-slot {
+    transition: grid-template-columns 0.75s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .l-hud-brand.is-shown .l-hud-vine path {
+    transition:
+      stroke-dashoffset 0.75s cubic-bezier(0.65, 0, 0.35, 1),
+      opacity 0.45s ease 0.85s;
+  }
+
+  .l-hud-brand.is-shown .l-hud-word {
+    transition:
+      opacity 0.45s ease 0.5s,
+      translate 0.7s var(--ease-spring) 0.5s;
+  }
+
+  .l-hud-brand.is-shown .l-hud-dot {
+    transition:
+      width 0.5s var(--ease-spring) 0.6s,
+      height 0.5s var(--ease-spring) 0.6s;
+  }
+}
+
+/* The actions: Sign in, the switch and the call to action, always together. */
+.l-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.l-nav-primary .l-nav-actions {
+  padding-left: 1.5rem;
+  border-left: 1px solid var(--l-glass-line);
+}
+
+.l-signin {
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  color: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.25s ease;
+}
+
+.l-signin:hover {
+  background: var(--l-glide);
+}
+
+/* The Day/Night switch: a disc with a sun or a moon. */
+.l-theme {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--l-glass-line);
+  border-radius: 100%;
+  background: transparent;
+  color: inherit;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.l-theme .icon {
+  transition: rotate 0.6s var(--ease-spring);
+}
+
+.l-theme:hover {
+  border-color: var(--l-purple);
+  background: var(--l-purple);
+  color: #fff;
+}
+
+.l-theme:hover .icon {
+  rotate: 40deg;
+}
+
+/* The HUD (after 50px, desktop). */
 .l-nav-secondary {
   position: absolute;
   inset: 0 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1rem var(--l-gutter);
-  margin-top: 2rem;
-  opacity: 0;
+  padding: 0.9rem var(--l-gutter);
   pointer-events: none;
-  transition:
-    margin 0.2s ease-in-out,
-    opacity 0.2s ease-in-out;
 }
 
-.l-nav.is-morphed .l-nav-secondary {
-  margin-top: 0;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.l-capsule {
+.l-glass {
   display: flex;
   align-items: center;
-  gap: 1px;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border: 1px solid var(--l-glass-line);
+  border-radius: 999px;
+  background: var(--l-glass-bg);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  opacity: 0;
+  translate: 0 -1.25rem;
+  scale: 0.96;
+  transition:
+    opacity 0.35s ease,
+    translate 0.6s var(--ease-spring),
+    scale 0.6s var(--ease-spring);
 }
 
-.l-disc {
-  display: grid;
-  place-items: center;
-  width: 39px;
-  height: 39px;
-  border-radius: 100%;
-  background: var(--l-plum);
-  transition: background-color 0.3s ease-in-out;
+.l-nav.is-morphed .l-glass {
+  opacity: 1;
+  translate: 0;
+  scale: 1;
 }
 
-/* The Noto dot, small. */
-.l-disc-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 100%;
-  background: var(--l-hot);
-  transition: scale 0.4s var(--ease-spring);
+.l-nav:not(.is-morphed) .l-nav-secondary > * {
+  pointer-events: none;
 }
 
-.l-disc:hover .l-disc-dot {
-  scale: 1.5;
+.l-nav-secondary .l-nav-actions {
+  position: absolute;
+  right: var(--l-gutter);
+  transition-delay: 0.05s;
+}
+
+.l-capsule-rule {
+  width: 1px;
+  height: 1.4rem;
+  margin: 0 0.35rem;
+  background: var(--l-glass-line);
 }
 
 .l-pill {
+  position: relative;
   display: flex;
   align-items: center;
-  border-radius: 4px;
-  background: var(--l-g50);
-  color: var(--l-ink);
-  transition:
-    background-color 0.3s ease-in-out,
-    color 0.3s ease-in-out;
+  gap: 0.15rem;
 }
 
 .l-pill .l-nav-link {
-  padding-block: 0.56rem;
+  padding: 0.6rem 1.2rem;
+  color: var(--l-g950);
 }
 
-.l-nav-pill-cta {
+.l-pill .l-nav-link:hover,
+.l-pill .l-nav-link.is-current {
+  color: var(--l-ink);
+}
+
+/* The glider: slides and stretches under the link in focus. */
+.l-pill-glider {
   position: absolute;
-  right: var(--l-gutter);
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--gw, 0);
+  border-radius: 999px;
+  background: var(--l-glide);
+  opacity: 0;
+  translate: var(--gx, 0) 0;
+  transition:
+    translate 0.55s var(--ease-spring),
+    width 0.55s var(--ease-spring),
+    opacity 0.3s ease;
 }
 
-/* Phones and tablets: a menu button and a stack of chips. */
+.l-pill.has-glider .l-pill-glider {
+  opacity: 1;
+}
+
+.l-nav-secondary .l-theme {
+  border-color: transparent;
+}
+
+/* Phones and tablets: the bar stays, with the switch and a menu button. */
+.l-nav-tools {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 .l-burger {
   position: relative;
-  display: none;
+  display: grid;
   width: 44px;
   height: 44px;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: 999px;
   background: var(--l-g50);
   color: var(--l-ink);
-  transition: background-color 0.3s ease-in-out;
 }
 
 .l-burger .icon {
   position: absolute;
   inset: 0;
   margin: auto;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.3s ease;
 }
 
 .l-burger-close,
@@ -583,12 +807,12 @@
 
 .l-menu {
   position: absolute;
-  top: calc(100% + 1px);
+  top: calc(100% + 0.25rem);
   right: var(--l-gutter);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 1px;
+  gap: 0.35rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -596,14 +820,17 @@
 
 .l-menu-chip {
   display: block;
-  padding: 0.75rem 1.125rem;
-  border-radius: 4px;
-  background: var(--l-g100);
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--l-glass-line);
+  border-radius: 999px;
+  background: var(--l-glass-bg);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   color: var(--l-ink);
   text-decoration: none;
   transition:
-    background-color 0.2s ease-in-out,
-    color 0.2s ease-in-out;
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .l-menu-chip:hover {
@@ -612,8 +839,37 @@
 }
 
 .l-menu-chip.is-cta {
+  border-color: transparent;
   background: var(--l-purple);
   color: #fff;
+}
+
+@media (max-width: 991px) {
+  .l-nav-links,
+  .l-nav-primary .l-nav-actions {
+    display: none;
+  }
+
+  .l-nav-tools {
+    display: flex;
+  }
+
+  .l-nav-tools .l-theme {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: var(--l-g50);
+  }
+
+  .l-nav-primary {
+    padding-block: 1rem;
+  }
+
+  .l-nav.is-scrolled .l-nav-primary {
+    background: var(--l-glass-bg);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+  }
 }
 
 /* ---------- Hero ---------- */
@@ -1856,61 +2112,6 @@
   color: var(--l-g950);
 }
 
-/* The Day/Night switch: a 40px disc with a sun or a moon. */
-.l-theme {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 1px solid currentColor;
-  border-radius: 100%;
-  background: transparent;
-  color: inherit;
-  transition:
-    background-color 0.3s ease-in-out,
-    border-color 0.3s ease-in-out,
-    color 0.3s ease-in-out;
-}
-
-.l-theme .icon {
-  transition: rotate 0.5s var(--ease-spring);
-}
-
-.l-theme:hover {
-  border-color: var(--l-purple);
-  background: var(--l-purple);
-  color: #fff;
-}
-
-.l-theme:hover .icon {
-  rotate: 30deg;
-}
-
-.l-nav-links .l-theme {
-  margin-left: 0.5rem;
-}
-
-.l-nav-secondary .l-theme {
-  margin-left: 1px;
-  border: 0;
-  background: var(--l-g50);
-  color: var(--l-ink);
-}
-
-.l-nav-secondary .l-theme:hover {
-  background: var(--l-purple);
-  color: #fff;
-}
-
-/* The phone bar shows the switch next to the menu button. */
-.l-nav-tools {
-  display: none;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 /* Switching themes: the new one opens as a circle from the switch. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -1973,35 +2174,6 @@
   .landing {
     --l-gutter: 2rem;
     --l-section: 4rem;
-  }
-
-  .l-nav-links {
-    display: none;
-  }
-
-  .l-burger {
-    display: grid;
-  }
-
-  .l-nav-tools {
-    display: flex;
-  }
-
-  .l-nav-tools .l-theme {
-    width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: 8px;
-    background: var(--l-g50);
-    color: var(--l-ink);
-  }
-
-  .l-nav-primary {
-    padding-block: 1rem;
-  }
-
-  .l-nav.is-scrolled .l-nav-primary {
-    background: var(--l-canvas);
   }
 
   .l-grid {
