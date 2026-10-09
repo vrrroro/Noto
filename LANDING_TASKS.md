@@ -28,7 +28,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
   they merge, a greyish purplish black. Day: one dark-purple orb and one Noto-orange orb; where
   they merge, a lightish purplish grey. The statement still shows in negative where an orb or
   the merge passes over it.
-- [ ] **T3. "Built on AWS" glows only inside the tiles.** The two orb shapes become faded, soft
+- [x] **T3. "Built on AWS" glows only inside the tiles.** The two orb shapes become faded, soft
   light orbs (orange and purple) and only show through the four service tiles, never outside or
   behind the gaps.
 - [ ] **T4. Anchor bug.** Clicking "Under the hood" (or any in-page link) must glide to its section
@@ -78,3 +78,11 @@ orb's translate and scale so it lines up with the real words; the lens sits insi
 a's offset, so it is exactly the intersection. Rings are outlines (not clipped). Checked in both
 themes mid-merge: Night light orange + light purple, merge greyish purplish black; Day orange +
 dark purple, merge lightish purplish grey; text aligned and inverted in every shape.
+
+**T3 (done).** The `.l-lens` lozenges are gone. Each `.l-aws-card` has `overflow: hidden` and a
+`::before` that paints one stage-wide picture of two faded radial orbs (orange `--aws-glow-hot*`,
+purple `--aws-glow-violet*`), sized `100cqw` and shifted by the tile's index (`--i`, set in
+`StackSection.jsx`; `.l-aws-stage` is a size container), so the orbs read as one pair seen
+through four windows and never show in the gaps. Pointer drift still uses `--m` / `--d`. Below
+992px the tiles scroll sideways, so each tile shows its own pair. Tiles lost the backdrop blur
+(nothing behind them now). Checked in both themes.

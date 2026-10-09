@@ -4,9 +4,10 @@ import IconButton from './IconButton.jsx';
 import { STACK } from './content.js';
 import { damp, requestScrollFrame, useScrollFrame } from '../../hooks/useScrollFrame.js';
 
-// "Built on AWS": four frosted cards over a pair of mirrored Noto shapes that
-// turn as the pointer moves across the section (horizontal position only,
-// eased, resting in the middle). Through the glass they read as soft colour.
+// "Built on AWS": four tiles with a pair of faded light orbs, orange and
+// purple, visible only through the tiles (see .l-aws-card::before). The orbs
+// drift as the pointer moves across the section (horizontal position only,
+// eased, resting in the middle).
 export default function StackSection({ motion }) {
   const sectionRef = useRef(null);
   const pointer = useRef({ target: 0.5, current: 0.5 });
@@ -43,13 +44,9 @@ export default function StackSection({ motion }) {
         </h2>
         <p className="l-text-large l-aws-sub">Seven managed services, and not one server of our own to look after.</p>
         <div className="l-aws-stage">
-          <div className="l-lens" aria-hidden="true">
-            <span className="is-a" />
-            <span className="is-b" />
-          </div>
           <ul className="l-aws-cards">
-            {STACK.map((card) => (
-              <li key={card.title} className="l-aws-card">
+            {STACK.map((card, i) => (
+              <li key={card.title} className="l-aws-card" style={{ '--i': i }}>
                 <Icon name={card.icon} size={48} />
                 <div className="l-aws-card-text">
                   <p className="l-aws-service">{card.service}</p>

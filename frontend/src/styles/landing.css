@@ -1411,59 +1411,16 @@
   color: var(--l-g950);
 }
 
+/* A query container, so the tiles can place their glows in the stage's own
+   coordinates (cqw) and line them up as one picture. */
 .l-aws-stage {
   position: relative;
   margin-top: 6rem;
-}
-
-/* A mirrored pair of glossy Noto lozenges that turns like a propeller as the
-   pointer crosses the section and opens up away from the middle. */
-.l-aws {
-  overflow: clip;
-}
-
-.l-lens {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-  rotate: calc((var(--m, 0.5) - 0.5) * 110deg);
-}
-
-.l-lens span {
-  position: absolute;
-  top: -4.5rem;
-  width: 16rem;
-  height: 9rem;
-  border-radius: 50%;
-}
-
-.l-lens .is-a {
-  right: 0;
-  translate: calc(var(--d, 0) * -8rem - 0.5rem) 0;
-  rotate: calc(-12deg - var(--d, 0) * 40deg);
-  background: radial-gradient(
-    ellipse at 34% 30%,
-    #fff 0,
-    color-mix(in srgb, var(--orange) 50%, #fff) 12%,
-    var(--orange) 42%,
-    color-mix(in srgb, var(--orange) 45%, var(--void)) 100%
-  );
-}
-
-.l-lens .is-b {
-  left: 0;
-  translate: calc(var(--d, 0) * 8rem + 0.5rem) 0;
-  rotate: calc(-12deg - var(--d, 0) * 40deg);
-  background: radial-gradient(
-    ellipse at 66% 70%,
-    #fff 0,
-    color-mix(in srgb, var(--l-purple) 45%, #fff) 12%,
-    var(--l-purple) 42%,
-    var(--l-plum) 100%
-  );
+  container-type: inline-size;
+  --aws-glow-hot: light-dark(rgb(255 107 53 / 30%), rgb(255 130 80 / 30%));
+  --aws-glow-hot-2: light-dark(rgb(255 150 110 / 10%), rgb(255 150 110 / 9%));
+  --aws-glow-violet: light-dark(rgb(123 47 255 / 24%), rgb(170 130 255 / 30%));
+  --aws-glow-violet-2: light-dark(rgb(160 120 255 / 9%), rgb(170 130 255 / 10%));
 }
 
 .l-aws-cards {
@@ -1482,13 +1439,45 @@
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
+  position: relative;
+  isolation: isolate;
   min-width: 0;
   aspect-ratio: 1;
   padding: 2.5rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--l-ink) 8%, transparent);
   border-radius: 8px;
-  background: var(--l-glass);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  background: color-mix(in srgb, var(--l-ink) 4%, transparent);
+}
+
+/* Two faded light orbs, orange and purple, that exist only inside the tiles.
+   Every tile paints the same stage-wide picture, shifted by its own place in
+   the row (--i), so the orbs read as one pair seen through four windows and
+   never spill into the gaps. They drift with the pointer (--m) and part as
+   it leaves the middle (--d). */
+.l-aws-card::before {
+  --tile: calc((100cqw - 3 * var(--l-gap)) / 4);
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      18cqw 18cqw at calc(40% + (var(--m, 0.5) - 0.5) * 22% - var(--d, 0) * 6%) 58%,
+      var(--aws-glow-hot) 0,
+      var(--aws-glow-hot-2) 55%,
+      transparent 100%
+    ),
+    radial-gradient(
+      20cqw 20cqw at calc(61% + (var(--m, 0.5) - 0.5) * 22% + var(--d, 0) * 6%) 44%,
+      var(--aws-glow-violet) 0,
+      var(--aws-glow-violet-2) 55%,
+      transparent 100%
+    );
+  background-size: 100cqw 100%;
+  background-position: calc(var(--i, 0) * -1 * (var(--tile) + var(--l-gap))) 0;
+  background-repeat: no-repeat;
+  pointer-events: none;
 }
 
 .l-aws-card-text {
@@ -2040,6 +2029,12 @@
   .l-aws-card {
     flex: 0 0 40%;
     scroll-snap-align: start;
+  }
+
+  /* The tiles scroll sideways here, so each one shows its own pair of glows. */
+  .l-aws-card::before {
+    background-size: 100% 100%;
+    background-position: 0 0;
   }
 
   .l-popup {
