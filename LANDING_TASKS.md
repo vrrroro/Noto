@@ -48,7 +48,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
   stay dark purple in Day (the `.invert` cards) become a light purple appropriate for Day.
 - [x] **T11. Theme-matched app screenshots.** "Inside the app" shows Day screenshots in Day and
   Night screenshots in Night (taken after T10).
-- [ ] **T12. Orange pin line instead of the scrollbar.** Hide the browser scrollbar and show a
+- [x] **T12. Orange pin line instead of the scrollbar.** Hide the browser scrollbar and show a
   thin straight orange line on the right that tracks the scroll position (and can be dragged).
 - [ ] **T13. Wrap-up.** Update `e2e/landing-motion.mjs` for the new behaviour, run all tests,
   update CHANGELOG / PROJECT_CONTEXT / TESTING / README / HANDOFF, commit and push. Ask the owner
@@ -148,3 +148,15 @@ conditions as global.css), so the switch swaps them instantly. Checked: in Night
 shows `dashboard-dark.webp` (Day copy `display: none`), in Day the reverse. To regenerate: run a
 demo-mode server on 5174 and `appshots.mjs <dir> --webp` (session scratchpad; it registers
 rohit@college.edu in each theme and shoots the four screens).
+
+**T12 (done).** Site-wide (all routes). `global.css` hides the browser scrollbar
+(`scrollbar-width: none` + `::-webkit-scrollbar`; the old `scrollbar-gutter` is gone, so
+`clientWidth == innerWidth`). New `components/ScrollPin.jsx`, mounted in `App.jsx`: a fixed 14px
+strip on the right with a faint 2px track, an orange fill scaled to the scroll progress and an
+orange pin at the tip (`.scroll-pin*` in global.css; position from `--progress`, the dot uses
+`top: calc(progress * (100% - 8px))` because `vh` inside the transform measured wrong). Click or
+drag on it scrolls there (pointer capture). It hides when the page cannot scroll, re-measures on
+body resize, and only works inside the shared scroll loop. On coarse pointers (touch) it is a
+gauge only. Note: headless Chrome here reports `pointer: coarse`, so tests that click it must
+force `pointer-events: auto`. Checked: click at 50% → scrollY = 50% of max; drag to 22% → 22%;
+dot centred on the fill's tip.

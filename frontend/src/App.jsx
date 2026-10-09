@@ -12,6 +12,7 @@ import Assignments from './pages/Assignments.jsx';
 import Notes from './pages/Notes.jsx';
 import Subjects from './pages/Subjects.jsx';
 import NotFound from './pages/NotFound.jsx';
+import ScrollPin from './components/ScrollPin.jsx';
 
 // The landing page is its own chunk: signed-in users never download it.
 const Landing = lazy(() => import('./pages/Landing.jsx'));
@@ -36,6 +37,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <ScrollPin />
       <AuthProvider>
         <ToastProvider>
           <Routes>

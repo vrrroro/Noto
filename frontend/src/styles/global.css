@@ -225,10 +225,79 @@
   box-sizing: border-box;
 }
 
+/* No browser scrollbar: ScrollPin.jsx draws a thin orange line instead. */
 html {
   -webkit-text-size-adjust: 100%;
-  scrollbar-gutter: stable;
-  scrollbar-color: var(--surface-3) transparent;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* The scroll line: a hairline on the right edge, orange down to the current
+   position, a pin at the tip. A 14px strip catches clicks and drags. */
+.scroll-pin {
+  --pin: #ff6b35;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  width: 14px;
+  cursor: pointer;
+  touch-action: none;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-pin.is-idle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scroll-pin-track,
+.scroll-pin-fill {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  width: 2px;
+  border-radius: 2px;
+}
+
+.scroll-pin-track {
+  bottom: 0;
+  background: light-dark(rgb(13 13 26 / 7%), rgb(255 255 255 / 8%));
+}
+
+.scroll-pin-fill {
+  height: 100%;
+  background: var(--pin);
+  transform: scaleY(var(--progress, 0));
+  transform-origin: top;
+}
+
+.scroll-pin-dot {
+  position: absolute;
+  right: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pin);
+  box-shadow: 0 0 10px rgb(255 107 53 / 60%);
+  top: calc(var(--progress, 0) * (100% - 8px));
+  transition: scale 0.25s var(--ease-spring);
+}
+
+.scroll-pin:hover .scroll-pin-dot,
+.scroll-pin.is-dragging .scroll-pin-dot {
+  scale: 1.6;
+}
+
+/* Touch screens scroll by swiping; the line is only a gauge there. */
+@media (pointer: coarse) {
+  .scroll-pin {
+    pointer-events: none;
+  }
 }
 
 /* Lock page scroll behind an open sheet or the phone menu. */
