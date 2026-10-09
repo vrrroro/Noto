@@ -3,6 +3,18 @@ import Icon from '../Icon.jsx';
 import IconButton, { UpperTitle } from './IconButton.jsx';
 import { SCREENS } from './content.js';
 
+// A screenshot in both themes. Both are in the page and CSS shows the one that
+// matches the current theme (.l-shot-day / .l-shot-night), so the Day/Night
+// switch swaps them at once, inside its circular reveal too.
+function ThemeImage({ image, alt }) {
+  return (
+    <>
+      <img className="l-shot-day" src={image.day} alt={alt} />
+      <img className="l-shot-night" src={image.night} alt={alt} />
+    </>
+  );
+}
+
 // "Inside the app": one row per screen. Hovering a row (mouse only) turns the
 // title orange, fills its circle, and shows a frosted preview that follows the
 // pointer; activating a row opens a side panel (a native modal <dialog>, so
@@ -96,7 +108,7 @@ export default function AppTour() {
         {preview && (
           <>
             <p>{preview.tagline}</p>
-            <img src={preview.image} alt="" />
+            <ThemeImage image={preview.image} alt="" />
           </>
         )}
       </div>
@@ -133,7 +145,7 @@ export default function AppTour() {
               <p>{screen.does}</p>
               <p className="l-upper">Why it helps</p>
               <p>{screen.helps}</p>
-              <img src={screen.image} alt={screen.alt} />
+              <ThemeImage image={screen.image} alt={screen.alt} />
             </div>
           </>
         )}

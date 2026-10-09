@@ -1978,6 +1978,31 @@
   }
 }
 
+/* Screenshots come in both themes; show the one that matches. The conditions
+   mirror global.css: Night by choice, or by default unless the system asks
+   for light. (img.class selectors outrank `.l-preview img` and friends.) */
+.landing img.l-shot-night {
+  display: none;
+}
+
+:root[data-theme='dark'] .landing img.l-shot-day {
+  display: none;
+}
+
+:root[data-theme='dark'] .landing img.l-shot-night {
+  display: block;
+}
+
+@media not (prefers-color-scheme: light) {
+  :root:not([data-theme='light']) .landing img.l-shot-day {
+    display: none;
+  }
+
+  :root:not([data-theme='light']) .landing img.l-shot-night {
+    display: block;
+  }
+}
+
 /* Side panel: a native modal dialog anchored bottom right. */
 .l-popup {
   position: fixed;

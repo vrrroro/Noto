@@ -46,7 +46,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
   underglow.
 - [x] **T10. App light mode: no dark purple cards.** On the sign-in pages and in the app, cards that
   stay dark purple in Day (the `.invert` cards) become a light purple appropriate for Day.
-- [ ] **T11. Theme-matched app screenshots.** "Inside the app" shows Day screenshots in Day and
+- [x] **T11. Theme-matched app screenshots.** "Inside the app" shows Day screenshots in Day and
   Night screenshots in Night (taken after T10).
 - [ ] **T12. Orange pin line instead of the scrollbar.** Hide the browser scrollbar and show a
   thin straight orange line on the right that tracks the scroll position (and can be dragged).
@@ -138,3 +138,13 @@ plum `#2d1b4e → #1e1238` by Night. Checked every app page (sign-in, dashboard,
 subjects) in both themes from a demo-mode server (`appshots.mjs` in the session scratchpad; it
 registers a demo user, so run it against `VITE_* =` empty on port 5174): no dark card in Day, no
 light card in Night.
+
+**T11 (done).** New screenshots, taken after T10 from a demo-mode server with a seeded "Rohit"
+account, 1100x693 WebP like before: `frontend/src/assets/landing/{dashboard,assignments,notes,
+subjects}-{light,dark}.webp` (the four old single-theme images are deleted). `content.js` gives
+each screen `image: { day, night }`; `AppTour.jsx` renders both through `ThemeImage`
+(`img.l-shot-day` / `img.l-shot-night`) and `landing.css` shows the one matching the theme (same
+conditions as global.css), so the switch swaps them instantly. Checked: in Night the side panel
+shows `dashboard-dark.webp` (Day copy `display: none`), in Day the reverse. To regenerate: run a
+demo-mode server on 5174 and `appshots.mjs <dir> --webp` (session scratchpad; it registers
+rohit@college.edu in each theme and shoots the four screens).

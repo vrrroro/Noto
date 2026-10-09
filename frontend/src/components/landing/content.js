@@ -1,8 +1,13 @@
 // Copy for the landing page. Every claim here describes what Noto actually does.
-import dashboard from '../../assets/landing/dashboard.webp';
-import assignments from '../../assets/landing/assignments.webp';
-import notes from '../../assets/landing/notes.webp';
-import subjects from '../../assets/landing/subjects.webp';
+// Each screen in both themes; the page shows the one matching the current theme.
+import dashboardDay from '../../assets/landing/dashboard-light.webp';
+import dashboardNight from '../../assets/landing/dashboard-dark.webp';
+import assignmentsDay from '../../assets/landing/assignments-light.webp';
+import assignmentsNight from '../../assets/landing/assignments-dark.webp';
+import notesDay from '../../assets/landing/notes-light.webp';
+import notesNight from '../../assets/landing/notes-dark.webp';
+import subjectsDay from '../../assets/landing/subjects-light.webp';
+import subjectsNight from '../../assets/landing/subjects-dark.webp';
 
 export const NAV_LINKS = [
   { href: '#features', label: 'Features' },
@@ -98,7 +103,7 @@ export const SCREENS = [
     title: 'Dashboard',
     tags: ['Overview', 'Next up'],
     tagline: 'Totals, the next deadline and recent files on one screen.',
-    image: dashboard,
+    image: { day: dashboardDay, night: dashboardNight },
     alt: 'The Noto dashboard with assignment totals, a completion line and the next deadline',
     does: 'Counts your total, pending, completed and overdue assignments, shows how much is done, and puts the most urgent pending assignment in a card with a button to finish it. Upcoming deadlines and your latest uploads sit underneath.',
     helps: 'You open Noto and know in one look what needs doing tonight.',
@@ -108,7 +113,7 @@ export const SCREENS = [
     title: 'Assignments',
     tags: ['Deadlines', 'Priority'],
     tagline: 'Create, filter, sort and complete, with a countdown on every card.',
-    image: assignments,
+    image: { day: assignmentsDay, night: assignmentsNight },
     alt: 'The assignments page with search, filters and assignment cards',
     does: 'Create an assignment with a title, subject, due date, priority and description. Search, filter by subject or status, sort by due date, edit, delete, and toggle complete.',
     helps: 'Nothing lives only in the group chat any more, and nothing sneaks past its due date.',
@@ -118,7 +123,7 @@ export const SCREENS = [
     title: 'Notes',
     tags: ['Files', 'Up to 10 MB'],
     tagline: 'Upload PDFs, slides and photos; download or delete them any time.',
-    image: notes,
+    image: { day: notesDay, night: notesNight },
     alt: 'The notes page with uploaded files filed by subject',
     does: 'Upload PDF, Word, PowerPoint, text and image files up to 10 MB each, filed by subject. Your browser sends them straight to a private S3 bucket with a short-lived signed link.',
     helps: 'The slides you need are next to the assignment they are for, on any device.',
@@ -128,7 +133,7 @@ export const SCREENS = [
     title: 'Subjects',
     tags: ['Colours', 'Organise'],
     tagline: 'Group everything by subject, each with its own colour.',
-    image: subjects,
+    image: { day: subjectsDay, night: subjectsNight },
     alt: 'The subjects page with a coloured card per subject',
     does: 'Add the subjects you take this semester. Each gets a colour that marks its assignments and files, and a subject cannot be deleted while work still uses it.',
     helps: 'DBMS never gets lost between Operating Systems and AI.',
