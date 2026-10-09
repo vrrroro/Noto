@@ -5,7 +5,43 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Changed
+### Changed (landing round 3, branch `feature/landing-flow`; task list in `LANDING_TASKS.md`)
+
+- **One continuous purple flow.** The landing page sits on a single tall gradient from hero to
+  footer, with no slabs and no colour edges: all light by Day, all dark purple by Night. The
+  inset dark slabs, the negative light slabs, the plum footer and the nav's dark-over-slab state
+  are gone. The capping feature card is lilac by Day and deep purple by Night.
+- **Intro orbs:** Day shows a Noto-orange and a dark-purple orb that merge into a lightish purplish
+  grey; Night shows a light-orange and a light-purple orb that merge into a greyish purplish
+  black. No blend modes: each orb and the exact merge lens carry an aligned copy of the
+  statement in the opposite ink, so the words show in negative wherever they pass.
+- **Built on AWS:** the lozenge shapes became two faded light orbs (orange and purple) that live
+  only inside the four tiles, painted as one picture seen through four windows.
+- **In-page links** (nav, footer, buttons) no longer drag through the pinned "How it works"
+  section: far jumps fade out, jump, and rise in; near ones glide (`landing/glide.js`).
+- **Hero wordmark** drifts away without clipping: the rise-in mask only exists during the rise,
+  and the letters and dot fade as they spread.
+- **Ambient cursor light:** a very faint purple glow follows the mouse, behind the content.
+- **HUD:** roomier glass pills; the section links get a glider that follows the pointer and rests
+  on the section in view; Sign in, the Day/Night switch and Create account sit together on the
+  right. The top bar shows only the orange ball; after a little scrolling the small wordmark
+  draws itself in (the ball rides a vine line, "Noto" rises behind it) (`HudBrand.jsx`).
+- **Underglow** on every "Create account" and "Sign in" on the landing page.
+- **App:** the accent cards (sign-in card, dashboard "Next up") no longer flip to the opposite
+  theme; they are light lilac by Day and deep plum by Night.
+- **Inside the app** shows Day or Night screenshots to match the theme (new images in
+  `src/assets/landing/*-light.webp` / `*-dark.webp`, made by `e2e/app-screens.mjs`).
+- **No browser scrollbar:** a thin orange line with a pin on the right edge tracks the scroll
+  position on every page and can be clicked or dragged (`components/ScrollPin.jsx`).
+
+### Tests
+
+- `e2e/landing-motion.mjs`: 32 checks (was 27) covering the orb colours and merge, aligned
+  negative copies, the HUD ball/brand drawing, the glider, the underglow, the drift without
+  clipping, "Under the hood" never passing through "How it works", the AWS tiles and the scroll
+  pin. `e2e/run.mjs` clicks the moved Sign in link. New `e2e/app-screens.mjs`.
+
+### Changed (landing round 2)
 
 - **Landing page in Noto's purples, with an animated Noto wordmark** (no new dependencies).
   - Yellow is gone from the landing page. The signal is now the purple family (violet `#7b2fff`,

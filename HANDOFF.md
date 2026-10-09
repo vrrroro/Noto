@@ -23,6 +23,7 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 - The backend and the website are verified live by automated tests.
 - Optional extras are done too: search, filters, sorting, dark mode, upload progress, a public landing page.
 - Still open: sign-up with a real email through the UI, the alert email, CloudFront, console screenshots.
+- Landing page round 3 (one continuous purple flow, new orbs, glass HUD, orange scroll pin, theme-matched screenshots) is finished on branch `feature/landing-flow` and pushed; every task and its notes are in `LANDING_TASKS.md`. It is not merged into `main` or deployed yet: ask the owner first.
 
 ## Architecture
 
@@ -59,7 +60,7 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 - Backend unit: `cd backend && npm test` (36/36).
 - Frontend unit: `cd frontend && npm test` (19/19).
 - Demo end-to-end: `cd e2e && npm test` (32/32). It needs a dev server in demo mode; set `E2E_BASE_URL` if that server is not on 5173.
-- Landing motion: `node e2e/landing-motion.mjs` with a dev server running (27/27).
+- Landing motion: `node e2e/landing-motion.mjs` with a dev server running (32/32).
 - Live API: `node e2e/live-api.mjs` (36/36). Live website: `node e2e/live-site.mjs` (17/17).
 - The live tests create and delete their own temporary Cognito users.
 - Run the landing motion test against production with `E2E_BASE_URL=https://main.dg6fh880g1p8b.amplifyapp.com`.

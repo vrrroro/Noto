@@ -2,7 +2,7 @@
 
 ## Resume Here (read first)
 
-Last session: 2026-10-10 (landing page in purples with an animated Noto wordmark and a Day/Night switch; deployed to Amplify and verified live; the code is on branch `feature/landing-purple-noto`, not yet committed or merged). **Noto is online:** https://main.dg6fh880g1p8b.amplifyapp.com (AWS Amplify Hosting, HTTPS) against the live
+Last session: 2026-10-10. Landing round 3 (continuous purple flow, new orbs, HUD, scroll pin, theme-matched screenshots; see `LANDING_TASKS.md`) is done on branch `feature/landing-flow` and pushed, **not yet merged or deployed**; the live site still runs round 2 (`main` at `551e861`). **Noto is online:** https://main.dg6fh880g1p8b.amplifyapp.com (AWS Amplify Hosting, HTTPS) against the live
 AWS backend.
 
 | Item | State |
@@ -28,7 +28,7 @@ Re-check that AWS works (each creates and deletes its own test user(s)):
 cd C:\Users\rohit\Downloads\AWS
 node e2e/live-api.mjs    # the API, expect 36/36 (about 30 s)
 node e2e/live-site.mjs   # the hosted website in headless Chrome, expect 17/17 (about 40 s)
-E2E_BASE_URL=https://main.dg6fh880g1p8b.amplifyapp.com node e2e/landing-motion.mjs   # landing motion, 27/27
+E2E_BASE_URL=https://main.dg6fh880g1p8b.amplifyapp.com node e2e/landing-motion.mjs   # landing motion, 32/32
 ```
 
 Publish frontend changes to the website (builds, uploads the zip to Amplify, waits for it):
@@ -144,29 +144,28 @@ creates CloudFront and removes the Amplify app. See ARCHITECTURE.md.
   card per page. The spring easing is only used for the dot. Plain CSS, no UI or icon library.
   Fonts from Google Fonts.
 
-- **Landing page** (2026-10-08, rebuilt the same day): signed-out visitors to `/` see
-  `pages/Landing.jsx` (lazy chunk; sections in `components/landing/`, copy in
-  `components/landing/content.js`, styles in `styles/landing.css`). Style: "quiet precision"
-  (reference: Brilean) in Noto's palette and fonts: off-white page, void ink, native cursor.
-  **No yellow on the landing page** (owner's call, 2026-10-10): the signal is the purple family
-  (violet, dark plum, light lilac; tokens `--l-purple`, `--l-plum`, `--l-lilac`, `--l-mist` at
-  the top of landing.css) plus the Noto-dot orange (`--l-hot`); purple gradients only on big
-  surfaces (dark slabs, last feature card, footer, wordmark). The hero's floor is the animated
-  Noto wordmark (`components/landing/NotoMark.jsx`: letters rise, the dot drops and bounces,
-  pointer lean, scroll spread). The intro spheres are grey and lilac and show the statement in
-  negative (difference blending; neutral greys only, since a coloured difference turns lilac
-  green; Chrome would not run a backdrop-filter lens inside the sticky stage). The dot drops
-  once; it does not replay on hover (owner's call). No "Create your account" buttons on the
-  page; sign-up is in the nav, About and the footer. **Day/Night switch** in the landing nav
-  (`ThemeToggle.jsx`) sets the site-wide `scm.theme`, so the landing page now follows the theme
-  like the app does. Night is the negative of Day through `light-dark()` token pairs; the intro
-  slab gets `filter: invert(1) hue-rotate(180deg)` instead (its blended spheres need white words
-  on a dark ground). The orange (`--l-hot`, fixed `#ff6b35`) and the gradient card never
-  change. All
+- **Landing page** (2026-10-08, reworked 2026-10-10 in three rounds; the last one is tracked in
+  `LANDING_TASKS.md`): signed-out visitors to `/` see `pages/Landing.jsx` (lazy chunk; sections in
+  `components/landing/`, copy in `components/landing/content.js`, styles in
+  `styles/landing.css`). Owner's calls: **no yellow**; the signal is Noto's purples (`--l-purple`,
+  `--l-plum`, `--l-lilac`, mode-aware `--l-accent`) plus the Noto-dot orange `#ff6b35`, identical
+  in both themes. **Day is all light, Night is all dark purple, never a mix**: the whole page sits
+  on one continuous gradient (`--l-flow`), with no slabs or section edges. The hero floor is the
+  animated wordmark (`NotoMark.jsx`; the dot drops once, the letters drift and fade on scroll
+  with no clipping). The top bar shows only the orange ball; the HUD (glass pills, glider, actions
+  group) draws the small wordmark in after 160px (`HudBrand.jsx`). Intro orbs: Day orange + dark
+  purple merging to a light purplish grey, Night light orange + light purple merging to a
+  greyish purplish black, with aligned negative copies of the statement inside each orb and the
+  merge lens (no blend modes). AWS glows live only inside the tiles. In-page links jump past the
+  pinned section (`glide.js`). A faint purple light follows the cursor (`CursorGlow.jsx`).
+  "Create account" / "Sign in" have an underglow; no "Create your account" buttons. The
+  Day/Night switch (`ThemeToggle.jsx`) sets the site-wide `scm.theme`. "Inside the app" shows
+  theme-matched screenshots (regenerate with `e2e/app-screens.mjs`). The browser scrollbar is
+  replaced site-wide by an orange pin line (`components/ScrollPin.jsx`). All
   scroll-linked motion runs through one rAF loop in `hooks/useScrollFrame.js` (read phase, then
   write phase; stops when idle). No GSAP or Lenis: sticky positioning plus eased scrubs.
   Everything is off under reduced motion. Copy must stay true to what the app does.
-  `node e2e/landing-motion.mjs` (27 checks) guards the motion and the theme switch.
+  `node e2e/landing-motion.mjs` (32 checks) guards the motion and the theme switch.
 - React 19 + Vite frontend; React Router; no UI library; no auth SDK (Cognito called with `fetch`)
 - Backend: Node.js 22 Lambdas (ES modules), AWS SDK v3; route logic is pure JS with injected deps
 - 3 Lambdas (one per resource) with per-function least-privilege IAM

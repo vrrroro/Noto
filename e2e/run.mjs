@@ -101,7 +101,7 @@ try {
   const authLinks = await page.$$eval('.landing a[href="/register"], .landing a[href="/login"]', (links) => links.length);
   check('Landing links to sign-up and sign-in', authLinks >= 4);
   await shot('app-00-landing');
-  await click('.l-nav-links a[href="/login"]');
+  await click('.l-nav-primary .l-signin');
   await page.waitForSelector('#login-email');
 
   // --- Auth ---
