@@ -44,7 +44,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
   a line (like the vine on the sign-in page) and the small "Noto" wordmark appears in the HUD.
 - [x] **T9. Underglow.** "Create account" and "Sign in" on the landing page get a soft glowing
   underglow.
-- [ ] **T10. App light mode: no dark purple cards.** On the sign-in pages and in the app, cards that
+- [x] **T10. App light mode: no dark purple cards.** On the sign-in pages and in the app, cards that
   stay dark purple in Day (the `.invert` cards) become a light purple appropriate for Day.
 - [ ] **T11. Theme-matched app screenshots.** "Inside the app" shows Day screenshots in Day and
   Night screenshots in Night (taken after T10).
@@ -129,3 +129,12 @@ both themes. Applied to every "Sign in" and "Create account" on the landing page
 actions group (top bar and HUD), the phone menu's Create account chip and the "Inside the app"
 Sign in button. The top bar's Create account is now the same filled purple pill as the HUD's.
 Checked in both themes.
+
+**T10 (done).** Cause: `.invert` in `styles/global.css` deliberately took the opposite colour
+scheme, so the sign-in card (`.auth-card.invert`) and the dashboard's "Next up" card
+(`.next-card.invert`) stayed dark purple in Day (and turned light in Night). `.invert` now stays
+in the page's scheme and is set apart by a gradient: light lilac `#f3edff → #e4d7ff` by Day, deep
+plum `#2d1b4e → #1e1238` by Night. Checked every app page (sign-in, dashboard, assignments, notes,
+subjects) in both themes from a demo-mode server (`appshots.mjs` in the session scratchpad; it
+registers a demo user, so run it against `VITE_* =` empty on port 5174): no dark card in Day, no
+light card in Night.

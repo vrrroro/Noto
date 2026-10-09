@@ -11,8 +11,8 @@
    arches for content tiles, the page-title vine, subject colours, paper grain.
 
    Theming: every role token is a light-dark(Day, Night) pair, so an element
-   flips theme by setting color-scheme. `.invert` uses that for the one
-   inverted card on a page.
+   follows the page's scheme. `.invert` marks the one accent card on a page
+   (light lilac by Day, deep plum by Night).
    ========================================================================== */
 
 /* ---------- Tokens ---------- */
@@ -132,21 +132,13 @@
   }
 }
 
-/* The inverted card takes the opposite scheme. */
+/* The accent card (one per page: the sign-in card, the dashboard's "Next up").
+   It used to take the opposite scheme, which left a dark purple card on the
+   Day pages; now it stays in the page's scheme and is set apart by colour:
+   a light lilac by Day, a deep plum by Night. */
 .invert {
-  color-scheme: light;
-  background: var(--surface);
+  background: linear-gradient(150deg, light-dark(#f3edff, #2d1b4e) 0%, light-dark(#e4d7ff, #1e1238) 100%);
   color: var(--text);
-}
-
-:root[data-theme='light'] .invert {
-  color-scheme: dark;
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme='dark']) .invert {
-    color-scheme: dark;
-  }
 }
 
 /* Browsers without light-dark(): Night only. */
