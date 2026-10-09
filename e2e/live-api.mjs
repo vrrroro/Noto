@@ -33,6 +33,25 @@ const users = ['a', 'b'].map((tag) => ({
   password: `Aa1!${crypto.randomBytes(12).toString('base64url')}`,
 }));
 
+// Calls a public Cognito API action (no AWS credentials, like the browser does).
+async function idp(action, payload) {
+  const res = await fetch(`https://cognito-idp.${REGION}.amazonaws.com/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-amz-json-1.1', 'X-Amz-Target': `AWSCognitoIdentityProviderService.${action}` },
+    body: JSON.stringify({ ClientId: CLIENT, ...payload }),
+  });
+  const body = await res.json().catch(() => ({}));
+  return { ok: res.ok, body, error: res.ok ? null : String(body.__type || '').split('#').pop() };
+}
+
+// A third user goes through self-service sign-up, exactly as the Register page does.
+// Cognito emails a code to this unreachable example.com address; the test confirms the
+// account with the admin API in place of typing that code.
+const signupUser = {
+  email: `scm-live-signup-${stamp}@example.com`,
+  password: `Aa1!${crypto.randomBytes(12).toString('base64url')}`,
+};
+
 async function signIn(user) {
   const res = await fetch(`https://cognito-idp.${REGION}.amazonaws.com/`, {
     method: 'POST',
@@ -80,6 +99,33 @@ async function main() {
 
   const wrong = await signIn({ email: users[0].email, password: 'Wrong-password-1!' });
   check('Cognito rejects a wrong password', !wrong);
+
+  // ---- Self-service sign-up and password reset (public Cognito API) --------
+  const weak = await idp('SignUp', { Username: `scm-live-weak-${stamp}@example.com`, Password: 'password', UserAttributes: [] });
+  check('Sign-up rejects a password that breaks the policy', weak.error === 'InvalidPasswordException', weak.error);
+  const signUp = await idp('SignUp', {
+    Username: signupUser.email,
+    Password: signupUser.password,
+    UserAttributes: [{ Name: 'email', Value: signupUser.email }],
+  });
+  check('Sign-up creates an unconfirmed account and emails a code',
+    signUp.ok && signUp.body.UserConfirmed === false && signUp.body.CodeDeliveryDetails?.DeliveryMedium === 'EMAIL', signUp.error);
+  const again = await idp('SignUp', { Username: signupUser.email, Password: signupUser.password, UserAttributes: [{ Name: 'email', Value: signupUser.email }] });
+  check('Sign-up rejects an email that already has an account', again.error === 'UsernameExistsException', again.error);
+  const early = await idp('InitiateAuth', { AuthFlow: 'USER_PASSWORD_AUTH', AuthParameters: { USERNAME: signupUser.email, PASSWORD: signupUser.password } });
+  check('An unconfirmed account cannot sign in', early.error === 'UserNotConfirmedException', early.error);
+  const badCode = await idp('ConfirmSignUp', { Username: signupUser.email, ConfirmationCode: '000000' });
+  check('A wrong verification code is rejected', badCode.error === 'CodeMismatchException', badCode.error);
+  // Stands in for typing the emailed code: confirm the account and mark its email verified
+  // (entering the real code does both; password reset needs a verified email).
+  aws('cognito-idp', 'admin-confirm-sign-up', '--user-pool-id', POOL, '--username', signupUser.email);
+  aws('cognito-idp', 'admin-update-user-attributes', '--user-pool-id', POOL, '--username', signupUser.email,
+    '--user-attributes', 'Name=email_verified,Value=true');
+  check('After confirmation the new account signs in', Boolean(await signIn(signupUser)));
+  const forgot = await idp('ForgotPassword', { Username: signupUser.email });
+  check('Forgot password emails a reset code', forgot.ok && forgot.body.CodeDeliveryDetails?.DeliveryMedium === 'EMAIL', `${forgot.error}: ${forgot.body.message}`);
+  const badReset = await idp('ConfirmForgotPassword', { Username: signupUser.email, ConfirmationCode: '000000', Password: 'Bb2!NewPassword' });
+  check('A wrong reset code is rejected', badReset.error === 'CodeMismatchException', badReset.error);
 
   const anon = client(null);
   const A = client(tokenA);
