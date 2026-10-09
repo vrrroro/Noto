@@ -35,7 +35,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
   without first passing through / stopping in the pinned "How it works" section.
 - [x] **T5. Hero wordmark drifts away without clipping.** When scrolling down, the big Noto
   letters spread and drift away seamlessly (fade out), with no cut edges.
-- [ ] **T6. Ambient cursor glow.** A very faint purple light follows the cursor on the landing
+- [x] **T6. Ambient cursor glow.** A very faint purple light follows the cursor on the landing
   page (mouse only, extremely subtle, both themes).
 - [ ] **T7. Roomier, fluid scrolled HUD.** The capsule nav shown after scrolling gets more
   spacing, a sliding hover highlight, and a better place for the Day/Night switch.
@@ -101,3 +101,10 @@ animation (`@keyframes l-mask`, filled backwards through the delay), so nothing 
 rise; `--i` / `--dy` moved to the mask element so both animations share timing. Letters and dot
 fade with scroll (`opacity: clamp(0, 1.35 - p*1.6, 1)`). The hero no longer clips (done in T1).
 Checked at scroll 150/300/450/600: clean drift and fade, no cut edges, `clip-path: none` after.
+
+**T6 (done).** New `components/landing/CursorGlow.jsx` (mounted first in `pages/Landing.jsx`): a
+fixed 640px radial light (`.l-cursor-glow`, 8-9% purple, `light-dark` pair) that eases after the
+mouse through the shared loop and fades in/out on enter/leave. `.landing` got
+`isolation: isolate` so the glow's `z-index: -1` puts it on the flow but under all content.
+Mouse only; off under reduced motion. Checked in both themes; 0 animation frames once the pointer
+stops.

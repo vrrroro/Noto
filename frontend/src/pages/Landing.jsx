@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import CursorGlow from '../components/landing/CursorGlow.jsx';
 import LandingNav from '../components/landing/LandingNav.jsx';
 import HeroSection from '../components/landing/HeroSection.jsx';
 import IntroSlab from '../components/landing/IntroSlab.jsx';
@@ -48,6 +49,7 @@ export default function Landing() {
 
   return (
     <div ref={rootRef} className={`landing ${motion ? 'has-motion' : ''}`}>
+      <CursorGlow motion={motion} />
       <LandingNav />
       <main id="l-main">
         <HeroSection motion={motion} />
