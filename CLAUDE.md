@@ -3118,7 +3118,7 @@ File Storage: S3 presigned upload/download verified live
 API: HTTP API + JWT authorizer deployed and verified
 Monitoring: Log groups, alarms, dashboard deployed; alert email/budget not yet configured
 Deployment: deploy.ps1 (-NoCloudFront until the account is verified; the site is then hosted on Amplify)
-Testing: 36 backend + 19 frontend unit, 32-check demo E2E, 19-check landing motion, 36-check live API, 17-check live website, all passing
+Testing: 36 backend + 19 frontend unit, 32-check demo E2E, 27-check landing motion, 36-check live API, 17-check live website, all passing
 Documentation: Complete; PROJECT_CONTEXT.md has the deployed resource list
 ```
 

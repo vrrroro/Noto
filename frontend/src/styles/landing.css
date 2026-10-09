@@ -1,37 +1,53 @@
 /* ==========================================================================
    Noto - landing page
 
-   Quiet precision with a volt spark, in Noto's own palette and type:
+   Quiet precision with a purple spark, in Noto's own palette and type:
    - an off-white page (Noto's Day paper) with void ink and a neutral grey
-     ramp mixed from those two; Noto yellow is the only signal colour (arrows,
-     the final card, the timeline, the footer) and Noto orange appears only as
-     hover feedback (the orange dot in the wordmark aside);
+     ramp mixed from those two; the signal is Noto's purple family (violet,
+     dark plum, light lilac) and the orange of the Noto dot (the wordmark,
+     the timeline marker, hover feedback). No yellow;
+   - the hero is the Noto wordmark itself: its letters rise in, the dot
+     drops and bounces into place, and scrolling spreads the letters apart;
    - Archivo at normal width for display and UI, tracking tightening as the
      size grows; Geist Mono for the small uppercase chips; Playfair Display
      for the wordmark and the one statement on the black slab;
-   - a 12-column grid with empty columns, hairlines, 2/4/8/16px radii, no
-     gradients and no shadows in the UI, the native cursor;
+   - a 12-column grid with empty columns, hairlines, 2/4/8/16px radii, purple
+     gradients only on the big surfaces (dark slabs, the last card, the
+     footer, the wordmark), no shadows in the UI, the native cursor;
    - motion is scroll-linked (sticky stages, eased scrubs) or pointer-linked,
-     never autoplaying, and all of it is off under reduced motion.
+     never autoplaying, and all of it is off under reduced motion;
+   - Day and Night: the page follows the site's theme (html[data-theme], the
+     same `scm.theme` the app uses, or the system), and the sun/moon button
+     in the nav switches it. Night is the negative of Day: every role token
+     below is a light-dark(Day, Night) pair, paper and ink swap, so the page
+     turns dark and the dark slabs and the footer turn light. The intro slab
+     is shown as an exact negative of its Day self (a filter, see Night
+     below) so its blended spheres keep working. The Noto orange and the
+     purple gradient card never change.
    Loaded only with the landing page (it is a separate chunk).
    ========================================================================== */
 
-:root:has(.landing) {
-  color-scheme: light;
-}
-
 .landing {
-  --l-canvas: #faf8ff;
-  --l-ink: var(--void);
-  --l-volt: var(--yellow);
-  --l-hot: var(--orange);
-  --l-g50: color-mix(in srgb, var(--void) 7%, var(--l-canvas));
-  --l-g100: color-mix(in srgb, var(--void) 11%, var(--l-canvas));
-  --l-g200: color-mix(in srgb, var(--void) 17%, var(--l-canvas));
-  --l-g300: color-mix(in srgb, var(--void) 24%, var(--l-canvas));
-  --l-g700: color-mix(in srgb, var(--void) 44%, var(--l-canvas));
-  --l-g900: color-mix(in srgb, var(--void) 52%, var(--l-canvas));
-  --l-g950: color-mix(in srgb, var(--void) 62%, var(--l-canvas));
+  --l-canvas: light-dark(#faf8ff, #0d0d1a); /* the page */
+  --l-ink: light-dark(#0d0d1a, #f3eeff); /* type on the page, and the slabs */
+  --l-purple: #7b2fff; /* filled accents, white text on it (both themes) */
+  --l-plum: light-dark(#2d1b4e, #e4d8ff); /* dark purple by Day, its negative by Night */
+  --l-lilac: light-dark(#c4b0ff, #5a22c8); /* the signal on the slabs */
+  --l-mist: light-dark(#ece5ff, #221838); /* palest tint on the page */
+  --l-hot: #ff6b35; /* the Noto dot: the same orange in both themes */
+  --l-glyph-top: light-dark(#2d1b4e, #f1eaff);
+  --l-glyph-end: light-dark(#c4b0ff, #8e5cff);
+  /* Fixed deep purples: the gradient card keeps white type in both themes. */
+  --l-grad: linear-gradient(135deg, #7b2fff 0%, #5a22c8 45%, #2d1b4e 100%);
+  --l-grad-text: linear-gradient(135deg, var(--l-purple) 0%, color-mix(in srgb, var(--l-purple) 45%, var(--l-plum)) 60%, var(--l-plum) 100%);
+  --l-slab: radial-gradient(ellipse 90% 70% at 50% 115%, color-mix(in srgb, var(--l-plum) 85%, var(--l-purple)) 0%, var(--l-ink) 70%);
+  --l-g50: color-mix(in srgb, var(--l-ink) 7%, var(--l-canvas));
+  --l-g100: color-mix(in srgb, var(--l-ink) 11%, var(--l-canvas));
+  --l-g200: color-mix(in srgb, var(--l-ink) 17%, var(--l-canvas));
+  --l-g300: color-mix(in srgb, var(--l-ink) 26%, var(--l-canvas));
+  --l-g700: color-mix(in srgb, var(--l-ink) 44%, var(--l-canvas));
+  --l-g900: color-mix(in srgb, var(--l-ink) 52%, var(--l-canvas));
+  --l-g950: color-mix(in srgb, var(--l-ink) 62%, var(--l-canvas));
   --l-glass: rgb(120 120 134 / 25%);
 
   --l-gutter: 4rem;
@@ -49,7 +65,6 @@
   position: relative;
   min-height: 100vh;
   overflow-x: clip;
-  color-scheme: light;
   background: var(--l-canvas);
   color: var(--l-ink);
   font-family: var(--font-sans);
@@ -76,8 +91,9 @@
 }
 
 .landing .l-dark :focus-visible,
-.landing .l-nav.is-dark :focus-visible {
-  outline-color: var(--l-volt);
+.landing .l-nav.is-dark :focus-visible,
+.landing .l-footer :focus-visible {
+  outline-color: var(--l-lilac);
 }
 
 /* The wordmark's dot stays orange but loses its glow here. */
@@ -86,8 +102,8 @@
 }
 
 .landing ::selection {
-  background: var(--l-volt);
-  color: var(--l-ink);
+  background: var(--l-purple);
+  color: #fff;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -198,9 +214,9 @@
 
 .l-ib {
   --ib-fg: var(--l-ink);
-  --ib-bg: var(--l-ink);
-  --ib-arrow: var(--l-volt);
-  --ib-hover-fg: var(--l-volt);
+  --ib-bg: var(--l-purple);
+  --ib-arrow: #fff;
+  --ib-hover-fg: #fff;
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -270,16 +286,19 @@
   }
 }
 
-.l-ib-volt {
-  --ib-bg: var(--l-volt);
-  --ib-arrow: var(--l-ink);
-  --ib-hover-fg: var(--l-ink);
+/* The Noto-dot orange variant. */
+.l-ib-hot {
+  --ib-bg: var(--l-hot);
+  --ib-arrow: #0d0d1a;
+  --ib-hover-fg: #0d0d1a;
 }
 
-/* Already a pill; hover turns it orange. */
+/* Already a pill (dark plum, lilac label); hover turns it orange. */
 .l-ib-solid {
-  --ib-fg: var(--l-volt);
-  --ib-hover-fg: var(--l-volt);
+  --ib-fg: var(--l-lilac);
+  --ib-bg: var(--l-plum);
+  --ib-arrow: var(--l-lilac);
+  --ib-hover-fg: var(--l-lilac);
   padding-left: 1.3rem;
 }
 
@@ -297,7 +316,7 @@
 
 .l-dark .l-ib-ink {
   --ib-fg: var(--l-canvas);
-  --ib-bg: var(--l-volt);
+  --ib-bg: var(--l-lilac);
   --ib-arrow: var(--l-ink);
   --ib-hover-fg: var(--l-ink);
 }
@@ -317,8 +336,9 @@
 }
 
 .l-circle-link:hover {
-  background: var(--l-ink);
-  color: var(--l-volt);
+  border-color: var(--l-purple);
+  background: var(--l-purple);
+  color: #fff;
 }
 
 /* Two-phase underline: draws in from the left, leaves to the right. */
@@ -441,7 +461,7 @@
 
 .l-nav.is-dark .l-nav-cta {
   --ib-fg: var(--l-canvas);
-  --ib-bg: var(--l-volt);
+  --ib-bg: var(--l-lilac);
   --ib-arrow: var(--l-ink);
   --ib-hover-fg: var(--l-ink);
 }
@@ -480,16 +500,21 @@
   width: 39px;
   height: 39px;
   border-radius: 100%;
-  background: var(--l-ink);
+  background: var(--l-plum);
   transition: background-color 0.3s ease-in-out;
 }
 
+/* The Noto dot, small. */
 .l-disc-dot {
   width: 10px;
   height: 10px;
   border-radius: 100%;
-  background: var(--l-volt);
-  transition: background-color 0.3s ease-in-out;
+  background: var(--l-hot);
+  transition: scale 0.4s var(--ease-spring);
+}
+
+.l-disc:hover .l-disc-dot {
+  scale: 1.5;
 }
 
 .l-pill {
@@ -513,11 +538,7 @@
 }
 
 .l-nav.is-dark .l-disc {
-  background: var(--l-volt);
-}
-
-.l-nav.is-dark .l-disc-dot {
-  background: var(--l-ink);
+  background: var(--l-lilac);
 }
 
 .l-nav.is-dark .l-pill {
@@ -527,7 +548,7 @@
 
 .l-nav.is-dark .l-nav-pill-cta {
   --ib-fg: var(--l-ink);
-  --ib-bg: var(--l-volt);
+  --ib-bg: var(--l-lilac);
   --ib-arrow: var(--l-ink);
   --ib-hover-fg: var(--l-ink);
 }
@@ -593,8 +614,8 @@
 }
 
 .l-menu-chip.is-cta {
-  background: var(--l-ink);
-  color: var(--l-volt);
+  background: var(--l-purple);
+  color: #fff;
 }
 
 .l-nav.is-dark .l-burger {
@@ -608,23 +629,223 @@
 }
 
 .l-nav.is-dark .l-menu-chip.is-cta {
-  background: var(--l-volt);
+  background: var(--l-lilac);
   color: var(--l-ink);
 }
 
 /* ---------- Hero ---------- */
 
+/* A full screen: the headline on top, the Noto wordmark filling the floor,
+   and a lilac haze behind it that drifts towards the pointer. */
 .l-hero {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  height: 65svh;
-  min-height: 38rem;
-  padding-bottom: 5rem;
+  gap: clamp(1rem, 4svh, 3rem);
+  min-height: 100svh;
+  padding-top: 8.5rem;
+  overflow: clip;
+}
+
+.l-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(38% 46% at calc(var(--mx, 0.5) * 100%) 88%, color-mix(in srgb, var(--l-lilac) 60%, transparent), transparent 72%),
+    radial-gradient(26% 34% at 88% 18%, var(--l-mist), transparent 72%),
+    radial-gradient(22% 30% at 8% 40%, color-mix(in srgb, var(--l-hot) 12%, transparent), transparent 72%);
 }
 
 .l-hero-grid {
   align-items: end;
+}
+
+.l-hero .l-h1 em {
+  font-style: normal;
+  background: var(--l-grad-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* The wordmark: Noto's own logo (Playfair italic and the orange dot), as big
+   as the floor allows. Every glyph is a gradient from dark plum to lilac.
+   --p (0 → 1 as the hero scrolls away) spreads the letters and swells the
+   dot; --px (-1 … 1, the pointer) leans the word and nudges the dot. */
+.l-mark {
+  display: flex;
+  justify-content: center;
+  user-select: none;
+}
+
+.l-mark-word {
+  display: inline-flex;
+  align-items: baseline;
+  padding: 0 0.1em 0.14em;
+  font-family: var(--font-serif);
+  font-size: clamp(7rem, min(30vw, 50svh), 32rem);
+  font-style: italic;
+  font-weight: 600;
+  line-height: 0.86;
+  letter-spacing: -0.035em;
+  transform: translateY(calc(var(--p, 0) * -6%));
+}
+
+/* Each letter rises out of its own floor: the mask clips only below, a little
+   under the baseline so the N's swash tail stays whole. */
+.l-mark-mask {
+  display: inline-block;
+  clip-path: inset(-50% -50% -0.16em -50%);
+}
+
+/* The padding stretches the gradient under the glyph's whole outline (the
+   N's swash dips below the line box, and background-clip: text only paints
+   inside the box); the negative margins give the space back. */
+.l-mark-glyph {
+  display: inline-block;
+  margin: -0.1em -0.16em -0.22em;
+  padding: 0.1em 0.16em 0.22em;
+  background: linear-gradient(172deg, var(--l-glyph-top) 12%, var(--l-purple) 58%, var(--l-glyph-end) 108%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transform: translate(calc((var(--i) - 1.5) * var(--p, 0) * 0.32em), calc(var(--dy) * var(--p, 0) * 0.14em))
+    rotate(calc(var(--dy) * var(--p, 0) * 7deg)) skewX(calc(var(--px, 0) * -7deg));
+  transform-origin: 50% 100%;
+}
+
+.l-mark-dot {
+  position: relative;
+  display: inline-block;
+  width: 0.2em;
+  height: 0.2em;
+  margin-left: 0.04em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #ffc2a3 0, var(--l-hot) 42%, #c2410c 100%);
+  transform: translateX(calc(var(--px, 0) * 0.1em + var(--p, 0) * 0.4em)) scale(calc(1 + var(--p, 0) * 0.9));
+  transform-origin: 50% 100%;
+}
+
+/* A soft orange glow that breathes (opacity and scale only, so it stays on the compositor). */
+.l-mark-dot::before {
+  content: '';
+  position: absolute;
+  inset: -60%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--l-hot) 45%, transparent) 0, transparent 68%);
+}
+
+/* The ring that spreads when the dot lands. */
+.l-mark-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 0.012em solid var(--l-hot);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .l-mark-glyph {
+    animation: l-rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(0.12s + var(--i) * 0.09s);
+  }
+
+  .l-mark-dot {
+    animation: l-dot-drop 1.25s linear 0.62s both;
+  }
+
+  .l-mark-dot::before {
+    animation: l-glow 3.4s ease-in-out 1.9s infinite;
+  }
+
+  .l-mark-dot::after {
+    animation: l-ripple 0.9s ease-out 1.32s;
+  }
+
+  .l-hero-grid > * {
+    animation: l-fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.35s;
+  }
+
+  .l-hero-grid > :nth-child(2) {
+    animation-delay: 0.5s;
+  }
+}
+
+@keyframes l-rise {
+  from {
+    translate: 0 105%;
+    rotate: 6deg;
+  }
+}
+
+@keyframes l-fade-up {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}
+
+/* Falls from above the screen, squashes on impact, bounces twice, settles. */
+@keyframes l-dot-drop {
+  0% {
+    translate: 0 -110svh;
+    scale: 0.85 1.2;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  48% {
+    translate: 0 0;
+    scale: 1.35 0.65;
+    animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
+  }
+  66% {
+    translate: 0 -0.75em;
+    scale: 0.9 1.12;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  80% {
+    translate: 0 0;
+    scale: 1.18 0.84;
+    animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
+  }
+  90% {
+    translate: 0 -0.18em;
+    scale: 0.97 1.03;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes l-ripple {
+  from {
+    opacity: 0.85;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 4.5;
+  }
+}
+
+@keyframes l-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    scale: 1;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.25;
+  }
 }
 
 .l-hero .l-h1 {
@@ -641,10 +862,15 @@
 
 /* ---------- Intro slab ---------- */
 
+/* Always drawn in its Day colours (a dark slab, white words); by Night the
+   whole section is shown as its exact negative instead (see Night below).
+   Swapping tokens would not do here: the spheres' difference blending needs
+   white words on a dark ground to print a negative. */
 .l-intro {
   position: relative;
   isolation: isolate;
   height: 210vh;
+  color-scheme: light;
   color: var(--l-canvas);
 }
 
@@ -657,7 +883,7 @@
   width: var(--w, 105%);
   translate: -50% 0;
   border-radius: 8px;
-  background: var(--l-ink);
+  background: var(--l-slab);
 }
 
 .l-intro-stage {
@@ -669,7 +895,18 @@
   overflow: hidden;
 }
 
-/* Two Noto dots, rendered as glass orbs: the page's one rich visual. */
+/* Two orbs layered OVER the statement, both showing it in negative. Both
+   blend as a difference with neutral greys only, so they flip light and dark
+   without throwing a colour cast (a coloured difference would turn the lilac
+   into its green complement):
+   - the grey orb: on the dark slab a grey glass sphere; the white words
+     under it turn dark grey;
+   - the light orb: a near-white difference (a true negative: the words under
+     it turn ink) with a separate lilac tint laid over it in normal blending,
+     so it reads as a light purple sphere.
+   Where they merge, the light orb inverts the grey one too, so the centre
+   flips again: the negative of the negative. */
+/* No z-index here: it would isolate the orbs from the words they blend with. */
 .l-orbs {
   position: absolute;
   inset: 0;
@@ -680,44 +917,54 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(26vw, 380px);
+  width: min(28vw, 400px);
   aspect-ratio: 1;
   border-radius: 50%;
-  mix-blend-mode: screen;
 }
 
 .l-orb::after {
   content: '';
   position: absolute;
   inset: -14%;
-  border: 1px solid rgb(255 230 0 / 40%);
+  border: 1px solid rgb(196 176 255 / 45%);
   border-radius: 50%;
 }
 
 .l-orb.is-a {
+  mix-blend-mode: difference;
   background: radial-gradient(
     circle at 32% 28%,
     #fff 0,
-    color-mix(in srgb, var(--orange) 55%, #fff) 9%,
-    var(--orange) 36%,
-    color-mix(in srgb, var(--orange) 42%, var(--void)) 70%,
-    var(--void) 100%
+    #e6e6ea 12%,
+    #b8b8bf 38%,
+    #6e6e75 70%,
+    #1e1e22 100%
   );
   transform: translate(-50%, -50%) translateX(calc((1 - var(--k, 0)) * -34vw))
-    rotate(calc(var(--q, 0) * 240deg)) scale(calc(0.7 + 0.3 * var(--k, 0)));
+    rotate(calc(var(--q, 0) * 240deg)) scale(calc(0.7 + 0.42 * var(--k, 0)));
 }
 
 .l-orb.is-b {
+  mix-blend-mode: difference;
+  background: radial-gradient(circle at 32% 28%, #fff 0, #f4f4f6 18%, #dcdce2 55%, #a4a4ad 92%, #7a7a84 100%);
+  transform: translate(-50%, -50%) translateX(calc((1 - var(--k, 0)) * 34vw))
+    rotate(calc(var(--q, 0) * -240deg)) scale(calc(0.7 + 0.42 * var(--k, 0)));
+}
+
+/* The light orb's colour: a lilac glaze in normal blending, riding on top. */
+.l-orb.is-b.is-tint {
+  mix-blend-mode: normal;
   background: radial-gradient(
     circle at 32% 28%,
-    #fff 0,
-    color-mix(in srgb, var(--yellow) 55%, #fff) 9%,
-    var(--yellow) 36%,
-    color-mix(in srgb, var(--yellow) 40%, var(--void)) 70%,
-    var(--void) 100%
+    rgb(255 255 255 / 0%) 0,
+    rgb(196 176 255 / 30%) 30%,
+    rgb(150 110 255 / 45%) 75%,
+    rgb(123 47 255 / 60%) 100%
   );
-  transform: translate(-50%, -50%) translateX(calc((1 - var(--k, 0)) * 34vw))
-    rotate(calc(var(--q, 0) * -240deg)) scale(calc(0.7 + 0.3 * var(--k, 0)));
+}
+
+.l-orb.is-tint::after {
+  content: none;
 }
 
 /* The statement resolves word by word: 30% to full white. */
@@ -788,10 +1035,16 @@
   width: 70%;
 }
 
-.l-card.is-volt {
+/* The card that caps the deck: the purple gradient, white type, the Noto dot. */
+.l-card.is-accent {
   z-index: 1;
   border-color: transparent;
-  background: var(--l-volt);
+  background: var(--l-grad);
+  color: #fff;
+}
+
+.l-card.is-accent .l-card-icon {
+  color: var(--l-hot);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -848,8 +1101,7 @@
   max-height: 1080px;
   padding: 4rem;
   border-radius: 8px;
-  color-scheme: dark;
-  background: var(--l-ink);
+  background: var(--l-slab);
   color: var(--l-canvas);
 }
 
@@ -874,7 +1126,7 @@
   left: 0;
   width: 1px;
   height: var(--fill, 2.5rem);
-  background: var(--l-volt);
+  background: linear-gradient(var(--l-lilac), var(--l-purple) 85%, var(--l-hot));
   transition: height 0.2s ease-in-out;
 }
 
@@ -890,15 +1142,15 @@
 }
 
 .l-marker rect {
-  fill: var(--l-volt);
+  fill: var(--l-lilac);
 }
 
 .l-marker circle {
-  fill: var(--l-ink);
+  fill: var(--l-hot);
 }
 
 .l-marker path {
-  stroke: var(--l-volt);
+  stroke: var(--l-lilac);
   stroke-width: 1;
 }
 
@@ -975,7 +1227,11 @@
 }
 
 .l-step.is-reached .l-step-dot {
-  background: var(--l-volt);
+  background: var(--l-lilac);
+}
+
+.l-step.is-active .l-step-dot {
+  background: var(--l-hot);
 }
 
 .l-step-body {
@@ -998,7 +1254,7 @@
   color: var(--l-g300);
 }
 
-/* Diagrams: volt line art. */
+/* Diagrams: lilac line art. */
 .l-diagram {
   width: auto;
   height: clamp(90px, calc(100vh - 38rem), 173px);
@@ -1008,16 +1264,21 @@
 
 .l-diagram :is(rect, circle, path) {
   fill: none;
-  stroke: var(--l-volt);
+  stroke: var(--l-lilac);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.l-diagram .d-box,
+.l-diagram .d-box {
+  fill: var(--l-lilac);
+}
+
+/* The colour dots of the three subject tags and the ticked ring: Noto orange. */
 .l-diagram .d-dot,
 .l-diagram .d-ring {
-  fill: var(--l-volt);
+  fill: var(--l-hot);
+  stroke: var(--l-hot);
 }
 
 .l-diagram .d-tick {
@@ -1222,9 +1483,9 @@
   background: radial-gradient(
     ellipse at 66% 70%,
     #fff 0,
-    color-mix(in srgb, var(--yellow) 50%, #fff) 12%,
-    var(--yellow) 42%,
-    color-mix(in srgb, var(--yellow) 45%, var(--void)) 100%
+    color-mix(in srgb, var(--l-purple) 45%, #fff) 12%,
+    var(--l-purple) 42%,
+    var(--l-plum) 100%
   );
 }
 
@@ -1328,8 +1589,9 @@
   text-transform: uppercase;
 }
 
-.l-tag.is-volt {
-  background: var(--l-volt);
+.l-tag.is-accent {
+  background: var(--l-mist);
+  color: var(--l-plum);
 }
 
 .l-row-title {
@@ -1361,8 +1623,9 @@
 }
 
 .l-row:focus-visible .l-row-circle {
-  background: var(--l-ink);
-  color: var(--l-volt);
+  border-color: var(--l-purple);
+  background: var(--l-purple);
+  color: #fff;
 }
 
 @media (hover: hover) {
@@ -1371,8 +1634,9 @@
   }
 
   .l-row:hover .l-row-circle {
-    background: var(--l-ink);
-    color: var(--l-volt);
+    border-color: var(--l-purple);
+    background: var(--l-purple);
+    color: #fff;
   }
 }
 
@@ -1435,8 +1699,7 @@
   padding: 2rem;
   border: 0;
   border-radius: 1rem;
-  color-scheme: light;
-  background: rgb(250 248 255 / 72%);
+  background: color-mix(in srgb, var(--l-canvas) 72%, transparent);
   -webkit-backdrop-filter: blur(19px);
   backdrop-filter: blur(19px);
   color: var(--l-ink);
@@ -1527,8 +1790,20 @@
   position: relative;
   z-index: 1;
   padding: 5.5rem 0 1.5rem;
-  background: var(--l-volt);
-  color: var(--l-ink);
+  overflow: clip;
+  background:
+    radial-gradient(50% 80% at 85% 0%, color-mix(in srgb, var(--l-purple) 70%, transparent), transparent 70%),
+    radial-gradient(30% 50% at 10% 100%, color-mix(in srgb, var(--l-hot) 22%, transparent), transparent 70%),
+    var(--l-plum);
+  color: var(--l-canvas);
+}
+
+.l-footer .brand {
+  color: var(--l-canvas);
+}
+
+.l-footer-statement {
+  color: var(--l-canvas);
 }
 
 .l-footer-grid {
@@ -1569,7 +1844,7 @@
   font-family: var(--font-mono);
   font-size: 0.875rem;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--void) 70%, var(--l-volt));
+  color: var(--l-lilac);
 }
 
 .l-footer-credits {
@@ -1581,7 +1856,90 @@
   font-family: var(--font-mono);
   font-size: 0.875rem;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--void) 70%, var(--l-volt));
+  color: color-mix(in srgb, var(--l-lilac) 75%, var(--l-plum));
+}
+
+/* ---------- Night ----------
+   Most of Night is in the token pairs at the top. What tokens cannot do:
+   the intro slab becomes the exact negative of its Day self (invert, then a
+   half turn of hue so its purples stay purple). It holds no orange, so the
+   Noto orange is untouched. The conditions mirror global.css: Night by
+   choice, or by default unless the system asks for light. */
+:root[data-theme='dark'] .landing .l-intro {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+@media not (prefers-color-scheme: light) {
+  :root:not([data-theme='light']) .landing .l-intro {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
+/* The Day/Night switch: a 40px disc with a sun or a moon. */
+.l-theme {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid currentColor;
+  border-radius: 100%;
+  background: transparent;
+  color: inherit;
+  transition:
+    background-color 0.3s ease-in-out,
+    border-color 0.3s ease-in-out,
+    color 0.3s ease-in-out;
+}
+
+.l-theme .icon {
+  transition: rotate 0.5s var(--ease-spring);
+}
+
+.l-theme:hover {
+  border-color: var(--l-purple);
+  background: var(--l-purple);
+  color: #fff;
+}
+
+.l-theme:hover .icon {
+  rotate: 30deg;
+}
+
+.l-nav-links .l-theme {
+  margin-left: 0.5rem;
+}
+
+.l-nav-secondary .l-theme {
+  margin-left: 1px;
+  border: 0;
+  background: var(--l-g50);
+  color: var(--l-ink);
+}
+
+.l-nav.is-dark .l-nav-secondary .l-theme {
+  background: var(--l-g950);
+  color: var(--l-canvas);
+}
+
+.l-nav-secondary .l-theme:hover {
+  background: var(--l-purple);
+  color: #fff;
+}
+
+/* The phone bar shows the switch next to the menu button. */
+.l-nav-tools {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Switching themes: the new one opens as a circle from the switch. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 /* ---------- Reduced motion: everything in place, nothing pinned ---------- */
@@ -1649,6 +2007,24 @@
     display: grid;
   }
 
+  .l-nav-tools {
+    display: flex;
+  }
+
+  .l-nav-tools .l-theme {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--l-g50);
+    color: var(--l-ink);
+  }
+
+  .l-nav.is-dark .l-nav-tools .l-theme {
+    background: var(--l-g950);
+    color: var(--l-canvas);
+  }
+
   .l-nav-primary {
     padding-block: 1rem;
   }
@@ -1666,7 +2042,8 @@
   }
 
   .l-hero {
-    min-height: 620px;
+    min-height: max(100svh, 620px);
+    padding-top: 6.5rem;
   }
 
   .l-about-text,
@@ -1763,8 +2140,13 @@
   }
 
   .l-hero {
-    height: auto;
-    min-height: max(65svh, 36rem);
+    min-height: max(92svh, 36rem);
+    padding-top: 5.5rem;
+  }
+
+  /* Phones: the word fills the width instead of the height. */
+  .l-mark-word {
+    font-size: 31vw;
   }
 
   .l-hero .l-h1,

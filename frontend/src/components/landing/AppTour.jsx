@@ -86,10 +86,7 @@ export default function AppTour() {
         </ul>
 
         <div className="l-app-cta">
-          <IconButton to="/register" variant="volt">
-            Create your account
-          </IconButton>
-          <IconButton to="/login" variant="volt">
+          <IconButton to="/login" variant="hot">
             Sign in
           </IconButton>
         </div>
@@ -120,7 +117,7 @@ export default function AppTour() {
                 </h3>
                 <span className="l-tags">
                   {screen.tags.map((tag) => (
-                    <span key={tag} className="l-tag is-volt">
+                    <span key={tag} className="l-tag is-accent">
                       {tag}
                     </span>
                   ))}

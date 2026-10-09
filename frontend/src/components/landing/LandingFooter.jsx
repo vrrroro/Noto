@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import Brand from '../Brand.jsx';
 import { NAV_LINKS } from './content.js';
 
-// Volt footer. Links use the two-phase underline: it draws in from the left
+// Dark plum footer with a violet glow. Links use the two-phase underline: it draws in from the left
 // on hover and leaves to the right.
 export default function LandingFooter() {
   return (

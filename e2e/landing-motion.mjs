@@ -1,5 +1,5 @@
 // Motion and interaction checks for the landing page in headless Chrome: the
-// nav states, the scroll-scrubbed intro, the stacking cards, the process
+// Noto wordmark and the palette, the nav states, the scroll-scrubbed intro, the stacking cards, the process
 // timeline, the side panel, scroll position on route changes, the idle
 // animation loop and reduced motion.
 // Usage:  (terminal 1) cd frontend && npm run dev
@@ -36,15 +36,58 @@ const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 await page.setViewport({ width: 1440, height: 900 });
+// Start in Day on every load, whatever the machine's theme.
+await page.evaluateOnNewDocument(() => localStorage.setItem('scm.theme', 'light'));
 await page.goto(BASE + '/', { waitUntil: 'networkidle0' });
 await sleep(800);
 const to = (y) => page.evaluate((v) => scrollTo({ top: v, behavior: 'instant' }), y);
 const top = (sel) => page.$eval(sel, (e) => e.getBoundingClientRect().top + scrollY);
 const navState = () => page.$eval('.l-nav', (e) => ({ morphed: e.classList.contains('is-morphed'), dark: e.classList.contains('is-dark') }));
 
+// 0. Wordmark: the dot drops in once and lands; scrolling spreads the letters; no yellow anywhere
+const dropDone = () =>
+  page.evaluate(() => document.querySelector('.l-mark-dot').getAnimations().every((a) => a.playState === 'finished'));
+const landed = await page.waitForFunction(
+  () => document.querySelector('.l-mark-dot').getAnimations().every((a) => a.playState === 'finished'),
+  { timeout: 5000 },
+).then(() => true, () => false);
+check('Wordmark: the four letters rise and the dot drops in and lands', landed && (await page.$$('.l-mark-glyph')).length === 4);
+await page.hover('.l-mark-dot'); await sleep(300);
+check('Wordmark: the drop is one-time; pointing at the dot does not replay it', await dropDone());
+await page.mouse.move(5, 450);
+check('Landing: no "Create your account" button', !(await page.evaluate(() => document.querySelector('.landing').innerText.includes('Create your account'))));
+
+// Day/Night: the switch flips the whole page and the saved theme; the orange stays
+const look = () => page.evaluate(() => ({
+  theme: document.documentElement.dataset.theme,
+  saved: localStorage.getItem('scm.theme'),
+  bg: getComputedStyle(document.querySelector('.landing')).backgroundColor,
+  dot: getComputedStyle(document.querySelector('.l-mark-dot')).backgroundImage,
+  slab: getComputedStyle(document.querySelector('.l-intro')).filter,
+}));
+const day = await look();
+await page.click('.l-nav-links .l-theme'); await sleep(1000);
+const night = await look();
+check('Theme: the switch turns Day into Night (page, saved choice, intro negative)',
+  day.theme === 'light' && night.theme === 'dark' && night.saved === 'dark' && day.bg !== night.bg && day.slab === 'none' && night.slab.includes('invert'),
+  `${day.bg} → ${night.bg}`);
+check('Theme: the Noto orange is the same in both', day.dot === night.dot);
+await page.click('.l-nav-links .l-theme'); await sleep(1000);
+check('Theme: switching back restores Day', (await look()).bg === day.bg);
+const yellow = await page.evaluate(() => {
+  const props = ['color', 'backgroundColor', 'borderTopColor', 'fill', 'stroke', 'outlineColor'];
+  return [...document.querySelectorAll('.landing, .landing *')].filter((el) => {
+    const cs = getComputedStyle(el);
+    return props.some((p) => cs[p] === 'rgb(255, 230, 0)') || cs.backgroundImage.includes('255, 230, 0');
+  }).length;
+});
+check('Palette: no Noto yellow left on the landing page', yellow === 0, `${yellow} element(s)`);
+
 // 1. Nav
 let s = await navState(); check('Nav: wide bar at the top', !s.morphed && !s.dark);
-await to(120); await sleep(300); s = await navState(); check('Nav: capsule after 50px', s.morphed && !s.dark);
+await to(120); await sleep(600); s = await navState(); check('Nav: capsule after 50px', s.morphed && !s.dark);
+const spread = await page.$eval('.l-mark', (e) => +e.style.getPropertyValue('--p'));
+check('Wordmark: scrolling the hero away spreads the letters', spread > 0.1, `--p ${spread.toFixed(2)}`);
 const intro = await top('.l-intro'); const introH = await page.$eval('.l-intro', (e) => e.offsetHeight);
 await to(intro + 300); await sleep(300); s = await navState(); check('Nav: light-on-dark over the intro slab', s.dark);
 await to(await top('.l-about') + 200); await sleep(300); s = await navState(); check('Nav: back to light over the page', !s.dark);
@@ -72,9 +115,9 @@ for (let y = cards - 900; y < cards + 1400; y += 40) {
   prev = sc;
 }
 check('Cards: scale never grows back while scrolling down', monotonic);
-check('Cards: deck ends at 0.90, 0.92 … and the volt card at 1.00', Math.abs(prev[0] - 0.9) < 0.005 && Math.abs(prev[5] - 1) < 0.005, prev.map((v) => v.toFixed(2)).join(' '));
+check('Cards: deck ends at 0.90, 0.92 … and the purple card at 1.00', Math.abs(prev[0] - 0.9) < 0.005 && Math.abs(prev[5] - 1) < 0.005, prev.map((v) => v.toFixed(2)).join(' '));
 
-// 4. Process: active step follows scroll, volt line lands on the active dot
+// 4. Process: active step follows scroll, the line lands on the active dot
 for (let i = 0; i < 4; i++) {
   await to(proc + ((i + 0.5) / 4) * (procH - 900)); await sleep(1100);
   const r = await page.evaluate(() => {
@@ -125,8 +168,9 @@ const rm = await page.evaluate(() => ({
   words: Math.min(...[...document.querySelectorAll('.l-word')].map((w) => +getComputedStyle(w).opacity)),
   sticky: getComputedStyle(document.querySelector('.l-card')).position,
   procH: document.querySelector('.l-process').offsetHeight,
+  mark: getComputedStyle(document.querySelector('.l-mark-glyph')).animationName + '/' + getComputedStyle(document.querySelector('.l-mark-dot')).animationName,
 }));
-check('Reduced motion: all steps open, words at full ink, nothing pinned', rm.steps === 4 && rm.words > 0.99 && rm.sticky !== 'sticky' && rm.procH < 2000, JSON.stringify(rm));
+check('Reduced motion: all steps open, words at full ink, nothing pinned, the wordmark still', rm.steps === 4 && rm.words > 0.99 && rm.sticky !== 'sticky' && rm.procH < 2000 && rm.mark === 'none/none', JSON.stringify(rm));
 
 check('No console errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 await browser.close();

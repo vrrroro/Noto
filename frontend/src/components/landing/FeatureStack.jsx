@@ -9,7 +9,7 @@ const CARD_GAP = 20; // px; matches .l-card margin-bottom (1.25rem)
 // Feature cards that stack as you scroll. Each card is position: sticky, 20px
 // lower than the one before, so the next card lands on top of it; cards that
 // have arrived shrink a little (0.90, 0.92 …) so their edges fan out above the
-// newest one. The volt card caps the deck, then the whole deck scrolls away
+// newest one. The purple card caps the deck, then the whole deck scrolls away
 // together when the list ends. The shrink is computed from where each card
 // would be without sticky positioning, so it never depends on sticky offsets.
 export default function FeatureStack({ motion }) {
@@ -58,7 +58,7 @@ export default function FeatureStack({ motion }) {
         </h2>
         <ul ref={listRef} className={`l-cards ${shown ? 'is-in' : ''}`}>
           {FEATURES.map((f, i) => (
-            <li key={f.title} className={`l-card ${f.body ? '' : 'is-volt'}`} style={{ '--i': i }}>
+            <li key={f.title} className={`l-card ${f.body ? '' : 'is-accent'}`} style={{ '--i': i }}>
               <Icon name={f.icon} size={40} className="l-card-icon" />
               <div className="l-card-text">
                 <h3 className="l-h6">{f.title}</h3>

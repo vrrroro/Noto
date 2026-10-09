@@ -27,5 +27,13 @@ export function useTheme() {
   }, [theme]);
 
   const cycleTheme = () => setTheme((t) => ORDER[(ORDER.indexOf(t) + 1) % ORDER.length]);
-  return { theme, cycleTheme };
+  return { theme, setTheme, cycleTheme };
+}
+
+// True when the page is showing Night: chosen, or "system" on a system that
+// does not ask for light (the same rule as global.css).
+export function isNight(theme) {
+  if (theme === 'dark') return true;
+  if (theme === 'light') return false;
+  return typeof matchMedia === 'undefined' || !matchMedia('(prefers-color-scheme: light)').matches;
 }

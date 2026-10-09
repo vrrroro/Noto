@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import Brand from '../Brand.jsx';
 import Icon from '../Icon.jsx';
 import IconButton from './IconButton.jsx';
+import ThemeToggle from './ThemeToggle.jsx';
 import { NAV_LINKS } from './content.js';
 import { useScrollFrame } from '../../hooks/useScrollFrame.js';
+import { isNight, useTheme } from '../../hooks/useTheme.js';
 
 function useMediaQuery(query) {
   const [matches, setMatches] = useState(() => matchMedia(query).matches);
@@ -29,6 +31,8 @@ export default function LandingNav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const shown = useRef({ scrolled: false, dark: false });
   const headerRef = useRef(null);
+  const { theme, setTheme } = useTheme();
+  const night = isNight(theme);
 
   useScrollFrame(() => {
     const isScrolled = scrollY > 50;
@@ -94,18 +98,22 @@ export default function LandingNav() {
           <IconButton to="/register" className="l-nav-cta">
             Create account
           </IconButton>
+          <ThemeToggle night={night} onChange={setTheme} />
         </nav>
-        <button
-          type="button"
-          className={`l-burger ${menuOpen ? 'is-open' : ''}`}
-          aria-expanded={menuOpen}
-          aria-controls="l-menu"
-          aria-label="Menu"
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          <Icon name="menu" size={20} className="l-burger-open" />
-          <Icon name="close" size={20} className="l-burger-close" />
-        </button>
+        <div className="l-nav-tools">
+          <ThemeToggle night={night} onChange={setTheme} />
+          <button
+            type="button"
+            className={`l-burger ${menuOpen ? 'is-open' : ''}`}
+            aria-expanded={menuOpen}
+            aria-controls="l-menu"
+            aria-label="Menu"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <Icon name="menu" size={20} className="l-burger-open" />
+            <Icon name="close" size={20} className="l-burger-close" />
+          </button>
+        </div>
       </div>
 
       {desktop && (
@@ -124,6 +132,7 @@ export default function LandingNav() {
                 Sign in
               </Link>
             </nav>
+            <ThemeToggle night={night} onChange={setTheme} />
           </div>
           <IconButton to="/register" variant="solid" className="l-nav-pill-cta">
             Create account

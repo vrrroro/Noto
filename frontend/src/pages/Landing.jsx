@@ -12,7 +12,7 @@ import { usePrefersReducedMotion } from '../hooks/useScrollFrame.js';
 import '../styles/landing.css';
 
 // The public front page for signed-out visitors: quiet precision on an
-// off-white page, with Noto's volt yellow as the signal and orange for hover.
+// off-white page, with Noto's purples as the signal and the orange dot for warmth.
 // All motion is scroll-linked or pointer-linked; nothing plays on its own.
 export default function Landing() {
   const rootRef = useRef(null);
@@ -46,7 +46,7 @@ export default function Landing() {
     <div ref={rootRef} className={`landing ${motion ? 'has-motion' : ''}`}>
       <LandingNav />
       <main id="l-main">
-        <HeroSection />
+        <HeroSection motion={motion} />
         <IntroSlab motion={motion} />
         <AboutSection />
         <FeatureStack motion={motion} />

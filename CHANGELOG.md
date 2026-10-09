@@ -7,6 +7,52 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **Landing page in Noto's purples, with an animated Noto wordmark** (no new dependencies).
+  - Yellow is gone from the landing page. The signal is now the purple family (violet `#7b2fff`,
+    dark plum `#2d1b4e`, light lilac `#c4b0ff`, a pale mist tint) plus the orange of the Noto dot.
+    Buttons have purple circles; the "Free, private, any browser." card, the footer and the dark
+    slabs use purple gradients; the timeline line runs lilac to orange with an orange marker dot;
+    diagrams are lilac line art with orange dots; the nav capsule's disc carries the orange dot.
+  - Hero: a full first screen whose floor is the Noto wordmark (Playfair italic, a plum-to-lilac
+    gradient). On arrival the four letters rise out of the floor one by one and the orange dot
+    drops in from above the screen, squashes, bounces twice and lands with a ripple, once; its
+    glow then breathes. The pointer leans the word and moves a lilac haze behind it; scrolling the
+    hero away spreads the letters apart and swells the dot. "sorted." is set in the purple
+    gradient. (`components/landing/NotoMark.jsx`)
+  - The "Create your account" buttons are gone from the hero and from "Inside the app"; signing
+    up is in the nav ("Create account"), the About section and the footer.
+  - **Day/Night switch** (sun/moon button in the landing nav, also in the scrolled capsule and the
+    phone bar). It sets the site-wide theme (`html[data-theme]`, saved as `scm.theme`, the same
+    one the app's sidebar uses) and opens the new theme as a circle from the button (View
+    Transitions; instant where unsupported or under reduced motion). The landing page now follows
+    that theme instead of always being light. Night is the negative of Day: the landing colours
+    are `light-dark()` pairs, so paper and ink swap, the page turns dark and the process slab
+    and the footer turn light. The intro slab is shown as an exact negative of its Day self
+    (`filter: invert(1) hue-rotate(180deg)`) so the spheres' negative effect still reads. The Noto
+    orange and the purple gradient card are identical in both themes. (`ThemeToggle.jsx`,
+    `useTheme` now exposes `setTheme` and `isNight`)
+  - Intro slab: the two spheres are now grey and light purple, and they sit over the statement
+    as negatives (difference blending with neutral greys, plus a lilac glaze on the light one):
+    words under them flip dark, and where the spheres merge the centre flips again into a dark
+    plum lens. They now merge about a third of the way through the pin, while the words are on
+    screen.
+  - Reduced motion still turns all of it off; the shared animation loop still stops when idle.
+
+### Added
+
+- `e2e/landing-motion.mjs`: eight more checks (27 in total): the wordmark's dot lands and does not
+  replay on hover, scrolling spreads the letters, no "Create your account" button, no Noto yellow,
+  the switch turns Day into Night (page, saved choice, intro negative) and back, and the orange is
+  the same in both; the reduced-motion check also covers the wordmark.
+
+### AWS
+
+- Frontend deployed to Amplify Hosting with `deploy.ps1 -FrontendOnly` (2026-10-10):
+  https://main.dg6fh880g1p8b.amplifyapp.com. Verified live: landing motion 27/27, live website
+  17/17. No backend or template change.
+
+### Changed (earlier)
+
 - **Landing page rebuilt** in a "quiet precision" style (reference: Brilean), still in Noto's palette
   and fonts. Replaces the maximalist version below.
   - Off-white page, void ink, a grey ramp mixed from the two; Noto yellow is the only signal colour

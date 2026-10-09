@@ -6,7 +6,7 @@ import { clamp01, useScrollFrame } from '../../hooks/useScrollFrame.js';
 
 // "How it works": a 400vh section whose black slab sticks for three screens
 // of scrolling while the four steps open in turn. The open step grows (flex,
-// 0.8s); the volt line and the marker follow the active dot. They are measured
+// 0.8s); the lilac line and the marker follow the active dot. They are measured
 // with a ResizeObserver on the steps, so they track the accordion while it is
 // still moving instead of waiting for scrolling to stop.
 // Every step is a real button: clicking (or tabbing to) one scrolls to it.
@@ -29,7 +29,7 @@ export default function ProcessTimeline({ motion }) {
     };
   }, motion);
 
-  // Volt fill height and marker position = the active dot's centre.
+  // Line fill height and marker position = the active dot's centre.
   useEffect(() => {
     const wrap = wrapRef.current;
     const measure = () => {

@@ -224,7 +224,7 @@ To run the local dev server against the deployed backend, run `deploy.ps1` once 
 | End-to-end browser run (headless Chrome, demo mode) | `cd e2e && npm test` (with `npm run dev` running) | 32 / 32 checks passing |
 | Live API against the deployed stack (Cognito, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 36 / 36 passing (2026-10-08) |
 | Live website in headless Chrome (sign-in, CRUD, S3 upload/download, sign-out) | `node e2e/live-site.mjs` | 17 / 17 passing (2026-10-08) |
-| Landing page motion (nav, scroll scrubs, card stack, timeline, dialog, reduced motion) | `node e2e/landing-motion.mjs` | 19 / 19 passing (2026-10-08) |
+| Landing page motion (wordmark, palette, Day/Night switch, nav, scroll scrubs, card stack, timeline, dialog, reduced motion) | `node e2e/landing-motion.mjs` | 27 / 27 passing (2026-10-10, local and live) |
 | Infrastructure lint | `cfn-lint infrastructure/template.yaml` | 0 findings |
 
 Still to do by hand: sign-up with a real email inbox. [TESTING.md](TESTING.md) contains the

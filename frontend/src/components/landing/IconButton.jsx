@@ -3,9 +3,9 @@ import Icon from '../Icon.jsx';
 
 // The circle-to-pill button: a label followed by a 40px circle with an arrow.
 // On hover or focus the circle's background stretches left under the label.
-// Variants: "ink" (black circle, volt arrow), "volt" (volt circle, ink arrow),
-// "solid" (already a black pill; turns orange on hover). On a dark slab the
-// ink variant switches to volt by itself (see .l-dark in landing.css).
+// Variants: "ink" (purple circle, white arrow), "hot" (Noto-orange circle, ink arrow),
+// "solid" (already a plum pill; turns orange on hover). On a dark slab the
+// ink variant switches to lilac by itself (see .l-dark in landing.css).
 export default function IconButton({ to, href, onClick, children, variant = 'ink', icon = 'arrowRight', className = '', ...rest }) {
   const classes = `l-ib l-ib-${variant} ${className}`;
   const content = (

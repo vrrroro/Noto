@@ -1,4 +1,4 @@
-// Thin-line volt diagrams for the four steps. Drawn in their finished state;
+// Thin-line lilac diagrams (orange dots) for the four steps. Drawn in their finished state;
 // landing.css animates them on a loop only while their step is open (and only
 // when motion is allowed).
 const BOXES = [0, 1, 2, 3, 4, 5];

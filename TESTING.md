@@ -8,7 +8,7 @@
 | End-to-end (browser) | Headless Chrome via `puppeteer-core` against `npm run dev` (demo mode) | `cd e2e && npm test` | **32 / 32 checks pass** (2026-10-08), no console errors |
 | Infrastructure | `cfn-lint` 1.57 (includes the SAM transform) | `cfn-lint infrastructure/template.yaml` | **0 findings** |
 | Live AWS API | `node` + AWS CLI against the deployed stack | `node e2e/live-api.mjs` | **36 / 36 pass** (2026-10-08) |
-| Landing motion | Headless Chrome via `puppeteer-core` (nav states, scroll scrubs, card stack, timeline, dialog, idle loop, reduced motion) | `node e2e/landing-motion.mjs` (dev server running) | **19 / 19 pass** (2026-10-08, local and live) |
+| Landing motion | Headless Chrome via `puppeteer-core` (one-time wordmark drop and spread, no yellow, Day/Night switch, nav states, scroll scrubs, card stack, timeline, dialog, idle loop, reduced motion) | `node e2e/landing-motion.mjs` (dev server running) | **27 / 27 pass** (2026-10-10, local and live) |
 | Live website | Headless Chrome via `puppeteer-core` against the hosted `WebsiteUrl`, temporary Cognito user | `node e2e/live-site.mjs` | **17 / 17 pass** (2026-10-08), no console errors |
 | Live AWS UI (manual) | manual checklist below | open the website | sign-up with a real email pending |
 
