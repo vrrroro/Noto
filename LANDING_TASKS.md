@@ -31,7 +31,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
 - [x] **T3. "Built on AWS" glows only inside the tiles.** The two orb shapes become faded, soft
   light orbs (orange and purple) and only show through the four service tiles, never outside or
   behind the gaps.
-- [ ] **T4. Anchor bug.** Clicking "Under the hood" (or any in-page link) must glide to its section
+- [x] **T4. Anchor bug.** Clicking "Under the hood" (or any in-page link) must glide to its section
   without first passing through / stopping in the pinned "How it works" section.
 - [ ] **T5. Hero wordmark drifts away without clipping.** When scrolling down, the big Noto
   letters spread and drift away seamlessly (fade out), with no cut edges.
@@ -86,3 +86,11 @@ purple `--aws-glow-violet*`), sized `100cqw` and shifted by the tile's index (`-
 through four windows and never show in the gaps. Pointer drift still uses `--m` / `--d`. Below
 992px the tiles scroll sideways, so each tile shows its own pair. Tiles lost the backdrop blur
 (nothing behind them now). Checked in both themes.
+
+**T4 (done).** Cause: a smooth scroll to `#aws` travels through the 400vh pinned `#how` section,
+which fills the screen for most of the trip. New `components/landing/glide.js`: one delegated
+click handler (installed in `pages/Landing.jsx`) for every `a[href^="#"]` except the skip link.
+Near targets (within 1.2 screens) glide smoothly; far ones fade `#l-main` out (160 ms), jump
+straight to the target and let it rise and fade back in (520 ms). Reduced motion jumps. The URL
+hash is still updated. Checked with a probe: from the top, "Under the hood" goes y 0 → 8607 in one
+step, never showing "How it works", and lands with `#aws` at the top.

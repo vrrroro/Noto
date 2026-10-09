@@ -8,6 +8,7 @@ import ProcessTimeline from '../components/landing/ProcessTimeline.jsx';
 import StackSection from '../components/landing/StackSection.jsx';
 import AppTour from '../components/landing/AppTour.jsx';
 import LandingFooter from '../components/landing/LandingFooter.jsx';
+import { installGlide } from '../components/landing/glide.js';
 import { usePrefersReducedMotion } from '../hooks/useScrollFrame.js';
 import '../styles/landing.css';
 
@@ -41,6 +42,9 @@ export default function Landing() {
     rootRef.current.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
+
+  // "#section" links glide to their section without dragging through the pinned ones.
+  useEffect(() => installGlide(rootRef.current, { motion }), [motion]);
 
   return (
     <div ref={rootRef} className={`landing ${motion ? 'has-motion' : ''}`}>
