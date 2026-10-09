@@ -19,7 +19,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
 
 ## Tasks
 
-- [ ] **T1. One continuous purple flow, no slabs.** The middle of the page (intro orbs, "Who it's
+- [x] **T1. One continuous purple flow, no slabs.** The middle of the page (intro orbs, "Who it's
   for", "What's inside", "How it works", "Built on AWS", "Inside the app") and the footer sit on
   one continuous purple gradient with no visible colour edges. Night: all dark purple. Day: all
   light. No dark slabs in Day, no light slabs in Night (remove the inset black slabs and the
@@ -59,3 +59,13 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
 ## Notes per task
 
 (Filled in as each task is done: what changed, where, and how it was checked.)
+
+**T1 (done).** `landing.css`: tokens are now Day/Night pairs with fixed purples (`--l-purple`,
+`--l-plum`, `--l-lilac`) and a mode-aware `--l-accent`; Night paper is dark purple `#110b20`.
+`.landing` paints one tall `--l-flow` gradient (stops `--l-f0..f3` plus four soft glows) behind
+everything; the intro slab element and its width scrub, the process slab background, the footer
+background, all `.is-dark` / `.l-dark` / `data-nav="dark"` rules and the nav's dark detection are
+gone. The capping card is lilac by Day, purple by Night (`--l-card-*`). The hero haze runs 40svh
+past the hero and fades out. Checked with full-page screenshots in both themes: no edges.
+Known follow-ups: the intro orbs still use the old difference look (T2); `e2e/landing-motion.mjs`
+still expects the old nav dark state and the slab width (T13).

@@ -18,29 +18,44 @@
      never autoplaying, and all of it is off under reduced motion;
    - Day and Night: the page follows the site's theme (html[data-theme], the
      same `scm.theme` the app uses, or the system), and the sun/moon button
-     in the nav switches it. Night is the negative of Day: every role token
-     below is a light-dark(Day, Night) pair, paper and ink swap, so the page
-     turns dark and the dark slabs and the footer turn light. The intro slab
-     is shown as an exact negative of its Day self (a filter, see Night
-     below) so its blended spheres keep working. The Noto orange and the
-     purple gradient card never change.
+     in the nav switches it. Every role token below is a light-dark(Day,
+     Night) pair. Day is light from top to bottom, Night is dark purple from
+     top to bottom: never a mix of light and dark sections;
+   - one continuous flow: the whole page, hero to footer, sits on a single
+     tall purple gradient (--l-flow) with soft glows; no section has a
+     background or an edge of its own. The Noto orange never changes.
    Loaded only with the landing page (it is a separate chunk).
    ========================================================================== */
 
 .landing {
-  --l-canvas: light-dark(#faf8ff, #0d0d1a); /* the page */
-  --l-ink: light-dark(#0d0d1a, #f3eeff); /* type on the page, and the slabs */
+  --l-canvas: light-dark(#faf8ff, #110b20); /* the paper: off-white by Day, dark purple by Night */
+  --l-ink: light-dark(#0d0d1a, #f3eeff); /* type */
   --l-purple: #7b2fff; /* filled accents, white text on it (both themes) */
-  --l-plum: light-dark(#2d1b4e, #e4d8ff); /* dark purple by Day, its negative by Night */
-  --l-lilac: light-dark(#c4b0ff, #5a22c8); /* the signal on the slabs */
-  --l-mist: light-dark(#ece5ff, #221838); /* palest tint on the page */
+  --l-plum: #2d1b4e; /* dark purple (fixed) */
+  --l-lilac: #c4b0ff; /* light purple (fixed) */
+  --l-accent: light-dark(#7b2fff, #c4b0ff); /* lines, labels and diagrams on the page */
+  --l-mist: light-dark(#ece5ff, #251842); /* palest tint on the page */
   --l-hot: #ff6b35; /* the Noto dot: the same orange in both themes */
   --l-glyph-top: light-dark(#2d1b4e, #f1eaff);
   --l-glyph-end: light-dark(#c4b0ff, #8e5cff);
-  /* Fixed deep purples: the gradient card keeps white type in both themes. */
-  --l-grad: linear-gradient(135deg, #7b2fff 0%, #5a22c8 45%, #2d1b4e 100%);
-  --l-grad-text: linear-gradient(135deg, var(--l-purple) 0%, color-mix(in srgb, var(--l-purple) 45%, var(--l-plum)) 60%, var(--l-plum) 100%);
-  --l-slab: radial-gradient(ellipse 90% 70% at 50% 115%, color-mix(in srgb, var(--l-plum) 85%, var(--l-purple)) 0%, var(--l-ink) 70%);
+  --l-grad-text: linear-gradient(135deg, var(--l-purple) 0%, var(--l-glyph-top) 100%);
+  /* The capping feature card: light lilac by Day, deep purple by Night. */
+  --l-card-a: light-dark(#ece3ff, #7b2fff);
+  --l-card-b: light-dark(#cdb9ff, #2d1b4e);
+  --l-card-ink: light-dark(#2d1b4e, #ffffff);
+  /* The flow: one gradient down the whole page, Day all light, Night all dark purple. */
+  --l-f0: light-dark(#faf8ff, #110b20);
+  --l-f1: light-dark(#f4efff, #170f2b);
+  --l-f2: light-dark(#ece3ff, #1f1239);
+  --l-f3: light-dark(#e5d9ff, #281646);
+  --l-glow: light-dark(rgb(123 47 255 / 10%), rgb(123 47 255 / 22%));
+  --l-glow-hot: light-dark(rgb(255 107 53 / 7%), rgb(255 107 53 / 9%));
+  --l-flow:
+    radial-gradient(60% 18% at 15% 22%, var(--l-glow), transparent 70%),
+    radial-gradient(50% 14% at 88% 41%, var(--l-glow-hot), transparent 70%),
+    radial-gradient(70% 16% at 30% 58%, var(--l-glow), transparent 70%),
+    radial-gradient(55% 12% at 80% 76%, var(--l-glow), transparent 70%),
+    linear-gradient(180deg, var(--l-f0) 0%, var(--l-f1) 9%, var(--l-f2) 22%, var(--l-f3) 40%, var(--l-f2) 58%, var(--l-f3) 72%, var(--l-f1) 88%, var(--l-f0) 100%);
   --l-g50: color-mix(in srgb, var(--l-ink) 7%, var(--l-canvas));
   --l-g100: color-mix(in srgb, var(--l-ink) 11%, var(--l-canvas));
   --l-g200: color-mix(in srgb, var(--l-ink) 17%, var(--l-canvas));
@@ -65,7 +80,8 @@
   position: relative;
   min-height: 100vh;
   overflow-x: clip;
-  background: var(--l-canvas);
+  background: var(--l-flow);
+  background-color: var(--l-canvas);
   color: var(--l-ink);
   font-family: var(--font-sans);
   font-size: 1rem;
@@ -90,10 +106,8 @@
   outline-offset: 2px;
 }
 
-.landing .l-dark :focus-visible,
-.landing .l-nav.is-dark :focus-visible,
-.landing .l-footer :focus-visible {
-  outline-color: var(--l-lilac);
+.landing :focus-visible {
+  outline-color: var(--l-accent);
 }
 
 /* The wordmark's dot stays orange but loses its glow here. */
@@ -197,11 +211,6 @@
   text-transform: uppercase;
 }
 
-.l-upper.is-dark {
-  background: var(--l-g950);
-  color: var(--l-canvas);
-}
-
 /* Only where the label has a column of its own, so content never scrolls under it. */
 @media (min-width: 992px) {
   .l-grid > .l-upper-wrap {
@@ -293,12 +302,12 @@
   --ib-hover-fg: #0d0d1a;
 }
 
-/* Already a pill (dark plum, lilac label); hover turns it orange. */
+/* Already a pill (purple, white label); hover turns it orange. */
 .l-ib-solid {
-  --ib-fg: var(--l-lilac);
-  --ib-bg: var(--l-plum);
-  --ib-arrow: var(--l-lilac);
-  --ib-hover-fg: var(--l-lilac);
+  --ib-fg: #fff;
+  --ib-bg: var(--l-purple);
+  --ib-arrow: #fff;
+  --ib-hover-fg: #fff;
   padding-left: 1.3rem;
 }
 
@@ -309,16 +318,9 @@
 @media (hover: hover) {
   .l-ib-solid:hover {
     --ib-bg: var(--l-hot);
-    --ib-arrow: var(--l-canvas);
-    --ib-hover-fg: var(--l-canvas);
+    --ib-arrow: #0d0d1a;
+    --ib-hover-fg: #0d0d1a;
   }
-}
-
-.l-dark .l-ib-ink {
-  --ib-fg: var(--l-canvas);
-  --ib-bg: var(--l-lilac);
-  --ib-arrow: var(--l-ink);
-  --ib-hover-fg: var(--l-ink);
 }
 
 /* Outlined circle link (39px). */
@@ -448,22 +450,11 @@
 
 .l-nav-link:hover {
   background: var(--l-hot);
-  color: var(--l-canvas);
+  color: #0d0d1a;
 }
 
 .l-nav-cta {
   margin-left: 0.75rem;
-}
-
-.l-nav.is-dark .l-nav-primary {
-  color: var(--l-canvas);
-}
-
-.l-nav.is-dark .l-nav-cta {
-  --ib-fg: var(--l-canvas);
-  --ib-bg: var(--l-lilac);
-  --ib-arrow: var(--l-ink);
-  --ib-hover-fg: var(--l-ink);
 }
 
 /* After 50px: a centred capsule rises in, the call to action sits on the right. */
@@ -537,22 +528,6 @@
   right: var(--l-gutter);
 }
 
-.l-nav.is-dark .l-disc {
-  background: var(--l-lilac);
-}
-
-.l-nav.is-dark .l-pill {
-  background: var(--l-g950);
-  color: var(--l-canvas);
-}
-
-.l-nav.is-dark .l-nav-pill-cta {
-  --ib-fg: var(--l-ink);
-  --ib-bg: var(--l-lilac);
-  --ib-arrow: var(--l-ink);
-  --ib-hover-fg: var(--l-ink);
-}
-
 /* Phones and tablets: a menu button and a stack of chips. */
 .l-burger {
   position: relative;
@@ -610,27 +585,12 @@
 
 .l-menu-chip:hover {
   background: var(--l-hot);
-  color: var(--l-canvas);
+  color: #0d0d1a;
 }
 
 .l-menu-chip.is-cta {
   background: var(--l-purple);
   color: #fff;
-}
-
-.l-nav.is-dark .l-burger {
-  background: var(--l-g950);
-  color: var(--l-canvas);
-}
-
-.l-nav.is-dark .l-menu-chip:not(.is-cta) {
-  background: var(--l-g700);
-  color: var(--l-canvas);
-}
-
-.l-nav.is-dark .l-menu-chip.is-cta {
-  background: var(--l-lilac);
-  color: var(--l-ink);
 }
 
 /* ---------- Hero ---------- */
@@ -646,18 +606,21 @@
   gap: clamp(1rem, 4svh, 3rem);
   min-height: 100svh;
   padding-top: 8.5rem;
-  overflow: clip;
 }
 
+/* The haze runs on below the hero and fades out, so it never leaves an edge. */
 .l-hero::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: 0 0 -40svh;
   z-index: -1;
   background:
-    radial-gradient(38% 46% at calc(var(--mx, 0.5) * 100%) 88%, color-mix(in srgb, var(--l-lilac) 60%, transparent), transparent 72%),
-    radial-gradient(26% 34% at 88% 18%, var(--l-mist), transparent 72%),
-    radial-gradient(22% 30% at 8% 40%, color-mix(in srgb, var(--l-hot) 12%, transparent), transparent 72%);
+    radial-gradient(38% 34% at calc(var(--mx, 0.5) * 100%) 66%, color-mix(in srgb, var(--l-purple) 22%, transparent), transparent 72%),
+    radial-gradient(26% 26% at 88% 14%, var(--l-mist), transparent 72%),
+    radial-gradient(22% 22% at 8% 30%, color-mix(in srgb, var(--l-hot) 12%, transparent), transparent 72%);
+  -webkit-mask-image: linear-gradient(#000 55%, transparent);
+  mask-image: linear-gradient(#000 55%, transparent);
+  pointer-events: none;
 }
 
 .l-hero-grid {
@@ -862,28 +825,11 @@
 
 /* ---------- Intro slab ---------- */
 
-/* Always drawn in its Day colours (a dark slab, white words); by Night the
-   whole section is shown as its exact negative instead (see Night below).
-   Swapping tokens would not do here: the spheres' difference blending needs
-   white words on a dark ground to print a negative. */
+/* No background of its own: the statement and the orbs float on the flow. */
 .l-intro {
   position: relative;
   isolation: isolate;
   height: 210vh;
-  color-scheme: light;
-  color: var(--l-canvas);
-}
-
-.l-intro-bg {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  z-index: -1;
-  width: var(--w, 105%);
-  translate: -50% 0;
-  border-radius: 8px;
-  background: var(--l-slab);
 }
 
 .l-intro-stage {
@@ -1035,12 +981,12 @@
   width: 70%;
 }
 
-/* The card that caps the deck: the purple gradient, white type, the Noto dot. */
+/* The card that caps the deck: light lilac by Day, deep purple by Night, the Noto dot. */
 .l-card.is-accent {
   z-index: 1;
   border-color: transparent;
-  background: var(--l-grad);
-  color: #fff;
+  background: linear-gradient(135deg, var(--l-card-a), var(--l-card-b));
+  color: var(--l-card-ink);
 }
 
 .l-card.is-accent .l-card-icon {
@@ -1100,9 +1046,7 @@
   height: calc(100% - 2rem);
   max-height: 1080px;
   padding: 4rem;
-  border-radius: 8px;
-  background: var(--l-slab);
-  color: var(--l-canvas);
+  color: var(--l-ink);
 }
 
 .l-steps-wrap {
@@ -1126,7 +1070,7 @@
   left: 0;
   width: 1px;
   height: var(--fill, 2.5rem);
-  background: linear-gradient(var(--l-lilac), var(--l-purple) 85%, var(--l-hot));
+  background: linear-gradient(var(--l-accent), var(--l-purple) 85%, var(--l-hot));
   transition: height 0.2s ease-in-out;
 }
 
@@ -1142,7 +1086,7 @@
 }
 
 .l-marker rect {
-  fill: var(--l-lilac);
+  fill: var(--l-accent);
 }
 
 .l-marker circle {
@@ -1150,7 +1094,7 @@
 }
 
 .l-marker path {
-  stroke: var(--l-lilac);
+  stroke: var(--l-accent);
   stroke-width: 1;
 }
 
@@ -1197,7 +1141,7 @@
 }
 
 .l-step.is-active .l-step-btn {
-  color: var(--l-canvas);
+  color: var(--l-ink);
 }
 
 .l-step-title {
@@ -1227,7 +1171,7 @@
 }
 
 .l-step.is-reached .l-step-dot {
-  background: var(--l-lilac);
+  background: var(--l-accent);
 }
 
 .l-step.is-active .l-step-dot {
@@ -1251,7 +1195,7 @@
   max-width: 28rem;
   font-size: 1.125rem;
   line-height: 1.25;
-  color: var(--l-g300);
+  color: var(--l-g950);
 }
 
 /* Diagrams: lilac line art. */
@@ -1264,14 +1208,14 @@
 
 .l-diagram :is(rect, circle, path) {
   fill: none;
-  stroke: var(--l-lilac);
+  stroke: var(--l-accent);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .l-diagram .d-box {
-  fill: var(--l-lilac);
+  fill: var(--l-accent);
 }
 
 /* The colour dots of the three subject tags and the ticked ring: Noto orange. */
@@ -1591,7 +1535,7 @@
 
 .l-tag.is-accent {
   background: var(--l-mist);
-  color: var(--l-plum);
+  color: var(--l-glyph-top);
 }
 
 .l-row-title {
@@ -1790,20 +1734,11 @@
   position: relative;
   z-index: 1;
   padding: 5.5rem 0 1.5rem;
-  overflow: clip;
-  background:
-    radial-gradient(50% 80% at 85% 0%, color-mix(in srgb, var(--l-purple) 70%, transparent), transparent 70%),
-    radial-gradient(30% 50% at 10% 100%, color-mix(in srgb, var(--l-hot) 22%, transparent), transparent 70%),
-    var(--l-plum);
-  color: var(--l-canvas);
+  color: var(--l-ink);
 }
 
 .l-footer .brand {
-  color: var(--l-canvas);
-}
-
-.l-footer-statement {
-  color: var(--l-canvas);
+  color: var(--l-ink);
 }
 
 .l-footer-grid {
@@ -1844,7 +1779,7 @@
   font-family: var(--font-mono);
   font-size: 0.875rem;
   text-transform: uppercase;
-  color: var(--l-lilac);
+  color: var(--l-accent);
 }
 
 .l-footer-credits {
@@ -1856,23 +1791,7 @@
   font-family: var(--font-mono);
   font-size: 0.875rem;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--l-lilac) 75%, var(--l-plum));
-}
-
-/* ---------- Night ----------
-   Most of Night is in the token pairs at the top. What tokens cannot do:
-   the intro slab becomes the exact negative of its Day self (invert, then a
-   half turn of hue so its purples stay purple). It holds no orange, so the
-   Noto orange is untouched. The conditions mirror global.css: Night by
-   choice, or by default unless the system asks for light. */
-:root[data-theme='dark'] .landing .l-intro {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-@media not (prefers-color-scheme: light) {
-  :root:not([data-theme='light']) .landing .l-intro {
-    filter: invert(1) hue-rotate(180deg);
-  }
+  color: var(--l-g950);
 }
 
 /* The Day/Night switch: a 40px disc with a sun or a moon. */
@@ -1916,11 +1835,6 @@
   border: 0;
   background: var(--l-g50);
   color: var(--l-ink);
-}
-
-.l-nav.is-dark .l-nav-secondary .l-theme {
-  background: var(--l-g950);
-  color: var(--l-canvas);
 }
 
 .l-nav-secondary .l-theme:hover {
@@ -2020,21 +1934,12 @@
     color: var(--l-ink);
   }
 
-  .l-nav.is-dark .l-nav-tools .l-theme {
-    background: var(--l-g950);
-    color: var(--l-canvas);
-  }
-
   .l-nav-primary {
     padding-block: 1rem;
   }
 
   .l-nav.is-scrolled .l-nav-primary {
     background: var(--l-canvas);
-  }
-
-  .l-nav.is-scrolled.is-dark .l-nav-primary {
-    background: var(--l-ink);
   }
 
   .l-grid {

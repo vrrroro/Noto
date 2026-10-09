@@ -54,10 +54,10 @@ export default function ProcessTimeline({ motion }) {
   }
 
   return (
-    <section id="how" ref={sectionRef} className="l-process" data-nav="dark" aria-labelledby="l-how-title">
+    <section id="how" ref={sectionRef} className="l-process" aria-labelledby="l-how-title">
       <div className="l-process-wrap">
-        <div className="l-process-slab l-dark">
-          <UpperTitle dark>How it works</UpperTitle>
+        <div className="l-process-slab">
+          <UpperTitle>How it works</UpperTitle>
           <h2 id="l-how-title" className="visually-hidden">
             How Noto works
           </h2>

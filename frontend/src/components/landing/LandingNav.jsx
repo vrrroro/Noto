@@ -21,38 +21,23 @@ function useMediaQuery(query) {
 
 // Two navs in one fixed header. At the top: a wide bar (wordmark left, links
 // right). After 50px of scroll on desktop it lifts away and a compact centred
-// capsule rises in, with the call to action as a separate pill. Over a section
-// marked data-nav="dark" (the one actually under the header) both switch to
-// their light-on-dark colours. Phones keep the bar and use a menu button.
+// capsule rises in, with the call to action as a separate pill. Phones keep
+// the bar and use a menu button.
 export default function LandingNav() {
   const desktop = useMediaQuery('(min-width: 992px)');
   const [scrolled, setScrolled] = useState(false);
-  const [dark, setDark] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const shown = useRef({ scrolled: false, dark: false });
+  const shown = useRef(false);
   const headerRef = useRef(null);
   const { theme, setTheme } = useTheme();
   const night = isNight(theme);
 
   useScrollFrame(() => {
     const isScrolled = scrollY > 50;
-    let isDark = false;
-    for (const section of document.querySelectorAll('[data-nav="dark"]')) {
-      const r = section.getBoundingClientRect();
-      if (r.top <= 40 && r.bottom > 40) {
-        isDark = true;
-        break;
-      }
-    }
     return () => {
-      if (isScrolled !== shown.current.scrolled) {
-        shown.current.scrolled = isScrolled;
-        setScrolled(isScrolled);
-      }
-      if (isDark !== shown.current.dark) {
-        shown.current.dark = isDark;
-        setDark(isDark);
-      }
+      if (isScrolled === shown.current) return;
+      shown.current = isScrolled;
+      setScrolled(isScrolled);
     };
   });
 
@@ -77,7 +62,7 @@ export default function LandingNav() {
   const close = () => setMenuOpen(false);
 
   return (
-    <header ref={headerRef} className={`l-nav ${morphed ? 'is-morphed' : ''} ${dark ? 'is-dark' : ''} ${scrolled ? 'is-scrolled' : ''}`}>
+    <header ref={headerRef} className={`l-nav ${morphed ? 'is-morphed' : ''} ${scrolled ? 'is-scrolled' : ''}`}>
       <a className="skip-link" href="#l-main">
         Skip to content
       </a>

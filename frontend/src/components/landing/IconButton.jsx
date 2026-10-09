@@ -4,8 +4,7 @@ import Icon from '../Icon.jsx';
 // The circle-to-pill button: a label followed by a 40px circle with an arrow.
 // On hover or focus the circle's background stretches left under the label.
 // Variants: "ink" (purple circle, white arrow), "hot" (Noto-orange circle, ink arrow),
-// "solid" (already a plum pill; turns orange on hover). On a dark slab the
-// ink variant switches to lilac by itself (see .l-dark in landing.css).
+// "solid" (already a filled purple pill; turns orange on hover).
 export default function IconButton({ to, href, onClick, children, variant = 'ink', icon = 'arrowRight', className = '', ...rest }) {
   const classes = `l-ib l-ib-${variant} ${className}`;
   const content = (
@@ -40,10 +39,10 @@ export default function IconButton({ to, href, onClick, children, variant = 'ink
 }
 
 // The tiny uppercase section label in a grey chip. Sticky on desktop.
-export function UpperTitle({ children, dark = false }) {
+export function UpperTitle({ children }) {
   return (
     <div className="l-upper-wrap">
-      <p className={`l-upper ${dark ? 'is-dark' : ''}`}>{children}</p>
+      <p className="l-upper">{children}</p>
     </div>
   );
 }
