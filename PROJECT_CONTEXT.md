@@ -2,7 +2,7 @@
 
 ## Resume Here (read first)
 
-Last session: 2026-10-10. Landing round 3 (continuous purple flow, new orbs, HUD, scroll pin, theme-matched screenshots; see `LANDING_TASKS.md`) is merged into `main`, pushed and **deployed to Amplify**; verified live (landing motion 32/32, live site 17/17). **Noto is online:** https://main.dg6fh880g1p8b.amplifyapp.com (AWS Amplify Hosting, HTTPS) against the live
+Last session: 2026-10-10. "Forgot password" (`/reset`) added, merged into `main` and deployed; self-service sign-up and reset verified on the live pool (live API 44/44). Landing round 3 (continuous purple flow, new orbs, HUD, scroll pin, theme-matched screenshots; see `LANDING_TASKS.md`) is merged into `main`, pushed and **deployed to Amplify**; verified live (landing motion 32/32, live site 17/17). **Noto is online:** https://main.dg6fh880g1p8b.amplifyapp.com (AWS Amplify Hosting, HTTPS) against the live
 AWS backend.
 
 | Item | State |

@@ -23,6 +23,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `e2e/run.mjs` (34 checks, was 32): the full reset flow in demo mode, including that the old
   password stops working.
 
+### AWS (sign-in)
+
+- Merged into `main` and deployed to Amplify Hosting with `deploy.ps1 -FrontendOnly`
+  (2026-10-10). Verified live: live site 17/17, landing motion 32/32, and `/reset` on the live
+  site reaches Cognito and shows the code step. No backend or template change.
+
 ### Changed (landing round 3, branch `feature/landing-flow`; task list in `LANDING_TASKS.md`)
 
 - **One continuous purple flow.** The landing page sits on a single tall gradient from hero to
