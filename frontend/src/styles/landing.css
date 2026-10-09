@@ -841,19 +841,41 @@
   overflow: hidden;
 }
 
-/* Two orbs layered OVER the statement, both showing it in negative. Both
-   blend as a difference with neutral greys only, so they flip light and dark
-   without throwing a colour cast (a coloured difference would turn the lilac
-   into its green complement):
-   - the grey orb: on the dark slab a grey glass sphere; the white words
-     under it turn dark grey;
-   - the light orb: a near-white difference (a true negative: the words under
-     it turn ink) with a separate lilac tint laid over it in normal blending,
-     so it reads as a light purple sphere.
-   Where they merge, the light orb inverts the grey one too, so the centre
-   flips again: the negative of the negative. */
-/* No z-index here: it would isolate the orbs from the words they blend with. */
+/* Two orbs over the statement, no blending: every colour is chosen.
+   - Night: a light-orange orb (a) and a light-purple orb (b); where they
+     merge, a greyish purplish black lens. Day: a Noto-orange orb and a dark
+     purple orb; where they merge, a lightish purplish grey lens.
+   - The negative: each orb (and the lens) carries its own copy of the
+     statement, aligned exactly over the real one and inked in the opposite
+     tone, and clips it to its circle. So the words flip wherever an orb or
+     the merge passes over them.
+   - Geometry: --xa / --xb are the orbs' offsets from the centre and --os
+     their scale (all from --k, the merge amount). A copy inside an orb
+     undoes the orb's own move and scale; the lens sits inside orb b at orb
+     a's place, so it is the intersection of the two circles. */
 .l-orbs {
+  --xa: calc((1 - var(--k, 0)) * -34vw);
+  --xb: calc((1 - var(--k, 0)) * 34vw);
+  --os: calc(0.7 + 0.42 * var(--k, 0));
+  --ow: min(28vw, 400px);
+  /* Orb a: Noto orange by Day, light orange by Night. */
+  --a0: light-dark(#ffd2bf, #ffffff);
+  --a1: light-dark(#ff8a5c, #ffe3d4);
+  --a2: light-dark(#ff6b35, #ffc3a3);
+  --a3: light-dark(#c9441a, #f29466);
+  --a-ink: light-dark(#ffffff, #2d1b4e);
+  /* Orb b: dark purple by Day, light purple by Night. */
+  --b0: light-dark(#8a6bc4, #ffffff);
+  --b1: light-dark(#5a3d8a, #efe8ff);
+  --b2: light-dark(#2d1b4e, #d3c3ff);
+  --b3: light-dark(#1b0f30, #a688fb);
+  --b-ink: light-dark(#ffffff, #1d1033);
+  /* The merge: lightish purplish grey by Day, greyish purplish black by Night. */
+  --m0: light-dark(#f1edf6, #3d3449);
+  --m1: light-dark(#dcd5e6, #272030);
+  --m2: light-dark(#c9c0d6, #1a1522);
+  --m-ink: light-dark(#1d1033, #f3eeff);
+  --ring: light-dark(rgb(45 27 78 / 22%), rgb(196 176 255 / 40%));
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -863,54 +885,65 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(28vw, 400px);
+  width: var(--ow);
   aspect-ratio: 1;
   border-radius: 50%;
-}
-
-.l-orb::after {
-  content: '';
-  position: absolute;
-  inset: -14%;
-  border: 1px solid rgb(196 176 255 / 45%);
-  border-radius: 50%;
+  overflow: hidden;
+  outline: 1px solid var(--ring);
+  outline-offset: calc(var(--ow) * 0.14);
+  transform: translate(-50%, -50%) translateX(var(--x)) scale(var(--os));
 }
 
 .l-orb.is-a {
-  mix-blend-mode: difference;
-  background: radial-gradient(
-    circle at 32% 28%,
-    #fff 0,
-    #e6e6ea 12%,
-    #b8b8bf 38%,
-    #6e6e75 70%,
-    #1e1e22 100%
-  );
-  transform: translate(-50%, -50%) translateX(calc((1 - var(--k, 0)) * -34vw))
-    rotate(calc(var(--q, 0) * 240deg)) scale(calc(0.7 + 0.42 * var(--k, 0)));
+  --x: var(--xa);
+  color: var(--a-ink);
 }
 
 .l-orb.is-b {
-  mix-blend-mode: difference;
-  background: radial-gradient(circle at 32% 28%, #fff 0, #f4f4f6 18%, #dcdce2 55%, #a4a4ad 92%, #7a7a84 100%);
-  transform: translate(-50%, -50%) translateX(calc((1 - var(--k, 0)) * 34vw))
-    rotate(calc(var(--q, 0) * -240deg)) scale(calc(0.7 + 0.42 * var(--k, 0)));
+  --x: var(--xb);
+  color: var(--b-ink);
 }
 
-/* The light orb's colour: a lilac glaze in normal blending, riding on top. */
-.l-orb.is-b.is-tint {
-  mix-blend-mode: normal;
-  background: radial-gradient(
-    circle at 32% 28%,
-    rgb(255 255 255 / 0%) 0,
-    rgb(196 176 255 / 30%) 30%,
-    rgb(150 110 255 / 45%) 75%,
-    rgb(123 47 255 / 60%) 100%
-  );
+/* The glossy body; it turns as the orbs travel, so the highlight rolls. */
+.l-orb-skin {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
 }
 
-.l-orb.is-tint::after {
-  content: none;
+.is-a > .l-orb-skin {
+  background: radial-gradient(circle at 32% 28%, var(--a0) 0, var(--a1) 16%, var(--a2) 46%, var(--a3) 100%);
+  rotate: calc(var(--q, 0) * 240deg);
+}
+
+.is-b > .l-orb-skin {
+  background: radial-gradient(circle at 32% 28%, var(--b0) 0, var(--b1) 16%, var(--b2) 46%, var(--b3) 100%);
+  rotate: calc(var(--q, 0) * -240deg);
+}
+
+/* A copy of the statement, laid exactly over the real one. */
+.l-orb-copy {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100svh;
+  margin: -50svh 0 0 -50vw;
+  transform: translateX(calc(-1 * var(--x) / var(--os))) scale(calc(1 / var(--os)));
+}
+
+/* Orb a's place inside orb b: the intersection of the two circles. */
+.l-orb-lens {
+  --x: var(--xa);
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, var(--m0) 0, var(--m1) 55%, var(--m2) 100%);
+  color: var(--m-ink);
+  transform: translateX(calc((var(--xa) - var(--xb)) / var(--os)));
 }
 
 /* The statement resolves word by word: 30% to full white. */
@@ -2074,10 +2107,7 @@
   /* On phones the dots fade out as the words arrive. */
   .l-orbs {
     opacity: calc(1 - var(--t, 0));
-  }
-
-  .l-orb {
-    width: 44vw;
+    --ow: 44vw;
   }
 
   .l-card {

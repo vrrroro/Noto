@@ -24,7 +24,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
   one continuous purple gradient with no visible colour edges. Night: all dark purple. Day: all
   light. No dark slabs in Day, no light slabs in Night (remove the inset black slabs and the
   "negative" light slabs). The nav's dark-over-slab state goes away with them.
-- [ ] **T2. Intro orbs recoloured.** Night: one light-orange orb and one light-purple orb; where
+- [x] **T2. Intro orbs recoloured.** Night: one light-orange orb and one light-purple orb; where
   they merge, a greyish purplish black. Day: one dark-purple orb and one Noto-orange orb; where
   they merge, a lightish purplish grey. The statement still shows in negative where an orb or
   the merge passes over it.
@@ -69,3 +69,12 @@ gone. The capping card is lilac by Day, purple by Night (`--l-card-*`). The hero
 past the hero and fades out. Checked with full-page screenshots in both themes: no edges.
 Known follow-ups: the intro orbs still use the old difference look (T2); `e2e/landing-motion.mjs`
 still expects the old nav dark state and the slab width (T13).
+
+**T2 (done).** No blend modes any more. `IntroSlab.jsx` renders the statement once for real and
+once inside each orb and inside a lens (`.l-orb-copy`); `landing.css` `.l-orbs` holds the colour
+pairs (`--a*` orb a, `--b*` orb b, `--m*` the merge, `--*-ink` the negative text) and the
+geometry (`--xa`, `--xb`, `--os` from `--k`). Each orb has `overflow: hidden`; a copy undoes its
+orb's translate and scale so it lines up with the real words; the lens sits inside orb b at orb
+a's offset, so it is exactly the intersection. Rings are outlines (not clipped). Checked in both
+themes mid-merge: Night light orange + light purple, merge greyish purplish black; Day orange +
+dark purple, merge lightish purplish grey; text aligned and inverted in every shape.

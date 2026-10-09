@@ -7,12 +7,31 @@ const WORDS = INTRO_STATEMENT.split(' ');
 // takes the remaining 25% to reach full ink (a 1.5 "stagger amount" in GSAP terms).
 const wordStart = (i) => ((i / (WORDS.length - 1)) * 0.75).toFixed(4);
 
+function Words() {
+  return WORDS.map((word, i) => (
+    <span key={i} className="l-word" style={{ '--s': wordStart(i) }}>
+      {word}{' '}
+    </span>
+  ));
+}
+
+// The same statement, for the copies the orbs carry (see .l-orb-copy).
+function Copy() {
+  return (
+    <div className="l-orb-copy">
+      <p className="l-intro-text">
+        <Words />
+      </p>
+    </div>
+  );
+}
+
 // No slab of its own: the section floats on the page's purple flow. Inside, a
-// stage pins for one
-// screen: a grey and a lilac orb travel in from the edges, merge at the centre
-// and part again while the statement resolves from 30% to full white one word
-// at a time. The orbs blend as a difference over the words, so while they
-// pass over the text it shows as a negative (see .l-orb in landing.css).
+// stage pins for one screen: two orbs travel in from the edges, merge at the
+// centre and part again while the statement resolves from 30% to full ink one
+// word at a time. Each orb, and the lens where they overlap, carries its own
+// copy of the statement in the opposite ink, so the words show in negative
+// wherever an orb passes (colours and geometry in landing.css, .l-orbs).
 // Everything is scrubbed by scroll position (eased), so scrolling up reverses it.
 export default function IntroSlab({ motion }) {
   const sectionRef = useRef(null);
@@ -22,8 +41,7 @@ export default function IntroSlab({ motion }) {
     const section = sectionRef.current;
     if (!section) return undefined;
     const r = section.getBoundingClientRect();
-    const vh = innerHeight;
-    const travel = Math.max(1, r.height - vh);
+    const travel = Math.max(1, r.height - innerHeight);
     const pinned = -r.top / travel; // 0 when the stage pins, 1 when it lets go
     const target = motion
       ? {
@@ -54,19 +72,21 @@ export default function IntroSlab({ motion }) {
         <p className="l-intro-text">
           <span className="visually-hidden">{INTRO_STATEMENT}</span>
           <span aria-hidden="true">
-            {WORDS.map((word, i) => (
-              <span key={i} className="l-word" style={{ '--s': wordStart(i) }}>
-                {word}{' '}
-              </span>
-            ))}
+            <Words />
           </span>
         </p>
-        {/* After the text and without a z-index, so the orbs paint over the words
-            in the same stacking context and their blending reaches them. */}
         <div className="l-orbs" aria-hidden="true">
-          <span className="l-orb is-a" />
-          <span className="l-orb is-b" />
-          <span className="l-orb is-b is-tint" />
+          <div className="l-orb is-a">
+            <span className="l-orb-skin" />
+            <Copy />
+          </div>
+          <div className="l-orb is-b">
+            <span className="l-orb-skin" />
+            <Copy />
+            <div className="l-orb-lens">
+              <Copy />
+            </div>
+          </div>
         </div>
       </div>
     </section>
