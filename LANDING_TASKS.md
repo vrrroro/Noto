@@ -42,7 +42,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
 - [x] **T8. HUD logo animation.** No "Noto" text in the landing HUD at the top of the page, only
   the orange ball (the big hero wordmark is the logo). After scrolling down a bit, the ball draws
   a line (like the vine on the sign-in page) and the small "Noto" wordmark appears in the HUD.
-- [ ] **T9. Underglow.** "Create account" and "Sign in" on the landing page get a soft glowing
+- [x] **T9. Underglow.** "Create account" and "Sign in" on the landing page get a soft glowing
   underglow.
 - [ ] **T10. App light mode: no dark purple cards.** On the sign-in pages and in the app, cards that
   stay dark purple in Day (the `.invert` cards) become a light purple appropriate for Day.
@@ -122,3 +122,10 @@ and the vine fades; it reverses when scrolling back. On phones the bar keeps the
 the switch and the menu (glass chips). Checked in both themes: top, HUD, mid-draw, drawn, hover
 glider, section glider. (Note for screenshots: puppeteer `clip` scrolls the page; use full
 viewport shots.)
+
+**T9 (done).** `.l-underglow` in `landing.css`: a layered box-shadow (purple light with a warm
+orange core beneath, plus a faint purple hairline) that grows on hover/focus; light-dark pairs for
+both themes. Applied to every "Sign in" and "Create account" on the landing page: the nav's
+actions group (top bar and HUD), the phone menu's Create account chip and the "Inside the app"
+Sign in button. The top bar's Create account is now the same filled purple pill as the HUD's.
+Checked in both themes.

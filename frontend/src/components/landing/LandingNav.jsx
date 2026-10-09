@@ -25,14 +25,14 @@ const SECTION_IDS = NAV_LINKS.map((link) => link.href.slice(1));
 
 // Sign in, the Day/Night switch and Create account: the same group in the
 // top bar and in the HUD.
-function Actions({ night, onTheme, solid, className = '' }) {
+function Actions({ night, onTheme, className = '' }) {
   return (
     <div className={`l-nav-actions ${className}`}>
-      <Link className="l-signin" to="/login">
+      <Link className="l-signin l-underglow" to="/login">
         Sign in
       </Link>
       <ThemeToggle night={night} onChange={onTheme} />
-      <IconButton to="/register" variant={solid ? 'solid' : 'ink'} className="l-nav-cta">
+      <IconButton to="/register" variant="solid" className="l-nav-cta l-underglow">
         Create account
       </IconButton>
     </div>
@@ -166,7 +166,7 @@ export default function LandingNav() {
               ))}
             </nav>
           </div>
-          <Actions night={night} onTheme={setTheme} solid className="l-glass" />
+          <Actions night={night} onTheme={setTheme} className="l-glass" />
         </div>
       )}
 
@@ -185,7 +185,7 @@ export default function LandingNav() {
             </Link>
           </li>
           <li>
-            <Link className="l-menu-chip is-cta" to="/register">
+            <Link className="l-menu-chip is-cta l-underglow" to="/register">
               Create account
             </Link>
           </li>

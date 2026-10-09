@@ -86,7 +86,7 @@ export default function AppTour() {
         </ul>
 
         <div className="l-app-cta">
-          <IconButton to="/login" variant="hot">
+          <IconButton to="/login" variant="hot" className="l-underglow">
             Sign in
           </IconButton>
         </div>

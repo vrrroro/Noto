@@ -642,6 +642,35 @@
   background: var(--l-glide);
 }
 
+/* Underglow for "Create account" and "Sign in": a soft purple light with a
+   warm orange core beneath the button, stronger on hover. Shadows rather
+   than a pseudo-element, so the buttons' own rounded clipping cannot cut it. */
+.l-underglow {
+  --ug-violet: light-dark(rgb(123 47 255 / 55%), rgb(150 100 255 / 70%));
+  --ug-hot: light-dark(rgb(255 107 53 / 40%), rgb(255 120 70 / 45%));
+  box-shadow:
+    0 12px 28px -10px var(--ug-violet),
+    0 6px 18px -12px var(--ug-hot),
+    0 0 0 1px color-mix(in srgb, var(--l-purple) 10%, transparent);
+  transition:
+    box-shadow 0.45s ease,
+    padding-left 0.4s ease-in-out,
+    color 0.4s ease-in-out,
+    background-color 0.25s ease;
+}
+
+.l-underglow:hover,
+.l-underglow:focus-visible {
+  box-shadow:
+    0 14px 32px -8px var(--ug-violet),
+    0 8px 24px -8px var(--ug-hot),
+    0 0 0 1px color-mix(in srgb, var(--l-purple) 22%, transparent);
+}
+
+.l-signin.l-underglow {
+  background: color-mix(in srgb, var(--l-purple) 7%, transparent);
+}
+
 /* The Day/Night switch: a disc with a sun or a moon. */
 .l-theme {
   display: grid;
