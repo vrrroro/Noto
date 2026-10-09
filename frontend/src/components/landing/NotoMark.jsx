@@ -5,7 +5,8 @@ import { clamp01, damp, requestScrollFrame, useScrollFrame } from '../../hooks/u
 // rise out of the floor one after another and the orange dot drops in from
 // above the screen, squashes, bounces twice and settles, once (CSS keyframes
 // in landing.css). After that:
-// - scrolling the hero away spreads the letters apart and swells the dot (--p);
+// - scrolling the hero away spreads the letters apart, swells the dot and
+//   fades them out (--p), with nothing clipping them;
 // - the pointer leans the word and nudges the dot towards it (--px), and the
 //   lilac haze behind the hero follows it (--mx on the hero).
 // Both values run through the shared scroll loop, so nothing ticks while idle.
@@ -70,8 +71,8 @@ export default function NotoMark({ motion }) {
     <div ref={markRef} className="l-mark" aria-hidden="true">
       <span className="l-mark-word">
         {LETTERS.map((letter, i) => (
-          <span key={i} className="l-mark-mask">
-            <span className="l-mark-glyph" style={{ '--i': i, '--dy': DRIFT[i] }}>
+          <span key={i} className="l-mark-mask" style={{ '--i': i, '--dy': DRIFT[i] }}>
+            <span className="l-mark-glyph">
               {letter}
             </span>
           </span>

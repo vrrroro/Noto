@@ -33,7 +33,7 @@ Legend: `[x]` done and checked in a browser · `[ ]` not started
   behind the gaps.
 - [x] **T4. Anchor bug.** Clicking "Under the hood" (or any in-page link) must glide to its section
   without first passing through / stopping in the pinned "How it works" section.
-- [ ] **T5. Hero wordmark drifts away without clipping.** When scrolling down, the big Noto
+- [x] **T5. Hero wordmark drifts away without clipping.** When scrolling down, the big Noto
   letters spread and drift away seamlessly (fade out), with no cut edges.
 - [ ] **T6. Ambient cursor glow.** A very faint purple light follows the cursor on the landing
   page (mouse only, extremely subtle, both themes).
@@ -94,3 +94,10 @@ Near targets (within 1.2 screens) glide smoothly; far ones fade `#l-main` out (1
 straight to the target and let it rise and fade back in (520 ms). Reduced motion jumps. The URL
 hash is still updated. Checked with a probe: from the top, "Under the hood" goes y 0 → 8607 in one
 step, never showing "How it works", and lands with `#aws` at the top.
+
+**T5 (done).** Cause: the rise-in mask (`clip-path` on `.l-mark-mask`) stayed on after the rise
+and cut the letters as they drifted, and the hero clipped its overflow. The mask is now only an
+animation (`@keyframes l-mask`, filled backwards through the delay), so nothing clips after the
+rise; `--i` / `--dy` moved to the mask element so both animations share timing. Letters and dot
+fade with scroll (`opacity: clamp(0, 1.35 - p*1.6, 1)`). The hero no longer clips (done in T1).
+Checked at scroll 150/300/450/600: clean drift and fade, no cut edges, `clip-path: none` after.
