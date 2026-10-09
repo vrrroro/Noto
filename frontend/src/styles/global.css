@@ -864,6 +864,22 @@ select:disabled {
   color: var(--text-muted);
 }
 
+/* A small link under a field ("Forgot password?"). */
+.field-link {
+  justify-self: end;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--orange-text);
+  text-decoration: none;
+}
+
+.field-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .form-actions {
   display: flex;
   flex-wrap: wrap;

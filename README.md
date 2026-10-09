@@ -33,7 +33,7 @@ download and delete their study files. All of this runs without managing a singl
 
 | Area | What a student can do |
 | --- | --- |
-| Authentication | Register, verify email, log in, log out, stay signed in (token refresh) |
+| Authentication | Register, verify email, log in, log out, reset a forgotten password (emailed code), stay signed in (token refresh) |
 | Assignments | Create, view, edit, delete, mark complete/pending, due date, priority, subject |
 | Notes / files | Upload (drag & drop, progress bar), list, download, delete, organise by subject |
 | Subjects | Create, list (with usage counts), delete (blocked while still in use) |
@@ -221,8 +221,8 @@ To run the local dev server against the deployed backend, run `deploy.ps1` once 
 | --- | --- | --- |
 | Backend unit tests (validation, CRUD, ownership, errors, S3 presigning, DynamoDB expressions) | `cd backend && npm test` | 36 / 36 passing |
 | Frontend unit tests (dates, filters, dashboard maths and next-up pick, subject colours, demo backend) | `cd frontend && npm test` | 19 / 19 passing |
-| End-to-end browser run (headless Chrome, demo mode) | `cd e2e && npm test` (with `npm run dev` running) | 32 / 32 checks passing |
-| Live API against the deployed stack (Cognito, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 36 / 36 passing (2026-10-08) |
+| End-to-end browser run (headless Chrome, demo mode, includes password reset) | `cd e2e && npm test` (with `npm run dev` running) | 34 / 34 checks passing (2026-10-10) |
+| Live API against the deployed stack (Cognito sign-in, self-service sign-up, password reset, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 44 / 44 passing (2026-10-10) |
 | Live website in headless Chrome (sign-in, CRUD, S3 upload/download, sign-out) | `node e2e/live-site.mjs` | 17 / 17 passing (2026-10-08) |
 | Landing page motion (wordmark, palette, Day/Night and orbs, HUD, glider, in-page jumps, AWS tiles, scroll pin, card stack, timeline, dialog, reduced motion) | `node e2e/landing-motion.mjs` | 32 / 32 passing (2026-10-10, local and live) |
 | Infrastructure lint | `cfn-lint infrastructure/template.yaml` | 0 findings |

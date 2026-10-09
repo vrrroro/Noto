@@ -26,6 +26,10 @@ const MESSAGES = {
 };
 
 export function authErrorMessage(err) {
+  // Password reset needs a verified email; an account that never entered its sign-up code has none.
+  if (err?.code === 'InvalidParameterException' && /verified email/i.test(err.message || '')) {
+    return 'This account has not verified its email yet. Sign in to finish verifying it first.';
+  }
   if (err?.code === 'InvalidPasswordException') {
     const detail = String(err.message || '').split(':').pop().trim();
     return `Password does not meet the requirements${detail ? `: ${detail}` : '.'}`;
@@ -55,6 +59,8 @@ const cognitoAuth = {
   signUp: (email, password) => cognito.signUp(email, password),
   confirmSignUp: (email, code) => cognito.confirmSignUp(email, code),
   resendCode: (email) => cognito.resendConfirmationCode(email),
+  forgotPassword: (email) => cognito.forgotPassword(email),
+  confirmForgotPassword: (email, code, password) => cognito.confirmForgotPassword(email, code, password),
 
   async signIn(email, password) {
     const session = sessionFromTokens(await cognito.signIn(email, password));

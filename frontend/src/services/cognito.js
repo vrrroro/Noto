@@ -49,6 +49,13 @@ export const cognito = {
 
   resendConfirmationCode: (email) => call('ResendConfirmationCode', { ClientId: config.clientId, Username: email }),
 
+  // Password reset: Cognito emails a code to the account's verified address. For an
+  // unknown email it pretends to send one (the pool prevents user-existence leaks).
+  forgotPassword: (email) => call('ForgotPassword', { ClientId: config.clientId, Username: email }),
+
+  confirmForgotPassword: (email, code, password) =>
+    call('ConfirmForgotPassword', { ClientId: config.clientId, Username: email, ConfirmationCode: code, Password: password }),
+
   async signIn(email, password) {
     const data = await call('InitiateAuth', {
       ClientId: config.clientId,

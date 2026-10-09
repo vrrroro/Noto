@@ -26,7 +26,7 @@ Re-check that AWS works (each creates and deletes its own test user(s)):
 
 ```powershell
 cd C:\Users\rohit\Downloads\AWS
-node e2e/live-api.mjs    # the API, expect 36/36 (about 30 s)
+node e2e/live-api.mjs    # the API, expect 44/44 (about 30 s)
 node e2e/live-site.mjs   # the hosted website in headless Chrome, expect 17/17 (about 40 s)
 E2E_BASE_URL=https://main.dg6fh880g1p8b.amplifyapp.com node e2e/landing-motion.mjs   # landing motion, 32/32
 ```
@@ -67,9 +67,12 @@ points the app at it. The account is on the AWS **Free plan** ($100 credit, expi
 
 ## Working Features (verified)
 
-Verified live against AWS by `node e2e/live-api.mjs` (36/36, 2026-10-08):
+Verified live against AWS by `node e2e/live-api.mjs` (44/44, 2026-10-10):
 
 - Cognito sign-in with real tokens; wrong password rejected
+- Self-service sign-up (public SignUp API: password policy, emailed code, duplicate email,
+  unconfirmed account blocked, wrong code rejected) and password reset (ForgotPassword sends a
+  code to the verified email, a wrong reset code is rejected)
 - JWT authorizer: no token / garbage token → 401; CORS preflight for `http://localhost:5173` and
   for the hosted website
 - Subjects, assignments (CRUD, complete, validation) in DynamoDB
@@ -80,12 +83,13 @@ Verified on the hosted website by `node e2e/live-site.mjs` (17/17, 2026-10-08): 
 the landing page, sign-in redirect, live mode, wrong password, sign-in, subject, assignment create/complete/refresh,
 S3 upload, byte-identical download, deletes, sign-out, no console errors.
 
-Also verified locally: full UI in demo mode (32-check E2E, including the landing page),
+Also verified locally: full UI in demo mode (34-check E2E, including the landing page and password reset),
 36 backend + 19 frontend unit tests.
 
 ## Implemented but NOT yet verified against AWS
 
-- Sign-up and the Cognito verification email through the UI (needs a real inbox)
+- That the verification and reset emails actually arrive in a real inbox (the APIs that send them
+  are verified live; delivery needs the owner's own email)
 - The UI's manual checklist in TESTING.md against the live backend
 - CloudFront hosting (blocked: account verification; Amplify serves the site meanwhile),
   CloudWatch alarm emails and the Budget

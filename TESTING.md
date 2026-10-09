@@ -5,9 +5,9 @@
 | Backend unit | `node:test` (built in, no dependency) | `cd backend && npm test` | **36 / 36 pass** |
 | Frontend unit | Vitest | `cd frontend && npm test` | **19 / 19 pass** (2026-10-08) |
 | Production build | Vite | `cd frontend && npm run build` | builds cleanly |
-| End-to-end (browser) | Headless Chrome via `puppeteer-core` against `npm run dev` (demo mode) | `cd e2e && npm test` | **32 / 32 checks pass** (2026-10-08), no console errors |
+| End-to-end (browser) | Headless Chrome via `puppeteer-core` against `npm run dev` (demo mode) | `cd e2e && npm test` | **34 / 34 checks pass** (2026-10-10, includes password reset), no console errors |
 | Infrastructure | `cfn-lint` 1.57 (includes the SAM transform) | `cfn-lint infrastructure/template.yaml` | **0 findings** |
-| Live AWS API | `node` + AWS CLI against the deployed stack | `node e2e/live-api.mjs` | **36 / 36 pass** (2026-10-08) |
+| Live AWS API | `node` + AWS CLI against the deployed stack | `node e2e/live-api.mjs` | **44 / 44 pass** (2026-10-10, includes self-service sign-up and password reset) |
 | Landing motion | Headless Chrome via `puppeteer-core` (one-time wordmark drop, drift without clipping, no yellow, Day/Night and orb colours, HUD ball and brand, glider, underglow, aligned orb copies, in-page jumps, AWS tiles, scroll pin, card stack, timeline, dialog, idle loop, reduced motion) | `node e2e/landing-motion.mjs` (dev server running) | **32 / 32 pass** (2026-10-10, local and live) |
 | Live website | Headless Chrome via `puppeteer-core` against the hosted `WebsiteUrl`, temporary Cognito user | `node e2e/live-site.mjs` | **17 / 17 pass** (2026-10-08), no console errors |
 | Live AWS UI (manual) | manual checklist below | open the website | sign-up with a real email pending |
@@ -57,6 +57,7 @@ cd e2e && npm install && npm test   # terminal 2 (set CHROME_PATH if Chrome is n
 | 2–3 | Register rejects mismatched / weak passwords | ✅ |
 | 4–5 | Register + verify works; duplicate email rejected | ✅ |
 | 6 | Wrong password rejected | ✅ |
+| 6b | Forgot password: reset with a code; old password stops working, new one signs in | ✅ |
 | 7–8 | Login lands on dashboard; stats `6 / 5 / 1 / 1` computed from data | ✅ |
 | 9–12 | Assignment form validation; create; mark complete; edit | ✅ |
 | 13–14 | Search and status filter | ✅ |
@@ -79,6 +80,8 @@ Amplify, or the CloudFront URL once enabled). Record the results here.
 - [ ] Login
 - [ ] Logout (then the browser Back button does not show private pages)
 - [ ] Wrong password shows "Incorrect email or password."
+- [ ] Forgot password: "Forgot password?" on the sign-in page emails a code; the code and a new
+      password reset it, the old password stops working and the new one signs in
 - [ ] Invalid email rejected
 - [ ] Opening `/assignments` while logged out redirects to login
 - [ ] `curl $API_URL/assignments` without a token returns `401`

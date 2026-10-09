@@ -5,6 +5,24 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (sign-in, branch `feature/password-reset`)
+
+- **Forgot password.** A "Forgot password?" link on the sign-in page opens `/reset`
+  (`pages/ResetPassword.jsx`): enter the email and Cognito emails a 6-digit code
+  (`ForgotPassword`); enter the code and a new password (same live policy checklist as Register)
+  and Cognito sets it (`ConfirmForgotPassword`), then back to sign in. The page never reveals
+  whether an account exists (the pool prevents user-existence errors). Demo mode accepts any
+  6-digit code. Uses the user pool's existing `verified_email` recovery; no AWS change.
+
+### Tests (sign-in)
+
+- `e2e/live-api.mjs` (44 checks, was 36) now exercises self-service sign-up on the live pool
+  (public `SignUp`: password policy, emailed code, duplicate email, unconfirmed account blocked,
+  wrong code rejected, sign-in after confirmation) and password reset (`ForgotPassword` sends a
+  code, a wrong reset code is rejected). Until now the live test only used admin-created users.
+- `e2e/run.mjs` (34 checks, was 32): the full reset flow in demo mode, including that the old
+  password stops working.
+
 ### Changed (landing round 3, branch `feature/landing-flow`; task list in `LANDING_TASKS.md`)
 
 - **One continuous purple flow.** The landing page sits on a single tall gradient from hero to

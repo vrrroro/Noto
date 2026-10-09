@@ -41,6 +41,8 @@ export function AuthProvider({ children }) {
       signUp: (email, password) => auth.signUp(email.trim(), password),
       confirmSignUp: (email, code) => auth.confirmSignUp(email.trim(), code.trim()),
       resendCode: (email) => auth.resendCode(email.trim()),
+      forgotPassword: (email) => auth.forgotPassword(email.trim()),
+      confirmForgotPassword: (email, code, password) => auth.confirmForgotPassword(email.trim(), code.trim(), password),
     }),
     [user, notice, signIn, signOut],
   );

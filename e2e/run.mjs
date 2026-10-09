@@ -310,6 +310,31 @@ try {
   await page.waitForSelector('#login-email');
   check('Logout + protected route redirect', page.url().endsWith('/login'));
 
+  // --- Forgot password: reset with a code, then sign in with the new password ---
+  await fill('#login-email', 'rohit@college.edu');
+  await click('a.field-link');
+  await page.waitForSelector('#reset-email');
+  check('Forgot password link carries the email over', (await page.$eval('#reset-email', (e) => e.value)) === 'rohit@college.edu');
+  await click('button[type=submit]');
+  await page.waitForSelector('#reset-code');
+  await fill('#reset-code', '123456');
+  await fill('#reset-password', 'weak');
+  await fill('#reset-confirm', 'weak');
+  await click('button[type=submit]');
+  await waitText('does not meet all the requirements');
+  await fill('#reset-password', 'NewPassw0rd');
+  await fill('#reset-confirm', 'NewPassw0rd');
+  await click('button[type=submit]');
+  await waitText('Password changed');
+  await login('rohit@college.edu', 'Passw0rd');
+  await waitText('Incorrect email or password.');
+  await fill('#login-password', 'NewPassw0rd');
+  await click('button[type=submit]');
+  await waitText('Recent files', 10000);
+  check('Password reset: the old password stops working and the new one signs in', true);
+  await page.locator('button.nav-button::-p-text(Sign out)').click();
+  await page.waitForSelector('#login-email');
+
   // --- Second user isolation ---
   await register('student.b@college.edu', 'Passw0rd');
   await login('student.b@college.edu', 'Passw0rd');

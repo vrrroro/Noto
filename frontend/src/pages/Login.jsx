@@ -79,6 +79,9 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <Link to="/reset" state={{ email: email.trim() }} className="field-link">
+            Forgot password?
+          </Link>
         </div>
         <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
           {loading ? 'Signing in…' : 'Sign in'}

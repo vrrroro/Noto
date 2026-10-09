@@ -41,6 +41,20 @@ export const demoAuth = {
 
   async resendCode() {},
 
+  // Like Cognito, "sends" a code without revealing whether the account exists.
+  async forgotPassword() {},
+
+  // Any 6-digit code is accepted in demo mode; the new password must meet the policy.
+  async confirmForgotPassword(email, code, password) {
+    const all = users();
+    const key = normalize(email);
+    const user = all[key];
+    if (!user || !/^\d{6}$/.test(code)) throw new AuthError('CodeMismatchException', 'bad code');
+    if (!passwordMeetsRules(password)) throw new AuthError('InvalidPasswordException', 'Password did not conform with policy');
+    user.passwordHash = await hashPassword(key, password);
+    writeJson(USERS_KEY, all);
+  },
+
   async signIn(email, password) {
     const key = normalize(email);
     const all = users();

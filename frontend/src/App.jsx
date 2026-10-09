@@ -7,6 +7,7 @@ import Layout from './components/Layout.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import ConfirmAccount from './pages/ConfirmAccount.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Assignments from './pages/Assignments.jsx';
 import Notes from './pages/Notes.jsx';
@@ -45,6 +46,7 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/confirm" element={<ConfirmAccount />} />
+              <Route path="/reset" element={<ResetPassword />} />
             </Route>
             <Route element={<ProtectedRoute guest={landing} />}>
               <Route element={<Layout />}>
