@@ -40,9 +40,11 @@ export default function CursorGlow({ motion }) {
     const p = pos.current;
     if (!p.on) return undefined;
     return () => {
+      const el = ref.current;
+      if (!el) return false; // the page has gone (route change) since the read
       p.x = damp(p.x, p.tx, 110, dt);
       p.y = damp(p.y, p.ty, 110, dt);
-      ref.current.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
+      el.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
       return Math.abs(p.x - p.tx) > 0.3 || Math.abs(p.y - p.ty) > 0.3;
     };
   }, motion);

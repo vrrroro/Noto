@@ -27,12 +27,12 @@ export function glideTo(target, { motion = true } = {}) {
   return (fadeOut?.finished ?? Promise.resolve()).then(() => {
     scrollTo({ top: y, behavior: 'instant' });
     fadeOut?.cancel();
-    main?.animate(
-      [
-        { opacity: 0, transform: `translateY(${Math.sign(distance) * 28}px)` },
-        { opacity: 1, transform: 'none' },
-      ],
-      { duration: 520, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+    // The page fades back in; only the target section rises, so nothing of
+    // the section before it slides into view.
+    main?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-out' });
+    target.animate(
+      [{ transform: `translateY(${Math.sign(distance) * 28}px)` }, { transform: 'none' }],
+      { duration: 620, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
     );
   });
 }
