@@ -41,6 +41,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   clipping, "Under the hood" never passing through "How it works", the AWS tiles and the scroll
   pin. `e2e/run.mjs` clicks the moved Sign in link. New `e2e/app-screens.mjs`.
 
+### AWS (landing round 3)
+
+- Merged into `main` and deployed to Amplify Hosting with `deploy.ps1 -FrontendOnly`
+  (2026-10-10): https://main.dg6fh880g1p8b.amplifyapp.com. Verified live: landing motion 32/32,
+  live site 17/17. No backend or template change.
+
 ### Changed (landing round 2)
 
 - **Landing page in Noto's purples, with an animated Noto wordmark** (no new dependencies).

@@ -23,7 +23,7 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 - The backend and the website are verified live by automated tests.
 - Optional extras are done too: search, filters, sorting, dark mode, upload progress, a public landing page.
 - Still open: sign-up with a real email through the UI, the alert email, CloudFront, console screenshots.
-- Landing page round 3 (one continuous purple flow, new orbs, glass HUD, orange scroll pin, theme-matched screenshots) is finished on branch `feature/landing-flow` and pushed; every task and its notes are in `LANDING_TASKS.md`. It is not merged into `main` or deployed yet: ask the owner first.
+- Landing page round 3 (one continuous purple flow, new orbs, glass HUD, orange scroll pin, theme-matched screenshots) is merged into `main` and deployed (2026-10-10, verified live); every task and its notes are in `LANDING_TASKS.md`.
 
 ## Architecture
 
