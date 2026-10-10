@@ -2442,6 +2442,22 @@ select:disabled {
   display: flex;
 }
 
+/* "Back to home": the top-left corner of the form side, on every sign-in page. */
+.auth-main {
+  position: relative;
+}
+
+.auth-back {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--gutter);
+  min-height: 40px;
+  padding: 0 14px 0 10px;
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  border-radius: 999px;
+  font-size: 17px;
+}
+
 /* The inverted card on the sign-in pages. */
 .auth-card {
   position: relative;

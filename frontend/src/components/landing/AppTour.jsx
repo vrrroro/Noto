@@ -15,14 +15,11 @@ function ThemeImage({ image, alt }) {
   );
 }
 
-// "Inside the app": one row per screen. Hovering a row (mouse only) turns the
-// title orange, fills its circle, and shows a frosted preview that follows the
-// pointer; activating a row opens a side panel (a native modal <dialog>, so
-// focus is trapped, Escape closes it and focus returns to the row).
+// "Inside the app": one row per screen, with no hover effect. Clicking a row
+// opens a side panel (a native modal <dialog>, so focus is trapped, Escape
+// closes it and focus returns to the row).
 export default function AppTour() {
-  const [hovered, setHovered] = useState(null);
   const [openIndex, setOpenIndex] = useState(null);
-  const previewRef = useRef(null);
   const dialogRef = useRef(null);
   const triggerRef = useRef(null);
 
@@ -30,20 +27,8 @@ export default function AppTour() {
     if (openIndex !== null && !dialogRef.current.open) dialogRef.current.showModal();
   }, [openIndex]);
 
-  function movePreview(e) {
-    const card = previewRef.current;
-    if (!card || e.pointerType !== 'mouse') return;
-    const w = card.offsetWidth;
-    const h = card.offsetHeight;
-    // Below-right of the pointer, flipped to the other side near the window edges.
-    const x = e.clientX + 24 + w > innerWidth ? e.clientX - 24 - w : e.clientX + 24;
-    const y = e.clientY + 24 + h > innerHeight ? e.clientY - 24 - h : e.clientY + 24;
-    card.style.transform = `translate(${x}px, ${y}px)`;
-  }
-
   function open(i, trigger) {
     triggerRef.current = trigger;
-    setHovered(null);
     setOpenIndex(i);
   }
 
@@ -53,7 +38,6 @@ export default function AppTour() {
   }
 
   const screen = openIndex === null ? null : SCREENS[openIndex];
-  const preview = hovered === null ? null : SCREENS[hovered];
 
   return (
     <section id="app" className="l-section l-app" aria-labelledby="l-app-title">
@@ -70,13 +54,6 @@ export default function AppTour() {
                 className="l-row"
                 aria-label={`${s.title}: more details`}
                 onClick={(e) => open(i, e.currentTarget)}
-                onPointerEnter={(e) => {
-                  if (e.pointerType !== 'mouse') return;
-                  movePreview(e);
-                  setHovered(i);
-                }}
-                onPointerMove={movePreview}
-                onPointerLeave={() => setHovered(null)}
               >
                 <span className="l-row-meta">
                   <Icon name={s.icon} size={40} />
@@ -102,15 +79,6 @@ export default function AppTour() {
             Sign in
           </IconButton>
         </div>
-      </div>
-
-      <div ref={previewRef} className={`l-preview ${preview ? 'is-on' : ''}`} aria-hidden="true">
-        {preview && (
-          <>
-            <p>{preview.tagline}</p>
-            <ThemeImage image={preview.image} alt="" />
-          </>
-        )}
       </div>
 
       <dialog

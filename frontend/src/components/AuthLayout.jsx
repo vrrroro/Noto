@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Brand from './Brand.jsx';
+import Icon from './Icon.jsx';
 import { isDemoMode } from '../config.js';
 
 // The arch window: a single vine climbs from the base and ends in Noto's dot.
@@ -39,6 +40,11 @@ export default function AuthLayout({ label, title, subtitle, children, footer })
       </section>
 
       <main className="auth-main">
+        {/* Back to the top of the landing page (the app scrolls to the top on a route change). */}
+        <Link to="/" className="btn btn-ghost auth-back">
+          <Icon name="arrowLeft" size={18} />
+          Back to home
+        </Link>
         <Link to="/" className="auth-brand brand brand-large" aria-label="Noto home">
           <Brand />
         </Link>

@@ -4,11 +4,17 @@
 const BOXES = [0, 1, 2, 3, 4, 5];
 
 const SHAPES = {
-  // Sign up: an email field draws from dotted to solid, then the six-digit code fills in.
+  // Sign up: a mouse pointer glides in and clicks the email field, which draws
+  // from dotted to solid while a line of "typing" runs along it; then the
+  // six-digit code fills in. A pointer, not a text caret, so the drawing does
+  // not read as a field you could type into.
   code: (
     <>
       <rect className="d-dash" x="10" y="16" width="420" height="58" rx="29" pathLength="1" />
-      <path className="d-caret" d="M46 33v24" />
+      <path className="d-typed" d="M46 45h150" pathLength="1" />
+      <g transform="translate(214 40)">
+        <path className="d-pointer" d="M0 0v25l6.4-6 4.5 9.8 3.9-1.8-4.4-9.6h8.8z" />
+      </g>
       {BOXES.map((i) => (
         <rect key={i} className="d-box" style={{ '--i': i }} x={22 + i * 70} y="104" width="52" height="52" rx="10" />
       ))}

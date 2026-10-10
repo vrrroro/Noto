@@ -1,5 +1,6 @@
 // Motion and interaction checks for the landing page in headless Chrome: the
-// Noto wordmark, the palette and Day/Night (orb colours included), the nav and
+// first-load intro (grey page, falling dot, colour ripple), the Noto wordmark,
+// the palette and Day/Night (orb colours included), the nav and
 // HUD (ball, brand drawing, glider, underglow), the intro orbs, the stacking
 // cards, the process timeline, in-page jumps, the AWS tiles, the scroll pin,
 // the side panel, route changes, the idle animation loop and reduced motion.
@@ -39,22 +40,62 @@ page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 await page.setViewport({ width: 1440, height: 900 });
 // Start in Day on every load, whatever the machine's theme.
 await page.evaluateOnNewDocument(() => localStorage.setItem('scm.theme', 'light'));
+// Watches the first-load intro on every frame of each load: the grey layer,
+// the dot's fall and squash, the ripple's radius, and when it all ends.
+await page.evaluateOnNewDocument(() => {
+  const s = (window.__intro = { mono: '', minY: 0, maxSx: 1, maxR: 0, fall: 0, settled: 0, monoGone: 0 });
+  const tick = (now) => {
+    const dot = document.querySelector('.l-mark-dot');
+    const mono = document.querySelector('.l-mono');
+    if (mono && !s.mono) s.mono = getComputedStyle(mono).backdropFilter;
+    if (mono) s.maxR = Math.max(s.maxR, parseFloat(getComputedStyle(mono).getPropertyValue('--l-r')) || 0);
+    if (!mono && s.mono && !s.monoGone) s.monoGone = now;
+    if (dot) {
+      const y = parseFloat((dot.style.translate || '0 0').split(' ')[1]) || 0;
+      const sx = parseFloat(dot.style.scale) || 1;
+      if (y < -innerHeight * 0.5 && y > s.minY && !s.fall && s.minY < 0) s.fall = now; // first frame it moves down
+      s.minY = Math.min(s.minY, y);
+      s.maxSx = Math.max(s.maxSx, sx);
+      if (s.fall && !s.settled && !dot.style.translate) s.settled = now;
+    }
+    if (!s.settled || !s.monoGone) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+});
 await page.goto(BASE + '/', { waitUntil: 'networkidle0' });
 await sleep(800);
 const to = (y) => page.evaluate((v) => scrollTo({ top: v, behavior: 'instant' }), y);
 const top = (sel) => page.$eval(sel, (e) => e.getBoundingClientRect().top + scrollY);
 const navState = () => page.$eval('.l-nav', (e) => ({ morphed: e.classList.contains('is-morphed') }));
 
-// 0. Wordmark: the dot drops in once and lands; scrolling spreads the letters; no yellow anywhere
-const dropDone = () =>
-  page.evaluate(() => document.querySelector('.l-mark-dot').getAnimations().every((a) => a.playState === 'finished'));
-const landed = await page.waitForFunction(
-  () => document.querySelector('.l-mark-dot').getAnimations().every((a) => a.playState === 'finished'),
-  { timeout: 5000 },
-).then(() => true, () => false);
-check('Wordmark: the four letters rise and the dot drops in and lands', landed && (await page.$$('.l-mark-glyph')).length === 4);
+// 0. Wordmark: the page opens grey, the dot falls, squashes and settles, its
+// ripple brings the colour back; scrolling spreads the letters; no yellow anywhere
+await page.waitForFunction(() => window.__intro.settled && window.__intro.monoGone, { timeout: 6000 }).catch(() => {});
+const firstLoad = await page.evaluate(() => ({ ...window.__intro, diag: Math.hypot(innerWidth, innerHeight) }));
+check('Intro: the page opens in grey (one grayscale layer), only the dot in colour', firstLoad.mono === 'grayscale(1)', firstLoad.mono);
+check(
+  'Intro: the dot falls from above the screen, squashes on impact and settles within 2 s',
+  firstLoad.minY < -450 && firstLoad.maxSx > 1.2 && firstLoad.settled > 0 && firstLoad.settled - firstLoad.fall < 2000 && (await page.$$('.l-mark-glyph')).length === 4,
+  `from ${firstLoad.minY.toFixed(0)}px, squash ${firstLoad.maxSx.toFixed(2)}, settled in ${(firstLoad.settled - firstLoad.fall).toFixed(0)} ms`,
+);
+check(
+  'Intro: one ripple grows past the screen corners and the grey layer is removed',
+  firstLoad.maxR > firstLoad.diag * 0.5 && firstLoad.monoGone > 0 && !(await page.$('.l-mono')),
+  `ripple ${firstLoad.maxR.toFixed(0)}px`,
+);
 await page.hover('.l-mark-dot'); await sleep(300);
-check('Wordmark: the drop is one-time; pointing at the dot does not replay it', await dropDone());
+check(
+  'Intro: plays once; pointing at the dot does not replay it',
+  await page.evaluate(() => !document.querySelector('.l-mono') && !document.querySelector('.l-mark-dot').style.translate),
+);
+check(
+  'Copy: no "student" or "project" on the page; the footer credit reads "bloomed by Rohit"',
+  await page.evaluate(() => {
+    const text = document.querySelector('.landing').innerText;
+    return !/student|project/i.test(text) && /bloomed by rohit/i.test(text);
+  }),
+);
+check('Nav: nothing in the top-left corner at the top of the page', await page.$eval('.l-nav-primary .l-hud-brand', (e) => getComputedStyle(e).opacity === '0'));
 await page.mouse.move(5, 450);
 check('Landing: no "Create your account" button', !(await page.evaluate(() => document.querySelector('.landing').innerText.includes('Create your account'))));
 
@@ -98,8 +139,8 @@ check('Palette: no Noto yellow left on the landing page', yellow === 0, `${yello
 // 1. Nav: the ball alone at the top, the HUD after 50px, the brand draws itself after 160px
 const brandShown = () => page.$eval('.l-capsule .l-hud-brand', (e) => e.classList.contains('is-shown'));
 let s = await navState();
-check('Nav: wide bar at the top, the orange ball alone (no "Noto")',
-  !s.morphed && !(await page.$eval('.l-nav-primary .l-hud-brand', (e) => e.classList.contains('is-shown'))));
+check('Nav: wide bar at the top, no brand in the corner (no "Noto", no ball)',
+  !s.morphed && (await page.$eval('.l-nav-primary .l-hud-brand', (e) => !e.classList.contains('is-shown') && getComputedStyle(e).opacity === '0')));
 await to(100); await sleep(700); s = await navState();
 check('Nav: the HUD after 50px, still only the ball', s.morphed && !(await brandShown()));
 await to(300); await sleep(1500);
@@ -118,6 +159,19 @@ const glider = async (sel) => {
   }, sel);
 };
 check('Nav: the glider slides under the hovered link', await glider('.l-pill .l-nav-link[href="#aws"]'));
+// From the first link to the last, sampled through the slide: never past the pill or the link.
+await page.hover('.l-pill .l-nav-link[href="#features"]'); await sleep(700);
+await page.hover('.l-pill .l-nav-link[href="#aws"]');
+let spill = 0;
+for (let i = 0; i < 24; i++) {
+  spill = Math.max(spill, await page.evaluate(() => {
+    const g = document.querySelector('.l-pill-glider').getBoundingClientRect();
+    const l = document.querySelector('.l-pill .l-nav-link[href="#aws"]').getBoundingClientRect();
+    return g.right - l.right;
+  }));
+  await sleep(25);
+}
+check('Nav: the glider never overshoots past "Under the hood"', spill < 1, `${spill.toFixed(1)}px past`);
 await page.mouse.move(700, 600);
 const glows = await page.$$eval('.l-underglow', (els) => els.filter((e) => getComputedStyle(e).boxShadow !== 'none').length);
 check('Nav: Sign in and Create account glow', glows >= 4, `${glows} glowing`);
@@ -151,7 +205,7 @@ for (let y = cards - 900; y < cards + 1400; y += 40) {
   prev = sc;
 }
 check('Cards: scale never grows back while scrolling down', monotonic);
-check('Cards: deck ends at 0.90, 0.92 … and the purple card at 1.00', Math.abs(prev[0] - 0.9) < 0.005 && Math.abs(prev[5] - 1) < 0.005, prev.map((v) => v.toFixed(2)).join(' '));
+check('Cards: five cards, the deck ends at 0.90, 0.92 … and the last card at 1.00', prev.length === 5 && Math.abs(prev[0] - 0.9) < 0.005 && Math.abs(prev[4] - 1) < 0.005, prev.map((v) => v.toFixed(2)).join(' '));
 
 // 4. Process: active step follows scroll, the line lands on the active dot
 for (let i = 0; i < 4; i++) {
@@ -166,6 +220,15 @@ for (let i = 0; i < 4; i++) {
   });
   check(`Process: step ${i + 1} open, line on its dot`, r.active === i && r.opened === 1 && r.gap < 2, `active ${r.active}, gap ${r.gap.toFixed(1)}px`);
 }
+// With step 4 open, 04 still sits at the very end of the line and the four
+// steps are evenly spaced (the open step's text shows beside the list).
+const ends = await page.evaluate(() => {
+  const ys = [...document.querySelectorAll('.l-step-dot')].map((d) => { const r = d.getBoundingClientRect(); return r.top + r.height / 2; });
+  const track = document.querySelector('.l-track').getBoundingClientRect();
+  const gaps = ys.slice(1).map((y, i) => y - ys[i]);
+  return { first: Math.abs(track.top - ys[0]), last: Math.abs(track.bottom - ys[3]), spread: Math.max(...gaps) - Math.min(...gaps) };
+});
+check('Process: the line runs from 01 to 04, evenly spaced, with 04 at its end', ends.first < 2 && ends.last < 2 && ends.spread < 2, JSON.stringify(ends));
 
 // 5. Idle: the shared loop stops when nothing moves
 await sleep(1500);
@@ -228,8 +291,10 @@ const rm = await page.evaluate(() => ({
   sticky: getComputedStyle(document.querySelector('.l-card')).position,
   procH: document.querySelector('.l-process').offsetHeight,
   mark: getComputedStyle(document.querySelector('.l-mark-glyph')).animationName + '/' + getComputedStyle(document.querySelector('.l-mark-dot')).animationName,
+  grey: window.__intro.mono,
+  dotMoved: window.__intro.minY,
 }));
-check('Reduced motion: all steps open, words at full ink, nothing pinned, the wordmark still', rm.steps === 4 && rm.words > 0.99 && rm.sticky !== 'sticky' && rm.procH < 2000 && rm.mark === 'none/none', JSON.stringify(rm));
+check('Reduced motion: all steps open, words at full ink, nothing pinned, the wordmark still, no grey intro', rm.steps === 4 && rm.words > 0.99 && rm.sticky !== 'sticky' && rm.procH < 2000 && rm.mark === 'none/none' && !rm.grey && rm.dotMoved === 0, JSON.stringify(rm));
 
 check('No console errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 await browser.close();

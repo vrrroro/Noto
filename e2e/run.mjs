@@ -100,6 +100,8 @@ try {
   check('Signed-out visitor sees the landing page', (await text()).includes('sorted.'));
   const authLinks = await page.$$eval('.landing a[href="/register"], .landing a[href="/login"]', (links) => links.length);
   check('Landing links to sign-up and sign-in', authLinks >= 4);
+  // After the first-load intro: the grey layer is gone and the dot has settled.
+  await page.waitForFunction(() => !document.querySelector('.l-mono') && !document.querySelector('.l-mark-dot')?.style.translate, { timeout: 6000 });
   await shot('app-00-landing');
   await click('.l-nav-primary .l-signin');
   await page.waitForSelector('#login-email');

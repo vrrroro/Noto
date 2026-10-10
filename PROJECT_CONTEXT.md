@@ -2,7 +2,7 @@
 
 ## Resume Here (read first)
 
-Last session: 2026-10-10. "Forgot password" (`/reset`) added, merged into `main` and deployed; self-service sign-up and reset verified on the live pool (live API 44/44). Landing round 3 (continuous purple flow, new orbs, HUD, scroll pin, theme-matched screenshots; see `LANDING_TASKS.md`) is merged into `main`, pushed and **deployed to Amplify**; verified live (landing motion 32/32, live site 17/17). **Noto is online:** https://main.dg6fh880g1p8b.amplifyapp.com (AWS Amplify Hosting, HTTPS) against the live
+Last session: 2026-10-11. Landing round 4 (grey first-load intro with a falling dot and a colour ripple, evenly spaced "How it works", no top-left ball, no hover on "Inside the app", copy without "student"/"project", "Back to home" on sign-in pages) is on branch **`feature/landing-round4`**, pushed to GitHub, **not merged and not deployed**: the owner reviews it locally first (`npm run dev`) and will ask for more changes. Verified locally: landing motion 38/38, demo E2E 34/34, frontend unit 19/19. Before that, 2026-10-10: "Forgot password" (`/reset`) added, merged into `main` and deployed; self-service sign-up and reset verified on the live pool (live API 44/44). Landing round 3 (continuous purple flow, new orbs, HUD, scroll pin, theme-matched screenshots; see `LANDING_TASKS.md`) is merged into `main`, pushed and **deployed to Amplify**; verified live (landing motion 32/32, live site 17/17). **Noto is online:** https://main.dg6fh880g1p8b.amplifyapp.com (AWS Amplify Hosting, HTTPS) against the live
 AWS backend.
 
 | Item | State |
@@ -169,7 +169,7 @@ creates CloudFront and removes the Amplify app. See ARCHITECTURE.md.
   scroll-linked motion runs through one rAF loop in `hooks/useScrollFrame.js` (read phase, then
   write phase; stops when idle). No GSAP or Lenis: sticky positioning plus eased scrubs.
   Everything is off under reduced motion. Copy must stay true to what the app does.
-  `node e2e/landing-motion.mjs` (32 checks) guards the motion and the theme switch.
+  `node e2e/landing-motion.mjs` (38 checks) guards the motion and the theme switch.
 - React 19 + Vite frontend; React Router; no UI library; no auth SDK (Cognito called with `fetch`)
 - Backend: Node.js 22 Lambdas (ES modules), AWS SDK v3; route logic is pure JS with injected deps
 - 3 Lambdas (one per resource) with per-function least-privilege IAM

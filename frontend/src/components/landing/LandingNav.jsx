@@ -40,7 +40,7 @@ function Actions({ night, onTheme, className = '' }) {
 }
 
 // Two navs in one fixed header. At the top of the page: a wide bar (the
-// orange ball alone on the left, the section links, then the actions).
+// section links, then the actions; nothing in the left corner).
 // After 50px on desktop it lifts away and the HUD rises in: a glass pill in
 // the centre with the brand and the section links, and the actions in a
 // glass pill on the right. A glider slides under the link you point at and
@@ -119,7 +119,7 @@ export default function LandingNav() {
       </a>
 
       <div className="l-nav-primary" inert={morphed || undefined}>
-        <HudBrand shown={!desktop && branded} className="l-nav-brand" />
+        <HudBrand shown={!desktop && branded} hideIdle className="l-nav-brand" />
         <nav className="l-nav-links" aria-label="Main">
           {NAV_LINKS.map((link) => (
             <a key={link.href} className="l-nav-link" href={link.href}>

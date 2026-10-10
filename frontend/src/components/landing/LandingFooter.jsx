@@ -16,7 +16,7 @@ export default function LandingFooter() {
         <div className="l-footer-brand">
           <Brand />
           <p>
-            Student workspace
+            Assignments, deadlines and notes
             <br />
             In the cloud, on AWS
           </p>
@@ -55,15 +55,13 @@ export default function LandingFooter() {
           </ul>
         </nav>
         <div className="l-footer-col is-wide">
-          <p className="l-footer-label">The project</p>
-          <p>
-            A college cloud computing project. Cognito, API Gateway, Lambda, DynamoDB, S3, CloudWatch and Amplify.
-          </p>
+          <p className="l-footer-label">Built on</p>
+          <p>Cognito, API Gateway, Lambda, DynamoDB, S3, CloudWatch and Amplify.</p>
         </div>
 
         <div className="l-footer-credits">
           <p>© {new Date().getFullYear()} Noto. All rights reserved.</p>
-          <p>A student cloud project</p>
+          <p>This was bloomed by Rohit</p>
           <a className="l-uline" href="#top">
             Back to top
           </a>

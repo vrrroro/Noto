@@ -5,6 +5,40 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (landing round 4, branch `feature/landing-round4`, not deployed)
+
+- **First-load intro.** The landing page now opens in grey (Day: white, greys and black; Night:
+  dark greys), with only the orange dot in colour. The dot falls like a drop of water with real
+  physics (gravity, a stretch in flight, a squash on contact that is longer for harder hits,
+  energy lost on each bounce, a short wobble as it settles; about 1.4 s from the fall) and its
+  first impact sends one ripple across the page that brings the colour back, the same circle
+  reveal as the Day/Night switch. Once per page load, never under reduced motion
+  (`components/landing/dropIntro.js`, `.l-mono` in landing.css). Replaces the CSS drop keyframes
+  and the ring ripple.
+- **How it works.** 01 to 04 now sit evenly along the line, which runs from the first dot to the
+  last, so 04 is at the end of the line; the open step's text and diagram show beside the list on
+  desktop and under it on tablets and phones. The sign-up diagram's blinking text caret is
+  replaced by a mouse pointer that glides in and clicks the field while a line of "typing" draws,
+  so it no longer looks like a real input.
+- **Nav.** The orange ball in the top-left corner of the top bar is gone (phones still draw the
+  small "Noto" in after scrolling). The section glider eases out without the spring overshoot,
+  so it no longer spills past "Under the hood".
+- **Inside the app.** No hover effect any more (no frosted preview, no orange title): the rows
+  open their panel on click. The closing "Sign in" button keeps its word inside its pill.
+- **What's inside.** The last card ("Free, private, any browser.") is removed; Dashboard caps the deck.
+- **Copy.** No "student" or "project" on the landing page; the footer credit reads "This was
+  bloomed by Rohit" and the "The project" column is now "Built on". The orange haze in the hero's
+  top-left corner is removed.
+- **Sign-in pages.** A "Back to home" button in the top-left corner of every sign-in page
+  (`AuthLayout.jsx`) returns to the top of the landing page.
+
+### Tests (landing round 4)
+
+- `e2e/landing-motion.mjs`: 38 checks (was 32): the grey intro, the fall, squash and settle
+  time, the ripple and the removal of the grey layer, no replay, the copy, the empty corner, the
+  glider never overshooting, five cards, and 01 to 04 evenly spaced with 04 at the end of the line.
+  38/38 locally; demo E2E 34/34; frontend unit 19/19.
+
 ### Added (sign-in, branch `feature/password-reset`)
 
 - **Forgot password.** A "Forgot password?" link on the sign-in page opens `/reset`

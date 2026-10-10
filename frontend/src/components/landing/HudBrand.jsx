@@ -4,12 +4,17 @@
 // along a vine line that draws itself, like the vine that ends in the dot on
 // the sign-in page; "Noto" then rises in behind it and the line fades away,
 // leaving "Noto" with its dot. Scrolling back to the top reverses it.
-export default function HudBrand({ shown, className = '' }) {
+// `hideIdle` hides the ball as well until the brand is shown (the top bar's
+// copy, so nothing sits in the corner at the top of the page).
+export default function HudBrand({ shown, hideIdle = false, className = '' }) {
+  const hidden = hideIdle && !shown;
   return (
     <a
       href="#top"
       className={`l-hud-brand ${shown ? 'is-shown' : ''} ${className}`}
       aria-label="Noto, back to top"
+      aria-hidden={hidden || undefined}
+      tabIndex={hidden ? -1 : undefined}
     >
       <span className="l-hud-slot">
         <span className="l-hud-word">Noto</span>

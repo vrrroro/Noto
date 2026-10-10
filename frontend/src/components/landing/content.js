@@ -16,7 +16,7 @@ export const NAV_LINKS = [
 ];
 
 export const INTRO_STATEMENT =
-  'We built Noto for the student with five subjects, too many PDFs and a deadline they half remember: one place for every assignment, every note and whatever is due next.';
+  'We built Noto for anyone with five subjects, too many PDFs and a deadline they half remember: one place for every assignment, every note and whatever is due next.';
 
 export const FEATURES = [
   {
@@ -44,7 +44,6 @@ export const FEATURES = [
     title: 'Dashboard',
     body: 'Total, pending, completed and overdue work, what is due next and what you uploaded last.',
   },
-  { icon: 'heart', title: 'Free, private, any browser.' },
 ];
 
 export const STEPS = [
@@ -102,7 +101,6 @@ export const SCREENS = [
     icon: 'dashboard',
     title: 'Dashboard',
     tags: ['Overview', 'Next up'],
-    tagline: 'Totals, the next deadline and recent files on one screen.',
     image: { day: dashboardDay, night: dashboardNight },
     alt: 'The Noto dashboard with assignment totals, a completion line and the next deadline',
     does: 'Counts your total, pending, completed and overdue assignments, shows how much is done, and puts the most urgent pending assignment in a card with a button to finish it. Upcoming deadlines and your latest uploads sit underneath.',
@@ -112,7 +110,6 @@ export const SCREENS = [
     icon: 'assignments',
     title: 'Assignments',
     tags: ['Deadlines', 'Priority'],
-    tagline: 'Create, filter, sort and complete, with a countdown on every card.',
     image: { day: assignmentsDay, night: assignmentsNight },
     alt: 'The assignments page with search, filters and assignment cards',
     does: 'Create an assignment with a title, subject, due date, priority and description. Search, filter by subject or status, sort by due date, edit, delete, and toggle complete.',
@@ -122,7 +119,6 @@ export const SCREENS = [
     icon: 'notes',
     title: 'Notes',
     tags: ['Files', 'Up to 10 MB'],
-    tagline: 'Upload PDFs, slides and photos; download or delete them any time.',
     image: { day: notesDay, night: notesNight },
     alt: 'The notes page with uploaded files filed by subject',
     does: 'Upload PDF, Word, PowerPoint, text and image files up to 10 MB each, filed by subject. Your browser sends them straight to a private S3 bucket with a short-lived signed link.',
@@ -132,7 +128,6 @@ export const SCREENS = [
     icon: 'subjects',
     title: 'Subjects',
     tags: ['Colours', 'Organise'],
-    tagline: 'Group everything by subject, each with its own colour.',
     image: { day: subjectsDay, night: subjectsNight },
     alt: 'The subjects page with a coloured card per subject',
     does: 'Add the subjects you take this semester. Each gets a colour that marks its assignments and files, and a subject cannot be deleted while work still uses it.',

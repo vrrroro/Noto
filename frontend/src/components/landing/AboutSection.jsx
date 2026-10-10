@@ -10,7 +10,7 @@ export default function AboutSection() {
             Who Noto is for
           </h2>
           <p className="l-text-large">
-            Noto is a student workspace that lives in the cloud. Sign in from a laptop in the library or a phone on the
+            Noto is a workspace for your coursework that lives in the cloud. Sign in from a laptop in the library or a phone on the
             bus, and your assignments, subjects and notes are already there.
           </p>
           <p className="l-text-large">

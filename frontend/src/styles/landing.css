@@ -6,8 +6,9 @@
      ramp mixed from those two; the signal is Noto's purple family (violet,
      dark plum, light lilac) and the orange of the Noto dot (the wordmark,
      the timeline marker, hover feedback). No yellow;
-   - the hero is the Noto wordmark itself: its letters rise in, the dot
-     drops and bounces into place, and scrolling spreads the letters apart;
+   - the hero is the Noto wordmark itself: its letters rise in on a grey
+     page, the dot falls like a drop of water and its ripple brings the
+     colour in, and scrolling spreads the letters apart;
    - Archivo at normal width for display and UI, tracking tightening as the
      size grows; Geist Mono for the small uppercase chips; Playfair Display
      for the wordmark and the one statement on the black slab;
@@ -39,10 +40,6 @@
   --l-glyph-top: light-dark(#2d1b4e, #f1eaff);
   --l-glyph-end: light-dark(#c4b0ff, #8e5cff);
   --l-grad-text: linear-gradient(135deg, var(--l-purple) 0%, var(--l-glyph-top) 100%);
-  /* The capping feature card: light lilac by Day, deep purple by Night. */
-  --l-card-a: light-dark(#ece3ff, #7b2fff);
-  --l-card-b: light-dark(#cdb9ff, #2d1b4e);
-  --l-card-ink: light-dark(#2d1b4e, #ffffff);
   /* The flow: one gradient down the whole page, Day all light, Night all dark purple. */
   --l-f0: light-dark(#faf8ff, #110b20);
   --l-f1: light-dark(#f4efff, #170f2b);
@@ -459,6 +456,14 @@
 .l-nav-brand {
   color: inherit;
   text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+/* The bar's own brand is only for phones, once the page has scrolled; at the
+   top of the page nothing sits in the corner (the big wordmark is the logo). */
+.l-nav-brand:not(.is-shown) {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .l-nav-links {
@@ -667,6 +672,12 @@
     0 0 0 1px color-mix(in srgb, var(--l-purple) 22%, transparent);
 }
 
+/* An outlined circle button keeps its label inside the pill, centred between
+   the left edge and the circle (otherwise the outline hugs the word). */
+.l-ib-hot.l-underglow {
+  padding-left: 1.3rem;
+}
+
 .l-signin.l-underglow {
   background: color-mix(in srgb, var(--l-purple) 7%, transparent);
 }
@@ -773,7 +784,8 @@
   color: var(--l-ink);
 }
 
-/* The glider: slides and stretches under the link in focus. */
+/* The glider: slides and stretches under the link in focus. It eases out
+   without overshooting, so it never spills past the first or last link. */
 .l-pill-glider {
   position: absolute;
   top: 0;
@@ -785,8 +797,8 @@
   opacity: 0;
   translate: var(--gx, 0) 0;
   transition:
-    translate 0.55s var(--ease-spring),
-    width 0.55s var(--ease-spring),
+    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.3s ease;
 }
 
@@ -924,8 +936,7 @@
   z-index: -1;
   background:
     radial-gradient(38% 34% at calc(var(--mx, 0.5) * 100%) 66%, color-mix(in srgb, var(--l-purple) 22%, transparent), transparent 72%),
-    radial-gradient(26% 26% at 88% 14%, var(--l-mist), transparent 72%),
-    radial-gradient(22% 22% at 8% 30%, color-mix(in srgb, var(--l-hot) 12%, transparent), transparent 72%);
+    radial-gradient(26% 26% at 88% 14%, var(--l-mist), transparent 72%);
   -webkit-mask-image: linear-gradient(#000 55%, transparent);
   mask-image: linear-gradient(#000 55%, transparent);
   pointer-events: none;
@@ -1016,16 +1027,6 @@
   background: radial-gradient(circle, color-mix(in srgb, var(--l-hot) 45%, transparent) 0, transparent 68%);
 }
 
-/* The ring that spreads when the dot lands. */
-.l-mark-dot::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 0.012em solid var(--l-hot);
-  border-radius: 50%;
-  opacity: 0;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .l-mark-glyph {
     animation: l-rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -1037,16 +1038,8 @@
     animation-delay: calc(0.12s + var(--i) * 0.09s);
   }
 
-  .l-mark-dot {
-    animation: l-dot-drop 1.25s linear 0.62s both;
-  }
-
   .l-mark-dot::before {
     animation: l-glow 3.4s ease-in-out 1.9s infinite;
-  }
-
-  .l-mark-dot::after {
-    animation: l-ripple 0.9s ease-out 1.32s;
   }
 
   .l-hero-grid > * {
@@ -1080,50 +1073,6 @@
   }
 }
 
-/* Falls from above the screen, squashes on impact, bounces twice, settles. */
-@keyframes l-dot-drop {
-  0% {
-    translate: 0 -110svh;
-    scale: 0.85 1.2;
-    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
-  }
-  48% {
-    translate: 0 0;
-    scale: 1.35 0.65;
-    animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
-  }
-  66% {
-    translate: 0 -0.75em;
-    scale: 0.9 1.12;
-    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
-  }
-  80% {
-    translate: 0 0;
-    scale: 1.18 0.84;
-    animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
-  }
-  90% {
-    translate: 0 -0.18em;
-    scale: 0.97 1.03;
-    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
-  }
-  100% {
-    translate: 0 0;
-    scale: 1;
-  }
-}
-
-@keyframes l-ripple {
-  from {
-    opacity: 0.85;
-    scale: 1;
-  }
-  to {
-    opacity: 0;
-    scale: 4.5;
-  }
-}
-
 @keyframes l-glow {
   0%,
   100% {
@@ -1138,6 +1087,33 @@
 
 .l-hero .l-h1 {
   grid-column: 1 / 8;
+}
+
+/* The first-load grey (dropIntro.js): one layer over the whole page that
+   turns everything behind it grey, with two holes in its mask: the dot
+   (--dx, --dy, --dr) and the ripple that brings the colour back (--rx, --ry,
+   --l-r, animated from 0 until it covers the screen). */
+@property --l-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+.l-mono {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  -webkit-backdrop-filter: grayscale(1);
+  backdrop-filter: grayscale(1);
+  -webkit-mask-image:
+    radial-gradient(circle at var(--dx, -100px) var(--dy, -100px), transparent var(--dr, 0px), #000 calc(var(--dr, 0px) + 6px)),
+    radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent var(--l-r), #000 calc(var(--l-r) + 1px));
+  mask-image:
+    radial-gradient(circle at var(--dx, -100px) var(--dy, -100px), transparent var(--dr, 0px), #000 calc(var(--dr, 0px) + 6px)),
+    radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent var(--l-r), #000 calc(var(--l-r) + 1px));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 
 .l-hero-side {
@@ -1337,18 +1313,6 @@
   flex-direction: column;
   gap: 1rem;
   width: 70%;
-}
-
-/* The card that caps the deck: light lilac by Day, deep purple by Night, the Noto dot. */
-.l-card.is-accent {
-  z-index: 1;
-  border-color: transparent;
-  background: linear-gradient(135deg, var(--l-card-a), var(--l-card-b));
-  color: var(--l-card-ink);
-}
-
-.l-card.is-accent .l-card-icon {
-  color: var(--l-hot);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1556,6 +1520,66 @@
   color: var(--l-g950);
 }
 
+/* With motion the four steps never move: 01 to 04 sit evenly from the top of
+   the line to its bottom (the line runs from the first dot to the last), and
+   the open step's text and diagram show beside the list on desktop and under
+   it on tablets and phones, cross-fading as the steps change. (Under reduced
+   motion every step is open, so the stacked accordion above stays.) */
+@media (prefers-reduced-motion: no-preference) {
+  .l-steps-wrap {
+    --l-row: 5rem;
+    grid-column: 5 / 9;
+  }
+
+  .l-steps {
+    justify-content: space-between;
+  }
+
+  .l-step,
+  .l-step.is-active {
+    flex: none;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .l-step-title {
+    white-space: nowrap;
+  }
+
+  .l-track {
+    top: calc(var(--l-row) / 2);
+    bottom: calc(var(--l-row) / 2);
+  }
+
+  .l-track-fill {
+    height: max(0px, calc(var(--fill, 0px) - var(--l-row) / 2));
+  }
+
+  /* Desktop: the body takes the next four columns, centred on the list. */
+  .l-step-body {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + var(--l-gap));
+    width: 100%;
+    padding: 0;
+    visibility: hidden;
+    translate: 0 calc(-50% + 1.5rem);
+    transition:
+      opacity 0.3s ease-in-out,
+      translate 0.3s ease-in-out,
+      visibility 0s linear 0.3s;
+  }
+
+  .l-step.is-active .l-step-body {
+    visibility: visible;
+    translate: 0 -50%;
+    transition:
+      opacity 0.5s ease-out 0.2s,
+      translate 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
+      visibility 0s;
+  }
+}
+
 /* Diagrams: lilac line art. */
 .l-diagram {
   width: auto;
@@ -1592,6 +1616,18 @@
   stroke-width: 1;
 }
 
+/* The sign-up pointer: an outlined arrow on the page colour, pressed from its tip. */
+.l-diagram .d-pointer {
+  fill: var(--l-canvas);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: 0 0;
+}
+
+.l-diagram .d-typed {
+  stroke-width: 2.5;
+}
+
 .l-diagram .d-path {
   stroke-dasharray: 2 7;
 }
@@ -1601,8 +1637,13 @@
     animation: d-dotted-to-solid 5s ease-in-out infinite;
   }
 
-  .l-step.is-active .is-code .d-caret {
-    animation: d-blink 1s steps(1) infinite;
+  .l-step.is-active .is-code .d-pointer {
+    animation: d-point 5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+  }
+
+  .l-step.is-active .is-code .d-typed {
+    stroke-dasharray: 1;
+    animation: d-type 5s ease-in-out infinite;
   }
 
   .l-step.is-active .is-code .d-box {
@@ -1664,9 +1705,45 @@
   }
 }
 
-@keyframes d-blink {
-  50% {
+/* The pointer: glides in from below-right, clicks (a quick press), rests on
+   the field while the line is typed, then drifts off before the loop restarts. */
+@keyframes d-point {
+  0% {
     opacity: 0;
+    transform: translate(70px, 64px);
+  }
+  8% {
+    opacity: 1;
+  }
+  22%,
+  30% {
+    transform: translate(0, 0) scale(1);
+  }
+  26% {
+    transform: translate(0, 0) scale(0.8);
+  }
+  66% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: translate(46px, 70px);
+  }
+}
+
+@keyframes d-type {
+  0%,
+  28% {
+    stroke-dashoffset: 1;
+  }
+  48%,
+  88% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 1;
   }
 }
 
@@ -1919,18 +1996,6 @@
   color: #fff;
 }
 
-@media (hover: hover) {
-  .l-row:hover .l-row-title {
-    color: var(--l-hot);
-  }
-
-  .l-row:hover .l-row-circle {
-    border-color: var(--l-purple);
-    background: var(--l-purple);
-    color: #fff;
-  }
-}
-
 .l-app-cta {
   display: flex;
   flex-wrap: wrap;
@@ -1939,48 +2004,9 @@
   margin-top: 4rem;
 }
 
-/* The frosted preview that follows the pointer 1:1. */
-.l-preview {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 24rem;
-  padding: 1rem;
-  border-radius: 8px;
-  background: var(--l-glass);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.l-preview.is-on {
-  opacity: 1;
-}
-
-.l-preview img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  object-position: top left;
-  border-radius: 4px;
-}
-
-@media (max-width: 991px), (hover: none) {
-  .l-preview {
-    display: none;
-  }
-}
-
 /* Screenshots come in both themes; show the one that matches. The conditions
    mirror global.css: Night by choice, or by default unless the system asks
-   for light. (img.class selectors outrank `.l-preview img` and friends.) */
+   for light. (img.class selectors outrank `.l-popup-body img` and friends.) */
 .landing img.l-shot-night {
   display: none;
 }
@@ -2271,6 +2297,29 @@
     left: calc(-4.4rem + 3.5px);
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    .l-steps-wrap {
+      grid-column: 5 / 13;
+      height: auto;
+      align-self: start;
+    }
+
+    .l-steps {
+      height: auto;
+    }
+
+    .l-step-body {
+      top: calc(100% + 1.5rem);
+      left: 0;
+      width: 100%;
+      translate: 0 1.5rem;
+    }
+
+    .l-step.is-active .l-step-body {
+      translate: 0 0;
+    }
+  }
+
   .l-step-dot {
     left: -4.4rem;
   }
@@ -2420,6 +2469,16 @@
   .l-step {
     flex-basis: 3.5rem;
     min-height: 3.5rem;
+  }
+
+  .l-steps-wrap {
+    --l-row: 3.5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .l-steps-wrap {
+      flex: none;
+    }
   }
 
   .l-step-btn {
