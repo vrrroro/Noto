@@ -4,7 +4,7 @@ import { SESSION_EXPIRED_EVENT } from '../services/api.js';
 
 const AuthContext = createContext(null);
 
-const toUser = (session) => (session ? { email: session.email, userId: session.userId } : null);
+const toUser = (session) => (session ? { email: session.email, name: session.name || '', userId: session.userId } : null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => toUser(auth.getSession()));
@@ -25,6 +25,10 @@ export function AuthProvider({ children }) {
     setUser(toUser(session));
   }, []);
 
+  const updateName = useCallback(async (name) => {
+    setUser(toUser(await auth.updateName(name.trim())));
+  }, []);
+
   const signOut = useCallback(async () => {
     await auth.signOut();
     setUser(null);
@@ -38,13 +42,14 @@ export function AuthProvider({ children }) {
       setNotice,
       signIn,
       signOut,
-      signUp: (email, password) => auth.signUp(email.trim(), password),
+      updateName,
+      signUp: (email, password, name = '') => auth.signUp(email.trim(), password, name.trim()),
       confirmSignUp: (email, code) => auth.confirmSignUp(email.trim(), code.trim()),
       resendCode: (email) => auth.resendCode(email.trim()),
       forgotPassword: (email) => auth.forgotPassword(email.trim()),
       confirmForgotPassword: (email, code, password) => auth.confirmForgotPassword(email.trim(), code.trim(), password),
     }),
-    [user, notice, signIn, signOut],
+    [user, notice, signIn, signOut, updateName],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

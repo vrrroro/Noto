@@ -1,7 +1,7 @@
 import { createHttpHandler } from '../shared/http.js';
 import { ok, created } from '../shared/response.js';
 import { notFound, conflict } from '../shared/errors.js';
-import { validateSubjectName } from '../shared/validation.js';
+import { validateSubjectColor, validateSubjectName } from '../shared/validation.js';
 import { FILE_STATUS } from '../shared/constants.js';
 import { toPublic, defaultClock, defaultIdGenerator } from './common.js';
 
@@ -15,12 +15,14 @@ export function createSubjectRoutes({ subjects, assignments, files, now = defaul
 
     'POST /subjects': async ({ userId, body, log }) => {
       const name = validateSubjectName(body);
+      const color = validateSubjectColor(body);
       const existing = await subjects.list(userId);
       if (existing.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
         throw conflict('SUBJECT_EXISTS', `You already have a subject called "${name}".`);
       }
 
       const item = { subjectId: newId(), userId, name, createdAt: now().toISOString() };
+      if (color) item.color = color;
       await subjects.create(item);
       log.info('Subject created', { subjectId: item.subjectId });
       return created(toPublic(item));

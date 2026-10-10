@@ -58,9 +58,11 @@ describe('format utils', () => {
     expect(checkFileBeforeUpload({ name: 'a.pdf', size: 0 })).toMatch(/empty/);
   });
 
-  it('builds a friendly greeting name from an email', () => {
-    expect(greetingName('rohit.sharma@college.edu')).toBe('Rohit');
-    expect(greetingName('')).toBe('Student');
+  it('greets by the first word of the account name, never the email', () => {
+    expect(greetingName('rohit sharma')).toBe('Rohit');
+    expect(greetingName('  Ada ')).toBe('Ada');
+    expect(greetingName('')).toBe('');
+    expect(greetingName(undefined)).toBe('');
   });
 
   it('rotates subject colours by creation order', () => {
@@ -77,6 +79,18 @@ describe('format utils', () => {
     expect(colorOf('dbms')).toBe(colorOf('DBMS'));
     expect(subjectColors(subjects.slice(0, 2))('DBMS')).toBe(colorOf('DBMS')); // adding subjects keeps colours
     expect(colorOf('Unknown')).toBe('var(--violet)');
+  });
+
+  it('uses a picked subject colour, and keeps the rotation for the rest', () => {
+    const subjects = [
+      { name: 'DBMS', createdAt: '2026-10-01' },
+      { name: 'OS', createdAt: '2026-10-02', color: 'green' },
+      { name: 'AI', createdAt: '2026-10-03' },
+    ];
+    const colorOf = subjectColors(subjects);
+    expect(colorOf('OS')).toBe('var(--green)');
+    expect(colorOf('DBMS')).toBe('var(--magenta)');
+    expect(colorOf('AI')).toBe('var(--cyan)');
   });
 });
 

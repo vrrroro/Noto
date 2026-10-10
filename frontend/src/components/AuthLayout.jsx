@@ -32,11 +32,6 @@ export default function AuthLayout({ label, title, subtitle, children, footer })
         <h2>
           Assignments, deadlines and notes, kept in <em>one</em> place.
         </h2>
-        <ul className="auth-points">
-          <li>See what is due next</li>
-          <li>Keep notes together by subject</li>
-          <li>Open them from any browser</li>
-        </ul>
       </section>
 
       <main className="auth-main">

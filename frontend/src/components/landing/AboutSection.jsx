@@ -1,7 +1,9 @@
 import IconButton, { UpperTitle } from './IconButton.jsx';
 import { NotoWord } from '../NotoWord.jsx';
+import { useAuth } from '../../hooks/useAuth.jsx';
 
 export default function AboutSection() {
+  const { isAuthenticated } = useAuth();
   return (
     <section className="l-section l-about" aria-labelledby="l-about-title">
       <div className="l-container l-grid">
@@ -18,7 +20,11 @@ export default function AboutSection() {
             It does a few things and does them properly. No feeds, no streaks, no clutter: just what is due, what is
             done, and the files you need to do it.
           </p>
-          <IconButton to="/register">Make your account</IconButton>
+          {isAuthenticated ? (
+            <IconButton to="/">Open your dashboard</IconButton>
+          ) : (
+            <IconButton to="/register">Make your account</IconButton>
+          )}
         </div>
       </div>
     </section>

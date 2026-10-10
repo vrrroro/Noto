@@ -27,6 +27,8 @@
   --yellow: #ffe600;
   --orange: #ff6b35; /* the signal: Noto dot, primary action, active state, labels, selection, focus */
   --violet: #7b2fff;
+  --blue: #3d7bff;
+  --green: #39e07a;
 
   /* Roles: light-dark(Day, Night) */
   --bg: light-dark(#faf8ff, #0d0d1a);
@@ -65,8 +67,9 @@
   --tone-neutral: light-dark(rgb(13 13 26 / 32%), rgb(255 255 255 / 42%));
 
   /* LED glow (emissive, same hue as the element) */
-  --glow-button: 0 0 22px rgb(255 107 53 / 55%), 0 0 8px rgb(255 107 53 / 75%);
-  --glow-dot: 0 0 14px rgb(255 107 53 / 85%), 0 0 5px rgb(255 107 53);
+  /* 20% softer than before (round 5): every glowing button and the Noto dot. */
+  --glow-button: 0 0 22px rgb(255 107 53 / 44%), 0 0 8px rgb(255 107 53 / 60%);
+  --glow-dot: 0 0 14px rgb(255 107 53 / 68%), 0 0 5px rgb(255 107 53 / 80%);
   --grain-opacity: 0.04;
 
   /* Type: three voices */
@@ -215,6 +218,14 @@
   .demo-badge {
     corner-shape: squircle;
   }
+}
+
+/* Switching Day/Night (switchTheme in useTheme.js): the new theme opens as
+   a circle from the switch, on the landing page and in the app alike. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 /* ---------- Base ---------- */
@@ -943,6 +954,100 @@ select:disabled {
     box-shadow var(--t-fast) ease;
 }
 
+/* Dashboard: asks a nameless account for a name, once. */
+.name-prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: calc(var(--space-md) * -1) 0 var(--space-lg);
+}
+
+.name-prompt-label {
+  color: var(--text-muted);
+}
+
+.name-prompt input {
+  width: min(16rem, 100%);
+  min-height: 40px;
+}
+
+/* The subject colour picker: a round swatch in the bar, opening a row of six. */
+.color-picker {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.color-swatch-btn,
+.color-option {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.color-swatch-btn {
+  align-self: center;
+  margin-left: var(--space-2xs, 4px);
+}
+
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 12%),
+    0 0 10px color-mix(in srgb, var(--swatch) 45%, transparent);
+  transition: scale var(--t-fast, 0.15s) ease;
+}
+
+.color-swatch-btn:hover .color-swatch,
+.color-option:hover .color-swatch {
+  scale: 1.1;
+}
+
+.color-swatch-btn[aria-expanded='true'] .color-swatch,
+.color-option[aria-checked='true'] .color-swatch {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--swatch);
+}
+
+.color-swatch-btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.color-pop {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--hairline),
+    0 14px 32px -12px var(--float-shadow);
+  animation: color-pop-in 0.18s ease-out;
+}
+
+@keyframes color-pop-in {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
 @media (hover: hover) {
   .giant-bar:hover {
     scale: 1.01;
@@ -1205,6 +1310,17 @@ select:disabled {
   border-top: 1px solid var(--hairline);
 }
 
+/* Home (back to the landing page) to the left of Sign out. */
+.sidebar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-md);
+}
+
+.sidebar-actions .nav-button {
+  width: auto;
+}
+
 .demo-badge {
   display: grid;
   gap: 4px;
@@ -1427,10 +1543,10 @@ select:disabled {
 }
 
 /* A graphite band separates chapters instead of a divider. */
+/* The dashboard's lower panels sit straight on the page: no band of a
+   second shade behind them (its edges showed against the sidebar column). */
 .band {
-  margin: var(--space-lg) calc(var(--gutter) * -1) calc(var(--space-xl) * -1);
-  padding: var(--space-lg) var(--gutter) var(--space-xl);
-  background: var(--band);
+  margin-top: var(--space-lg);
 }
 
 /* ---------- Cards ---------- */
@@ -1543,7 +1659,17 @@ select:disabled {
   font-variant-numeric: tabular-nums slashed-zero;
 }
 
-/* Completion meter: a 3px track; the orange dot springs to the real figure. */
+/* Completion meter: a 3px track; the orange dot springs to the real figure.
+   The spring runs on --meter itself (a registered number), and the fill and the
+   dot read min(--meter, 100), so the overshoot can stretch the bar but never past
+   the end of the track: at 100% it stops at the end instead of running into
+   the label. The dot stays inside the track at both ends. */
+@property --meter {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
 .meter {
   display: flex;
   flex-wrap: wrap;
@@ -1553,9 +1679,11 @@ select:disabled {
 }
 
 .meter-track {
+  --at: calc(min(var(--meter), 100) * (100% - 14px) / 100);
   position: relative;
   flex: 1 1 260px;
   height: 14px;
+  transition: --meter 1100ms var(--ease-spring);
 }
 
 .meter-track::before,
@@ -1564,32 +1692,29 @@ select:disabled {
   position: absolute;
   top: 5.5px;
   left: 0;
-  right: 0;
   height: 3px;
   border-radius: 3px;
 }
 
 .meter-track::before {
+  right: 0;
   background: var(--track);
 }
 
 .meter-fill {
+  width: calc(var(--at) + 7px);
   background: var(--cyan);
-  transform: scaleX(calc(var(--p) / 100));
-  transform-origin: left center;
-  transition: transform 1100ms var(--ease-spring);
 }
 
 .meter-dot {
   position: absolute;
   top: 0;
-  left: calc(var(--p) * 1% - 7px);
+  left: var(--at);
   width: 14px;
   height: 14px;
   border-radius: 50%;
   background: var(--orange);
   box-shadow: var(--glow-dot);
-  transition: left 1100ms var(--ease-spring);
 }
 
 .meter-label {
@@ -2541,46 +2666,6 @@ select:disabled {
   letter-spacing: -0.045em;
 }
 
-.auth-points {
-  display: grid;
-  gap: var(--space-sm);
-  margin: var(--space-lg) 0 0;
-  padding: 0;
-  list-style: none;
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.auth-points li {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.auth-points li::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--point-color);
-  box-shadow: 0 0 8px var(--point-color);
-}
-
-.auth-points li:nth-child(1) {
-  --point-color: var(--cyan);
-}
-
-.auth-points li:nth-child(2) {
-  --point-color: var(--yellow);
-}
-
-.auth-points li:nth-child(3) {
-  --point-color: var(--magenta);
-}
-
 /* ---------- Entrance choreography (only when motion is welcome) ---------- */
 
 @media (prefers-reduced-motion: no-preference) {
@@ -2745,12 +2830,47 @@ select:disabled {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   }
 
+  /* Everything fits one screen: the arch, the line under it and the form
+     are all sized from the screen's height, so nothing needs a scroll. */
+  .auth-page {
+    min-height: max(100dvh, 600px);
+  }
+
   .auth-intro {
     display: grid;
     align-content: center;
     justify-items: start;
-    padding: var(--space-xl) var(--space-xl) var(--space-lg);
+    padding: clamp(24px, 5dvh, 64px) var(--space-xl);
     border-right: 1px solid var(--hairline);
+  }
+
+  .auth-intro-brand {
+    margin-bottom: clamp(12px, 3dvh, 32px);
+  }
+
+  /* The heading sits under the arch now, not over the vine. */
+  .auth-arch {
+    width: auto;
+    height: min(46dvh, 440px);
+  }
+
+  .auth-intro h2 {
+    max-width: 15ch;
+    margin-top: clamp(16px, 3.5dvh, 36px);
+    font-size: clamp(34px, 5.4dvh, 56px);
+  }
+
+  .auth-main {
+    padding-block: clamp(64px, 9dvh, 96px) clamp(16px, 4dvh, 48px);
+  }
+
+  .auth-card {
+    gap: clamp(10px, 2dvh, var(--space-md));
+    padding: clamp(20px, 4dvh, var(--space-lg)) var(--space-lg) clamp(14px, 2.5dvh, var(--space-md));
+  }
+
+  .auth-card h1 {
+    font-size: clamp(38px, 6dvh, 54px);
   }
 
   .auth-brand {

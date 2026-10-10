@@ -6,7 +6,8 @@ import { useResource } from '../hooks/useResource.js';
 import { useToast } from '../components/Toast.jsx';
 import { assignmentsApi, filesApi, subjectsApi } from '../services/api.js';
 import { LIMITS } from '@backend/shared/constants.js';
-import { subjectColors } from '../utils/format.js';
+import SubjectColorPicker from '../components/SubjectColorPicker.jsx';
+import { rememberSubjectColor, subjectColors } from '../utils/format.js';
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -17,6 +18,7 @@ export default function Subjects() {
     return { subjects, assignments, files };
   });
   const [name, setName] = useState('');
+  const [color, setColor] = useState('violet');
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
@@ -42,7 +44,12 @@ export default function Subjects() {
     setSaving(true);
     setFormError('');
     try {
-      const created = await subjectsApi.create(name.trim());
+      const created = await subjectsApi.create(name.trim(), color);
+      // An older API does not keep the colour yet: remember it in this browser.
+      if (created.color !== color) {
+        rememberSubjectColor(created.subjectId, color);
+        created.color = color;
+      }
       setData((d) => ({
         ...d,
         subjects: [...d.subjects, created].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })),
@@ -70,7 +77,7 @@ export default function Subjects() {
             My <em>subjects</em>
           </>
         }
-        description="Subjects organise your assignments and notes."
+        description="Subjects organise your assignments and notes. Give each one its own colour."
       />
 
       <form className="inline-form" onSubmit={handleAdd} noValidate>
@@ -83,6 +90,7 @@ export default function Subjects() {
           </p>
         </div>
         <div className="giant-bar">
+          <SubjectColorPicker value={color} onChange={setColor} disabled={status !== 'success'} />
           <input
             id="subject-name"
             value={name}

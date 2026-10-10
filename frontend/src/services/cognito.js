@@ -36,13 +36,18 @@ async function call(action, payload) {
 }
 
 export const cognito = {
-  signUp: (email, password) =>
+  // `name` is Cognito's standard attribute: no change to the user pool needed.
+  signUp: (email, password, name) =>
     call('SignUp', {
       ClientId: config.clientId,
       Username: email,
       Password: password,
-      UserAttributes: [{ Name: 'email', Value: email }],
+      UserAttributes: [{ Name: 'email', Value: email }, ...(name ? [{ Name: 'name', Value: name }] : [])],
     }),
+
+  // Sets the signed-in user's own name (needs their access token only).
+  updateName: (accessToken, name) =>
+    call('UpdateUserAttributes', { AccessToken: accessToken, UserAttributes: [{ Name: 'name', Value: name }] }),
 
   confirmSignUp: (email, code) =>
     call('ConfirmSignUp', { ClientId: config.clientId, Username: email, ConfirmationCode: code }),

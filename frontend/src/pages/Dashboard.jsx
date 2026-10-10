@@ -58,7 +58,7 @@ function CompletionMeter({ completed, total }) {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percent}
-        style={{ '--p': shown }}
+        style={{ '--meter': shown }}
       >
         <span className="meter-fill" />
         <span className="meter-dot" />
@@ -124,8 +124,50 @@ function NextUp({ next, total, colorOf, completing, onComplete }) {
   );
 }
 
+// Accounts made before sign-up asked for a name have none: ask once, here,
+// and save it on the account (Cognito's `name`), never guess it from the email.
+function NamePrompt() {
+  const { updateName } = useAuth();
+  const toast = useToast();
+  const [name, setName] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function save(e) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setSaving(true);
+    try {
+      await updateName(name);
+      toast.success('Saved. Nice to meet you.');
+    } catch (err) {
+      toast.error(err.message || 'Could not save your name.');
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form className="name-prompt" onSubmit={save}>
+      <label htmlFor="name-prompt-input" className="name-prompt-label">
+        What should we call you?
+      </label>
+      <input
+        id="name-prompt-input"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Your name"
+        autoComplete="given-name"
+        maxLength={60}
+      />
+      <button type="submit" className="btn btn-secondary btn-sm" disabled={saving || !name.trim()}>
+        {saving ? 'Saving…' : 'Save'}
+      </button>
+    </form>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
+  const firstName = greetingName(user?.name);
   const toast = useToast();
   const [completing, setCompleting] = useState(false);
   const { status, data, error, reload } = useResource(async () => {
@@ -155,7 +197,7 @@ export default function Dashboard() {
         label={today}
         title={
           <>
-            Hello, <em>{greetingName(user?.email)}</em>
+            Hello, <em>{firstName || 'there'}</em>
           </>
         }
         actions={
@@ -169,6 +211,8 @@ export default function Dashboard() {
           </>
         }
       />
+
+      {!firstName && <NamePrompt />}
 
       {status === 'loading' && <LoadingState label="Loading your dashboard…" />}
       {status === 'error' && <ErrorState error={error} onRetry={reload} label="Failed to load the dashboard." />}

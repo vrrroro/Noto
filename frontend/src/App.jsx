@@ -15,7 +15,9 @@ import Subjects from './pages/Subjects.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ScrollPin from './components/ScrollPin.jsx';
 
-// The landing page is its own chunk: signed-in users never download it.
+// The landing page is its own chunk: signed-in users only download it if
+// they open it (the Home button). "/" is the landing page when signed out and
+// the dashboard when signed in; "/home" is the landing page for everyone.
 const Landing = lazy(() => import('./pages/Landing.jsx'));
 const landing = (
   <Suspense fallback={null}>
@@ -42,6 +44,7 @@ export default function App() {
       <AuthProvider>
         <ToastProvider>
           <Routes>
+            <Route path="/home" element={landing} />
             <Route element={<PublicOnlyRoute />}>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />

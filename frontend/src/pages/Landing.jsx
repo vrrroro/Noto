@@ -13,7 +13,8 @@ import { installGlide } from '../components/landing/glide.js';
 import { usePrefersReducedMotion } from '../hooks/useScrollFrame.js';
 import '../styles/landing.css';
 
-// The public front page for signed-out visitors: quiet precision on an
+// The public front page (at "/" for signed-out visitors, and at "/home" for
+// everyone, reached from the app's Home button): quiet precision on an
 // off-white page, with Noto's purples as the signal and the orange dot for warmth.
 // All motion is scroll-linked or pointer-linked; nothing plays on its own.
 export default function Landing() {

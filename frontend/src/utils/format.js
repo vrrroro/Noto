@@ -1,4 +1,5 @@
-import { ALLOWED_FILE_TYPES, LIMITS } from '@backend/shared/constants.js';
+import { ALLOWED_FILE_TYPES, LIMITS, SUBJECT_COLORS } from '@backend/shared/constants.js';
+import { readJson, writeJson } from './storage.js';
 
 export function formatBytes(bytes) {
   if (!Number.isFinite(bytes) || bytes < 0) return '—';
@@ -49,20 +50,48 @@ export function checkFileBeforeUpload(file) {
   return null;
 }
 
-export function greetingName(email = '') {
-  const local = email.split('@')[0] || 'Student';
-  const word = local.split(/[._\-+0-9]/).find(Boolean) || 'Student';
+// The name to greet the user by: the first word of the name on their account
+// (Cognito's `name`), never a guess from the email. Empty when there is none.
+export function greetingName(name = '') {
+  const word = String(name).trim().split(/\s+/)[0] || '';
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-// Each subject keeps one accent colour everywhere it appears. Colours rotate
-// in the order subjects were created, so the first four never collide and a
-// new subject does not recolour the others. Orange is left out on purpose:
-// it is reserved for Noto's dot.
-const SUBJECT_COLORS = ['var(--magenta)', 'var(--cyan)', 'var(--yellow)', 'var(--violet)'];
+// The six subject colours (keys from the backend) as CSS colours, with the
+// names the colour picker reads out.
+export const SUBJECT_PALETTE = {
+  violet: { css: 'var(--violet)', label: 'Violet' },
+  magenta: { css: 'var(--magenta)', label: 'Magenta' },
+  cyan: { css: 'var(--cyan)', label: 'Cyan' },
+  yellow: { css: 'var(--yellow)', label: 'Yellow' },
+  blue: { css: 'var(--blue)', label: 'Blue' },
+  green: { css: 'var(--green)', label: 'Green' },
+};
+export { SUBJECT_COLORS };
+
+// Colours picked in this browser, by subject ID. Used when the API does not
+// return a subject's colour (an older backend), so the pick still shows here.
+const LOCAL_COLORS_KEY = 'scm.subjectColors';
+export function rememberSubjectColor(subjectId, color) {
+  writeJson(LOCAL_COLORS_KEY, { ...readJson(LOCAL_COLORS_KEY, {}), [subjectId]: color });
+}
+
+// Each subject keeps one accent colour everywhere it appears: the one picked
+// for it, or else one from a rotation in the order subjects were created (only
+// subjects without a pick count), so the first four never collide and a new
+// subject does not recolour the others. Orange is left out on purpose: it is
+// reserved for Noto's dot.
+const ROTATION = ['magenta', 'cyan', 'yellow', 'violet'];
 
 export function subjectColors(subjects = []) {
+  const local = readJson(LOCAL_COLORS_KEY, {});
+  const picked = (s) => (SUBJECT_PALETTE[s.color] ? s.color : SUBJECT_PALETTE[local[s.subjectId]] ? local[s.subjectId] : null);
   const byAge = [...subjects].sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
-  const colors = new Map(byAge.map((s, i) => [s.name.toLowerCase(), SUBJECT_COLORS[i % SUBJECT_COLORS.length]]));
+  const colors = new Map();
+  let i = 0;
+  for (const s of byAge) {
+    const key = picked(s) ?? ROTATION[i++ % ROTATION.length];
+    colors.set(s.name.toLowerCase(), SUBJECT_PALETTE[key].css);
+  }
   return (name = '') => colors.get(name.toLowerCase()) ?? 'var(--violet)';
 }

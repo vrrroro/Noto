@@ -216,27 +216,27 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
   not much).
 - [x] **R5-9. Even section spacing.** Equal, appropriate spacing between every section (the gap
   between "Built on AWS" and "Inside the app" is too big).
-- [ ] **R5-10. Progress bar overshoot (app).** At 100% complete the progress bar's stretch
+- [x] **R5-10. Progress bar overshoot (app).** At 100% complete the progress bar's stretch
   animation must stay inside its track and not run into the "100%" label.
-- [ ] **R5-11. App theme switch.** Remove the "System" theme option. The app's Day/Night switch
+- [x] **R5-11. App theme switch.** Remove the "System" theme option. The app's Day/Night switch
   uses the landing page's circle reveal (growing outward from the button).
-- [ ] **R5-12. Greeting name.** "Hello, <name>" must not just use the part of the email before
+- [x] **R5-12. Greeting name.** "Hello, <name>" must not just use the part of the email before
   "@": use the account's real name (Cognito `name`/`given_name`) and fall back sensibly.
-- [ ] **R5-13. Upcoming / Recent files panels.** Their background is a different shade from the
+- [x] **R5-13. Upcoming / Recent files panels.** Their background is a different shade from the
   page and the edges look janky: make them sit cleanly on the background.
-- [ ] **R5-14. Subject colours.** When adding (and editing) a subject, a button next to it lets you
+- [x] **R5-14. Subject colours.** When adding (and editing) a subject, a button next to it lets you
   pick the subject's colour from 6 colours; the colour is saved and shown.
-- [ ] **R5-15. Softer glow.** Tone down the glow of all glowing buttons (New subject, New
+- [x] **R5-15. Softer glow.** Tone down the glow of all glowing buttons (New subject, New
   assignment, …) by 20%, and the Noto orb inside the app by 20%.
-- [ ] **R5-16. Sign-in page fits one screen.** Everything visible without scrolling; the
+- [x] **R5-16. Sign-in page fits one screen.** Everything visible without scrolling; the
   "Assignments, deadlines and notes, kept in one place." text must not overlap the animation;
   remove the three bullet points ("See what is due next", "Keep notes together by subject",
   "Open them from any browser").
-- [ ] **R5-17. Home button and signed-in landing.** In the app, a "Home" button to the left of
+- [x] **R5-17. Home button and signed-in landing.** In the app, a "Home" button to the left of
   "Sign out" goes to the top of the landing page. When signed in, the landing page shows "Signed
   in" with a round avatar (the account's initial) instead of "Sign in"/"Create account"; clicking
   it opens a menu: Dashboard, Assignments, Subjects, Notes, Sign out.
-- [ ] **R5-18. Open into the dashboard.** When signed in, opening the site (`/`) goes straight to
+- [x] **R5-18. Open into the dashboard.** When signed in, opening the site (`/`) goes straight to
   the dashboard. The landing page shows only when the user clicks Home (or is signed out).
 - [x] **R5-19. Night orbs.** In Night the scroll orbs use the same orange and dark purple as Day,
   but swapped: purple on the left, orange on the right.
@@ -277,3 +277,29 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
   + 2 × --l-section)`) under motion.
 - R5-19: Night orbs use the Day colours swapped: dark purple orb on the left, Noto orange on the
   right (white ink on both); the lens stays greyish purplish black.
+- R5-10: the meter's spring now runs on a registered `--meter` number and the fill/dot read
+  `min(--meter, 100)`, with the dot kept inside the track: it can stretch but never past the end.
+  Checked: 0 px past the track end while animating to 100%.
+- R5-11: `useTheme` has only `light`/`dark` (first visit follows the system once). New
+  `switchTheme(next, origin, setTheme)` (view transition + circle clip from the clicked button) is
+  used by the landing switch and the app sidebar; the view-transition CSS moved to global.css.
+- R5-12: sign-up asks for a Name, saved as Cognito's standard `name` attribute (no pool change);
+  the session reads the ID token's `name` claim. Dashboard greets by its first word; an account with
+  no name sees "Hello, there" and a one-line "What should we call you?" form (Cognito
+  `UpdateUserAttributes` with the user's own access token, then a token refresh). Demo auth mirrors it.
+- R5-13: the dashboard's `.band` (a second-shade strip with hard edges) is gone; the panels sit on
+  the page background.
+- R5-14: six colours (`SUBJECT_COLORS` in backend constants: violet, magenta, cyan, yellow, blue,
+  green). `SubjectColorPicker` (swatch in the add bar, radio group popover, arrow keys, Escape).
+  Backend `POST /subjects` accepts and stores an optional validated `color` (+ test). **The live
+  Lambda is not redeployed**, so against the live API the pick is remembered in this browser
+  (`scm.subjectColors`) until the backend is deployed. Subjects without a pick keep the rotation.
+- R5-15: `--glow-button` and `--glow-dot` alphas × 0.8.
+- R5-16: auth-points removed; at ≥1200px the arch, heading and card are sized from the screen
+  height, the heading sits under the arch. Sign-in has no scroll at 1280×720, 1366×768, 1440×900,
+  1920×1080. (Sign-up, with its extra fields, may still scroll on short screens.)
+- R5-17: sidebar has Home (left of Sign out) → `/home`. The landing page, when signed in, shows the
+  switch and `AccountMenu` ("Signed in" + initial): Dashboard, Assignments, Subjects, Notes, Sign out
+  (phone menu too); About's CTA and the footer's Account column switch to app links.
+- R5-18: `/` = dashboard when signed in, landing when signed out; `/home` = landing for everyone
+  (App.jsx). Sign-in still lands on the dashboard.

@@ -32,6 +32,21 @@ test('rejects duplicate subject names regardless of case', async () => {
   assert.equal((await createSubject('DBMS', USER_B)).status, 201);
 });
 
+test('keeps a chosen colour and rejects unknown ones', async () => {
+  const res = await app.call('subjects', 'POST /subjects', { userId: USER_A, body: { name: 'DBMS', color: 'green' } });
+  assert.equal(res.status, 201);
+  assert.equal(res.body.data.color, 'green');
+  const list = await app.call('subjects', 'GET /subjects');
+  assert.equal(list.body.data[0].color, 'green');
+
+  const bad = await app.call('subjects', 'POST /subjects', { userId: USER_A, body: { name: 'AI', color: 'orange' } });
+  assert.equal(bad.status, 400);
+  assert.equal(bad.body.error.code, 'VALIDATION_ERROR');
+
+  const none = await app.call('subjects', 'POST /subjects', { userId: USER_A, body: { name: 'OS' } });
+  assert.equal(none.body.data.color, undefined);
+});
+
 test('rejects empty subject names', async () => {
   const res = await createSubject('   ');
   assert.equal(res.status, 400);

@@ -1,4 +1,4 @@
-import { ALLOWED_FILE_TYPES, LIMITS, PRIORITIES, DEFAULT_PRIORITY } from './constants.js';
+import { ALLOWED_FILE_TYPES, LIMITS, PRIORITIES, DEFAULT_PRIORITY, SUBJECT_COLORS } from './constants.js';
 import { badRequest } from './errors.js';
 
 const invalid = (message) => badRequest('VALIDATION_ERROR', message);
@@ -80,6 +80,14 @@ export function validateAssignmentUpdate(body) {
 export function validateSubjectName(body) {
   requireObject(body);
   return requiredText(body.name, 'Subject name', LIMITS.SUBJECT_NAME_MAX);
+}
+
+// A subject's colour is optional; when given it must be one of SUBJECT_COLORS.
+export function validateSubjectColor(body) {
+  requireObject(body);
+  if (body.color === undefined || body.color === null || body.color === '') return undefined;
+  if (!SUBJECT_COLORS.includes(body.color)) throw invalid(`Colour must be one of ${SUBJECT_COLORS.join(', ')}.`);
+  return body.color;
 }
 
 // Strips any path, replaces unusual characters and enforces a length limit.

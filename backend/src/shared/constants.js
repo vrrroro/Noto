@@ -13,6 +13,10 @@ export const LIMITS = {
 };
 
 export const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH'];
+
+// The six colours a subject can be given (keys, not CSS: the frontend maps
+// them to its palette). Orange is left out on purpose: it is Noto's dot.
+export const SUBJECT_COLORS = ['violet', 'magenta', 'cyan', 'yellow', 'blue', 'green'];
 export const DEFAULT_PRIORITY = 'MEDIUM';
 
 // Extension -> content type. The backend decides the content type from the

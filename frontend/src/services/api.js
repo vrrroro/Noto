@@ -89,7 +89,7 @@ export const assignmentsApi = {
 
 export const subjectsApi = {
   list: () => data(request('GET', '/subjects')),
-  create: (name) => data(request('POST', '/subjects', { name })),
+  create: (name, color) => data(request('POST', '/subjects', { name, color })),
   remove: (id) => request('DELETE', `/subjects/${encodeURIComponent(id)}`),
 };
 

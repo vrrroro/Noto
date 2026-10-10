@@ -683,6 +683,136 @@
 }
 
 /* The Day/Night switch: a disc with a sun or a moon. */
+/* Signed in: a "Signed in" pill with the account's initial in an orange
+   circle, opening a small glass menu of the app's pages and Sign out. */
+.l-account {
+  position: relative;
+}
+
+.l-account-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 0.3rem 0.3rem 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--l-purple);
+  color: #fff;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.l-account-avatar {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--l-hot);
+  color: #1a0f2e;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.05rem;
+  transition: scale 0.25s ease;
+}
+
+.l-account-btn:hover .l-account-avatar,
+.l-account-btn[aria-expanded='true'] .l-account-avatar {
+  scale: 1.08;
+}
+
+.l-account-menu {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  z-index: 5;
+  width: 15rem;
+  padding: 0.5rem;
+  border: 1px solid var(--l-glass-line);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--l-canvas) 88%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--l-purple) 55%, transparent);
+  color: var(--l-ink);
+  animation: l-account-in 0.2s ease-out;
+}
+
+@keyframes l-account-in {
+  from {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+}
+
+.l-account-who {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.75rem;
+  border-bottom: 1px solid var(--l-g100);
+  font-size: 0.875rem;
+  color: var(--l-g950);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.l-account-who strong {
+  font-weight: 500;
+  color: var(--l-ink);
+}
+
+.l-account-menu ul {
+  margin: 0.4rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.l-account-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.l-account-item .icon {
+  opacity: 0;
+  translate: -4px 0;
+  transition:
+    opacity 0.2s ease,
+    translate 0.2s ease;
+}
+
+.l-account-item:is(:hover, :focus-visible) {
+  background: var(--l-glide);
+  color: var(--l-hot);
+}
+
+.l-account-item:is(:hover, :focus-visible) .icon {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.l-account-item.is-signout {
+  border-top: 1px solid var(--l-g100);
+  border-radius: 0 0 0.6rem 0.6rem;
+}
+
 .l-theme {
   display: grid;
   place-items: center;
@@ -861,6 +991,8 @@
 
 .l-menu-chip {
   display: block;
+  font: inherit;
+  cursor: pointer;
   padding: 0.75rem 1.25rem;
   border: 1px solid var(--l-glass-line);
   border-radius: 999px;
@@ -2247,12 +2379,6 @@
   justify-self: end;
 }
 
-/* Switching themes: the new one opens as a circle from the switch. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
 
 /* ---------- Reduced motion: everything in place, nothing pinned ---------- */
 

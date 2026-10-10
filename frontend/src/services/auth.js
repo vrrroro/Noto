@@ -47,6 +47,7 @@ function sessionFromTokens(result, previous = {}) {
   const claims = decodeJwt(result.IdToken);
   return {
     email: claims.email,
+    name: claims.name || '',
     userId: claims.sub,
     idToken: result.IdToken,
     accessToken: result.AccessToken,
@@ -56,7 +57,7 @@ function sessionFromTokens(result, previous = {}) {
 }
 
 const cognitoAuth = {
-  signUp: (email, password) => cognito.signUp(email, password),
+  signUp: (email, password, name) => cognito.signUp(email, password, name),
   confirmSignUp: (email, code) => cognito.confirmSignUp(email, code),
   resendCode: (email) => cognito.resendConfirmationCode(email),
   forgotPassword: (email) => cognito.forgotPassword(email),
@@ -75,6 +76,14 @@ const cognitoAuth = {
   },
 
   getSession: () => readJson(SESSION_KEY),
+
+  // Saves the name on the account, then refreshes the tokens so the session
+  // (and the ID token's `name` claim) carries it.
+  async updateName(name) {
+    await cognito.updateName(await this.getAccessToken(), name);
+    await this.getAccessToken({ forceRefresh: true });
+    return readJson(SESSION_KEY);
+  },
 
   // Returns a valid access token, refreshing it first if it is about to expire.
   async getAccessToken({ forceRefresh = false } = {}) {

@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Icon from '../Icon.jsx';
 import IconButton from './IconButton.jsx';
 import HudBrand from './HudBrand.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
+import AccountMenu, { APP_LINKS } from './AccountMenu.jsx';
 import { NAV_LINKS } from './content.js';
 import { useScrollFrame } from '../../hooks/useScrollFrame.js';
 import { isNight, useTheme } from '../../hooks/useTheme.js';
+import { useAuth } from '../../hooks/useAuth.jsx';
 
 function useMediaQuery(query) {
   const [matches, setMatches] = useState(() => matchMedia(query).matches);
@@ -24,8 +26,16 @@ const BRAND_AT = 160; // px of scroll before the small wordmark draws itself in
 const SECTION_IDS = NAV_LINKS.map((link) => link.href.slice(1));
 
 // Sign in, the Day/Night switch and Create account: the same group in the
-// top bar and in the HUD.
-function Actions({ night, onTheme, className = '' }) {
+// top bar and in the HUD. Signed in, the switch and the account menu instead.
+function Actions({ night, onTheme, signedIn, className = '' }) {
+  if (signedIn) {
+    return (
+      <div className={`l-nav-actions ${className}`}>
+        <ThemeToggle night={night} onChange={onTheme} />
+        <AccountMenu />
+      </div>
+    );
+  }
   return (
     <div className={`l-nav-actions ${className}`}>
       <Link className="l-signin l-underglow" to="/login">
@@ -58,6 +68,8 @@ export default function LandingNav() {
   const hovered = useRef(null);
   const { theme, setTheme } = useTheme();
   const night = isNight(theme);
+  const { isAuthenticated: signedIn, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useScrollFrame(() => {
     const y = scrollY;
@@ -127,7 +139,7 @@ export default function LandingNav() {
             </a>
           ))}
         </nav>
-        <Actions night={night} onTheme={setTheme} />
+        <Actions night={night} onTheme={setTheme} signedIn={signedIn} />
         <div className="l-nav-tools">
           <ThemeToggle night={night} onChange={setTheme} />
           <button
@@ -166,7 +178,7 @@ export default function LandingNav() {
               ))}
             </nav>
           </div>
-          <Actions night={night} onTheme={setTheme} className="l-glass" />
+          <Actions night={night} onTheme={setTheme} signedIn={signedIn} className="l-glass" />
         </div>
       )}
 
@@ -179,16 +191,43 @@ export default function LandingNav() {
               </a>
             </li>
           ))}
-          <li>
-            <Link className="l-menu-chip" to="/login">
-              Sign in
-            </Link>
-          </li>
-          <li>
-            <Link className="l-menu-chip is-cta l-underglow" to="/register">
-              Create account
-            </Link>
-          </li>
+          {signedIn ? (
+            <>
+              {APP_LINKS.map((link, i) => (
+                <li key={link.to}>
+                  <Link className={`l-menu-chip ${i === 0 ? 'is-cta l-underglow' : ''}`} to={link.to}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <button
+                  type="button"
+                  className="l-menu-chip"
+                  onClick={async () => {
+                    close();
+                    await signOut();
+                    navigate('/', { replace: true });
+                  }}
+                >
+                  Sign out
+                </button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <Link className="l-menu-chip" to="/login">
+                  Sign in
+                </Link>
+              </li>
+              <li>
+                <Link className="l-menu-chip is-cta l-underglow" to="/register">
+                  Create account
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
       )}
     </header>

@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom';
 import Brand from '../Brand.jsx';
 import { NotoWord } from '../NotoWord.jsx';
 import { NAV_LINKS } from './content.js';
+import { useAuth } from '../../hooks/useAuth.jsx';
 
 // Dark plum footer with a violet glow. Links use the two-phase underline: it draws in from the left
 // on hover and leaves to the right.
 export default function LandingFooter() {
+  const { isAuthenticated } = useAuth();
   return (
     <footer className="l-footer" aria-labelledby="l-footer-title">
       <div className="l-container l-grid l-footer-grid">
@@ -42,18 +44,33 @@ export default function LandingFooter() {
         </nav>
         <nav className="l-footer-col" aria-label="Account">
           <p className="l-footer-label">Account</p>
-          <ul>
-            <li>
-              <Link className="l-uline" to="/register">
-                Create account
-              </Link>
-            </li>
-            <li>
-              <Link className="l-uline" to="/login">
-                Sign in
-              </Link>
-            </li>
-          </ul>
+          {isAuthenticated ? (
+            <ul>
+              <li>
+                <Link className="l-uline" to="/">
+                  Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link className="l-uline" to="/assignments">
+                  Assignments
+                </Link>
+              </li>
+            </ul>
+          ) : (
+            <ul>
+              <li>
+                <Link className="l-uline" to="/register">
+                  Create account
+                </Link>
+              </li>
+              <li>
+                <Link className="l-uline" to="/login">
+                  Sign in
+                </Link>
+              </li>
+            </ul>
+          )}
         </nav>
         <div className="l-footer-col is-wide">
           <p className="l-footer-label">Built on</p>

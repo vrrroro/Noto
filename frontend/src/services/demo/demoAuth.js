@@ -20,12 +20,12 @@ const normalize = (email) => email.trim().toLowerCase();
 const users = () => readJson(USERS_KEY, {});
 
 export const demoAuth = {
-  async signUp(email, password) {
+  async signUp(email, password, name = '') {
     const key = normalize(email);
     const all = users();
     if (all[key]) throw new AuthError('UsernameExistsException', 'exists');
     if (!passwordMeetsRules(password)) throw new AuthError('InvalidPasswordException', 'Password did not conform with policy');
-    all[key] = { userId: crypto.randomUUID(), passwordHash: await hashPassword(key, password), confirmed: false, seeded: false };
+    all[key] = { userId: crypto.randomUUID(), name, passwordHash: await hashPassword(key, password), confirmed: false, seeded: false };
     writeJson(USERS_KEY, all);
   },
 
@@ -70,9 +70,20 @@ export const demoAuth = {
       writeJson(USERS_KEY, all);
     }
 
-    const session = { email: key, userId: user.userId };
+    const session = { email: key, name: user.name || '', userId: user.userId };
     writeJson(SESSION_KEY, session);
     return session;
+  },
+
+  async updateName(name) {
+    const session = readJson(SESSION_KEY);
+    if (!session) throw new AuthError('SessionExpired', 'Not signed in');
+    const all = users();
+    if (all[session.email]) all[session.email].name = name;
+    writeJson(USERS_KEY, all);
+    const next = { ...session, name };
+    writeJson(SESSION_KEY, next);
+    return next;
   },
 
   async signOut() {

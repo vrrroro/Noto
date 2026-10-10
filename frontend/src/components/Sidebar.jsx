@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { initialOf } from './landing/AccountMenu.jsx';
 import Icon from './Icon.jsx';
 import Brand from './Brand.jsx';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { useTheme } from '../hooks/useTheme.js';
+import { switchTheme, useTheme } from '../hooks/useTheme.js';
 import { isDemoMode } from '../config.js';
 
 const LINKS = [
@@ -13,11 +14,11 @@ const LINKS = [
   { to: '/subjects', label: 'Subjects' },
 ];
 
-const THEME_LABEL = { system: 'System', light: 'Day', dark: 'Night' };
+const THEME_LABEL = { light: 'Day', dark: 'Night' };
 
 export default function Sidebar() {
   const { user, signOut } = useAuth();
-  const { theme, cycleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -92,21 +93,31 @@ export default function Sidebar() {
               Data stays in this browser
             </p>
           )}
-          <button type="button" className="nav-link nav-button" onClick={cycleTheme}>
+          <button
+            type="button"
+            className="nav-link nav-button"
+            onClick={(e) => switchTheme(theme === 'dark' ? 'light' : 'dark', e.currentTarget, setTheme)}
+            aria-label={`Theme: ${THEME_LABEL[theme]}. Switch to ${theme === 'dark' ? 'Day' : 'Night'}`}
+          >
             <span className="nav-button-key">Theme</span>
             {THEME_LABEL[theme]}
           </button>
           <div className="user-box">
             <span className="avatar" aria-hidden="true">
-              {user?.email?.[0]?.toUpperCase() || '?'}
+              {initialOf(user)}
             </span>
             <span className="user-email" title={user?.email}>
-              {user?.email}
+              {user?.name || user?.email}
             </span>
           </div>
-          <button type="button" className="nav-link nav-button" onClick={handleSignOut}>
-            Sign out
-          </button>
+          <div className="sidebar-actions">
+            <Link to="/home" className="nav-link nav-button">
+              Home
+            </Link>
+            <button type="button" className="nav-link nav-button" onClick={handleSignOut}>
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
     </aside>

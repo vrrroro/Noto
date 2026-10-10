@@ -9,6 +9,7 @@ import { PASSWORD_RULES, isValidEmail, passwordMeetsRules } from '../utils/passw
 export default function Register() {
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -17,6 +18,7 @@ export default function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!name.trim()) return setError('Enter your name.');
     if (!isValidEmail(email.trim())) return setError('Enter a valid email address.');
     if (!passwordMeetsRules(password)) return setError('Your password does not meet all the requirements.');
     if (password !== confirm) return setError('Passwords do not match.');
@@ -24,7 +26,7 @@ export default function Register() {
     setLoading(true);
     setError('');
     try {
-      await signUp(email, password);
+      await signUp(email, password, name);
       navigate('/confirm', {
         state: { email: email.trim(), message: 'We sent a 6-digit verification code to your email.' },
       });
@@ -56,6 +58,19 @@ export default function Register() {
       )}
       <form className="form" onSubmit={handleSubmit} noValidate>
         <div className="field">
+          <label htmlFor="register-name">Name</label>
+          <input
+            id="register-name"
+            type="text"
+            autoComplete="name"
+            maxLength={60}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            autoFocus
+          />
+        </div>
+        <div className="field">
           <label htmlFor="register-email">Email</label>
           <input
             id="register-email"
@@ -64,7 +79,6 @@ export default function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            autoFocus
           />
         </div>
         <div className="field">
