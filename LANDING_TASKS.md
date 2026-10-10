@@ -194,9 +194,9 @@ Amplify. Each box is ticked (and committed) as soon as it is done and checked lo
 agent can resume from the first `[ ]`. Same rules as above (no new dependencies, Noto orange
 `#ff6b35`, Playfair/Archivo/Geist Mono, no yellow, reduced motion off, no Claude co-author line).
 
-- [ ] **R5-1. Smooth dot glow.** After the drop, the orange dot's glow must not snap to a lower
+- [x] **R5-1. Smooth dot glow.** After the drop, the orange dot's glow must not snap to a lower
   brightness: no sudden jumps in the glow at any point (during the bounce or when it settles).
-- [ ] **R5-2. Grey only on the wordmark.** The first-load monochrome is limited to the big "Noto"
+- [x] **R5-2. Grey only on the wordmark.** The first-load monochrome is limited to the big "Noto"
   word (not the whole page). The word starts grey, and after the dot finishes bouncing a ripple
   from the dot gives the word back its colour.
 - [ ] **R5-3. Fuller sections, Noto in the logo font.** Less empty space around the content in
@@ -246,3 +246,12 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
 ### Round 5 notes
 
 (Filled in as tasks are finished: what changed, where, how it was checked.)
+
+- R5-1: the glow's breathing keyframes (`l-glow`, landing.css) now start and end at the resting
+  glow (opacity 1, scale 1) and dip to 0.7 / 1.18, so nothing jumps when the breathing starts at
+  1.9 s. Checked with frame captures.
+- R5-2: `dropIntro.js` no longer puts a grey layer over the page. It clones the four letters into
+  `span.l-mark-mono` (greyed with `filter: grayscale(1)`, laid exactly over the real ones, its
+  rise animations synced to the real letters' start time), and when the last bounce ends one
+  ripple (`--l-r` on its mask, 700 ms, same easing as the Day/Night switch) spreads from the dot
+  and removes the copy. Checked with frame captures in Day and Night.

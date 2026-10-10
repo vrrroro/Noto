@@ -965,6 +965,7 @@
 }
 
 .l-mark-word {
+  position: relative;
   display: inline-flex;
   align-items: baseline;
   padding: 0 0.1em 0.14em;
@@ -1073,15 +1074,17 @@
   }
 }
 
+/* Starts and ends at the glow's resting state, so it never jumps when the
+   breathing begins (or when the drop intro lets go of the dot). */
 @keyframes l-glow {
   0%,
   100% {
-    opacity: 0.55;
+    opacity: 1;
     scale: 1;
   }
   50% {
-    opacity: 1;
-    scale: 1.25;
+    opacity: 0.7;
+    scale: 1.18;
   }
 }
 
@@ -1089,31 +1092,26 @@
   grid-column: 1 / 8;
 }
 
-/* The first-load grey (dropIntro.js): one layer over the whole page that
-   turns everything behind it grey, with two holes in its mask: the dot
-   (--dx, --dy, --dr) and the ripple that brings the colour back (--rx, --ry,
-   --l-r, animated from 0 until it covers the screen). */
+/* The first-load grey (dropIntro.js): a copy of the four letters laid over
+   the real ones and greyed, with a hole in its mask (--rx, --ry, --l-r,
+   animated from 0) that grows from the dot until the copy is gone. The copy
+   reaches 0.4em past the word on every side so the swashes stay inside it. */
 @property --l-r {
   syntax: '<length>';
   inherits: false;
   initial-value: 0px;
 }
 
-.l-mono {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
+.l-mark-mono {
+  position: absolute;
+  inset: -0.4em;
+  display: flex;
+  align-items: baseline;
+  padding: 0.4em 0.5em 0.54em;
   pointer-events: none;
-  -webkit-backdrop-filter: grayscale(1);
-  backdrop-filter: grayscale(1);
-  -webkit-mask-image:
-    radial-gradient(circle at var(--dx, -100px) var(--dy, -100px), transparent var(--dr, 0px), #000 calc(var(--dr, 0px) + 6px)),
-    radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent var(--l-r), #000 calc(var(--l-r) + 1px));
-  mask-image:
-    radial-gradient(circle at var(--dx, -100px) var(--dy, -100px), transparent var(--dr, 0px), #000 calc(var(--dr, 0px) + 6px)),
-    radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent var(--l-r), #000 calc(var(--l-r) + 1px));
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
+  filter: grayscale(1);
+  -webkit-mask-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent calc(var(--l-r) - 1px), #000 var(--l-r));
+  mask-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent calc(var(--l-r) - 1px), #000 var(--l-r));
 }
 
 .l-hero-side {

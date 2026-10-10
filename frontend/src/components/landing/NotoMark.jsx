@@ -3,10 +3,10 @@ import { playDropIntro } from './dropIntro.js';
 import { clamp01, damp, requestScrollFrame, useScrollFrame } from '../../hooks/useScrollFrame.js';
 
 // The Noto wordmark as the hero's centrepiece. On arrival the four letters
-// rise out of the floor one after another (CSS keyframes in landing.css) on a
-// page that is still grey; the orange dot falls like a drop of water and its
-// impact sends one ripple across the page that brings the colour back, while
-// it bounces and settles (dropIntro.js; once per page load). After that:
+// rise out of the floor one after another (CSS keyframes in landing.css) in
+// grey; the orange dot falls like a drop of water, bounces and settles, and
+// then one ripple from it spreads across the word and brings its colour back
+// (dropIntro.js; once per page load). After that:
 // - scrolling the hero away spreads the letters apart, swells the dot and
 //   fades them out (--p), with nothing clipping them;
 // - the pointer leans the word and nudges the dot towards it (--px), and the
@@ -46,7 +46,7 @@ export default function NotoMark({ motion }) {
     };
   }, motion);
 
-  // Before the first paint, so the page never shows in colour or with the dot in place first.
+  // Before the first paint, so the word never shows in colour or with the dot in place first.
   useLayoutEffect(() => (motion ? playDropIntro(dotRef.current) : undefined), [motion]);
 
   // Listens on the whole hero, so the word reacts wherever the pointer is.

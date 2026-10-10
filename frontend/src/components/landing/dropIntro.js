@@ -1,17 +1,16 @@
-// The first-load intro for the hero's orange dot: the page starts in grey
-// (only the dot is in colour), the dot falls like a drop of water, and the
-// moment it hits the wordmark's baseline a single ripple spreads from the
-// impact and brings the page's colour back, the same circle reveal as the
-// Day/Night switch. The dot keeps bouncing meanwhile, with real physics:
-// gravity, a squash while it is in contact (longer for harder hits), a
-// stretch while it flies, energy lost on every bounce, and a short wobble as
-// it settles. All of it is over in about a second and a half.
+// The first-load intro for the hero's orange dot: the Noto wordmark rises in
+// grey (the rest of the page is in colour), the dot falls like a drop of
+// water and bounces with real physics: gravity, a squash while it is in
+// contact (longer for harder hits), a stretch while it flies, energy lost on
+// every bounce, and a short wobble as it settles. When it comes to rest, one
+// ripple spreads from it across the word and gives the letters their colour
+// back, the same circle reveal as the Day/Night switch. About two seconds.
 //
-// The grey is one fixed layer over the whole page (backdrop-filter:
-// grayscale) with two holes cut in its mask: one that follows the dot, so the
-// dot always shows its orange, and the ripple, which grows from the impact
-// until the layer is gone. It plays once per page load, never under reduced
-// motion (NotoMark only calls it when motion is allowed).
+// The grey is a copy of the four letters laid exactly over the real ones
+// (same classes, so they rise in step), greyed with a filter, with a hole in
+// its mask that grows from the dot until the copy is gone. It plays once per
+// page load, never under reduced motion (NotoMark only calls it when motion
+// is allowed).
 
 const START_DELAY = 450; // ms: the letters are about half risen when the dot falls
 const FALL_S = 0.42; // seconds from above the screen to the baseline
@@ -29,10 +28,32 @@ export function playDropIntro(dot) {
   if (played || !dot) return () => {};
   played = true;
 
-  const overlay = document.createElement('div');
-  overlay.className = 'l-mono';
+  // The grey copy of the letters, over the real ones.
+  const word = dot.parentElement;
+  const overlay = document.createElement('span');
+  overlay.className = 'l-mark-mono';
   overlay.setAttribute('aria-hidden', 'true');
-  document.body.append(overlay);
+  const originals = [...word.querySelectorAll('.l-mark-mask')];
+  for (const mask of originals) overlay.append(mask.cloneNode(true));
+  word.append(overlay);
+  // The copies' rise must run on the same clock as the real letters' (theirs
+  // may start a frame or a remount later): pairs of [real, copy] animations.
+  const pairs = () =>
+    originals.flatMap((mask, i) => {
+      const copy = overlay.children[i];
+      const real = [mask, mask.firstElementChild].flatMap((e) => e.getAnimations());
+      const mine = [copy, copy.firstElementChild].flatMap((e) => e.getAnimations());
+      return real.map((a, j) => [a, mine[j]]).filter(([, b]) => b);
+    });
+  let synced = false;
+  function sync() {
+    let all = true;
+    for (const [a, b] of pairs()) {
+      if (a.startTime == null) all = false;
+      else if (b.startTime !== a.startTime) b.startTime = a.startTime;
+    }
+    synced = all;
+  }
 
   // Everything is measured from the dot's bottom edge at rest (the floor),
   // re-read every frame so a late web font or a scroll cannot leave the
@@ -58,13 +79,19 @@ export function playDropIntro(dot) {
   }
   apply(s.y, 1, 1);
 
+  // x, y: the dot's centre on screen; the ripple grows until it covers the copy.
   function startRipple(x, y) {
-    const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 24;
+    const box = overlay.getBoundingClientRect();
+    x -= box.left;
+    y -= box.top;
+    const radius = Math.hypot(Math.max(x, box.width - x), Math.max(y, box.height - y)) + 8;
     overlay.style.setProperty('--rx', `${x.toFixed(1)}px`);
     overlay.style.setProperty('--ry', `${y.toFixed(1)}px`);
     ripple = overlay.animate({ '--l-r': ['0px', `${radius.toFixed(0)}px`] }, { ...RIPPLE, fill: 'forwards' });
     ripple.finished.then(() => overlay.remove()).catch(() => {});
   }
+
+  let landed = false; // set on the step the last bounce ends
 
   function step(dt) {
     if (s.phase === 'air') {
@@ -81,7 +108,7 @@ export function playDropIntro(dot) {
         s.launch = speed * RESTITUTION;
         s.sq = 0;
         s.sv = 0;
-        return true; // impact this frame
+        return;
       }
     } else if (s.phase === 'contact') {
       s.contact += dt;
@@ -94,6 +121,7 @@ export function playDropIntro(dot) {
         if (s.launch < STOP_SPEED) {
           s.phase = 'rest';
           s.v = 0;
+          landed = true;
         } else {
           s.phase = 'air';
           s.v = -s.launch;
@@ -105,7 +133,6 @@ export function playDropIntro(dot) {
       s.sv += a * dt;
       s.sq += s.sv * dt;
     }
-    return false;
   }
 
   function frame(now) {
@@ -117,36 +144,28 @@ export function playDropIntro(dot) {
     const dt = Math.min(1 / 30, (now - previous) / 1000);
     previous = now;
     if (s.phase === 'wait' && now - started >= START_DELAY) s.phase = 'air';
+    if (!synced) sync();
 
     // Read: where the floor is now (the applied translate moves the bottom
     // edge; the scale is anchored there, so it does not).
     const r = dot.getBoundingClientRect();
     const floor = r.bottom - applied.y;
     const cx = r.left + r.width / 2;
-    const w = r.width / applied.sx;
     const h = r.height / applied.sy;
 
     // Small fixed steps keep the bounces the same at any frame rate.
-    let impact = false;
-    for (let left = dt; left > 1e-6; left -= 1 / 240) {
-      if (step(Math.min(left, 1 / 240))) impact = true;
-    }
+    for (let left = dt; left > 1e-6; left -= 1 / 240) step(Math.min(left, 1 / 240));
 
     const stretch = s.phase === 'air' ? MAX_STRETCH * Math.min(1, Math.abs(s.v) / v0) : 0;
     const sx = 1 + s.sq - stretch * 0.45;
     const sy = 1 - s.sq * 0.9 + stretch;
     apply(s.y, sx, sy);
 
-    // Write: the dot's hole, a little larger than the dot with a soft edge,
-    // so its glow keeps some colour too.
-    const cy = floor + s.y - (h * sy) / 2;
-    overlay.style.setProperty('--dx', `${cx.toFixed(1)}px`);
-    overlay.style.setProperty('--dy', `${cy.toFixed(1)}px`);
-    overlay.style.setProperty('--dr', `${((Math.max(w * sx, h * sy) / 2) * 1.02).toFixed(1)}px`);
-    if (impact && !ripple) startRipple(cx, floor - h / 2);
+    // The colour comes back once the bounces are over.
+    if (landed && !ripple) startRipple(cx, floor - h / 2);
 
     const settled = s.phase === 'rest' && Math.abs(s.sq) < 0.002 && Math.abs(s.sv) < 0.05;
-    if (settled) {
+    if (settled && ripple) {
       finished = true;
       dot.style.removeProperty('translate');
       dot.style.removeProperty('scale');
