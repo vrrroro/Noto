@@ -186,3 +186,63 @@ Owner's list, all done and checked locally (landing motion 38/38, demo E2E 34/34
 - "Back to home" on the sign-in pages; the closing "Sign in" button's word sits inside its pill.
 - Inside the app: no hover effect, click opens the panel. "Free, private, any browser." card removed.
 - Sign-up diagram: mouse pointer instead of a blinking text caret.
+
+## Round 5 (2026-10-11, branch `feature/landing-round5`, from `feature/landing-round4`, not deployed)
+
+Owner's list, in their order. Local only: do **not** merge into `main` and do **not** deploy to
+Amplify. Each box is ticked (and committed) as soon as it is done and checked locally, so any
+agent can resume from the first `[ ]`. Same rules as above (no new dependencies, Noto orange
+`#ff6b35`, Playfair/Archivo/Geist Mono, no yellow, reduced motion off, no Claude co-author line).
+
+- [ ] **R5-1. Smooth dot glow.** After the drop, the orange dot's glow must not snap to a lower
+  brightness: no sudden jumps in the glow at any point (during the bounce or when it settles).
+- [ ] **R5-2. Grey only on the wordmark.** The first-load monochrome is limited to the big "Noto"
+  word (not the whole page). The word starts grey, and after the dot finishes bouncing a ripple
+  from the dot gives the word back its colour.
+- [ ] **R5-3. Fuller sections, Noto in the logo font.** Less empty space around the content in
+  every section (wider/larger content, tighter padding). Every "Noto" inside running text is set
+  in the logo's font (Playfair, like the wordmark).
+- [ ] **R5-4. How it works: body under the step again.** Go back to the earlier design where each
+  step's animation/text opens under its title, but keep 01–04 equally spaced along the line.
+- [ ] **R5-5. Inside the app hover.** Hovering a row (Dashboard, Assignments …) highlights the
+  whole row card so it reads as a button, and its title turns orange. Click still expands.
+- [ ] **R5-6. Footer.** Remove the closing "Sign in" button at the end of the page; centre
+  "This was bloomed by Rohit".
+- [ ] **R5-7. Built on AWS tiles.** The orbs live inside the cards, not behind them: one very
+  subtle orange→purple gradient stretched across all four cards (from "Sign in, handled" to
+  "Served and watched"). Fix the 4th card (Amplify/CloudWatch) so its header lines up with the
+  other three.
+- [ ] **R5-8. Hero tagline higher.** Move "Your semester, sorted." up a little (properly spaced,
+  not much).
+- [ ] **R5-9. Even section spacing.** Equal, appropriate spacing between every section (the gap
+  between "Built on AWS" and "Inside the app" is too big).
+- [ ] **R5-10. Progress bar overshoot (app).** At 100% complete the progress bar's stretch
+  animation must stay inside its track and not run into the "100%" label.
+- [ ] **R5-11. App theme switch.** Remove the "System" theme option. The app's Day/Night switch
+  uses the landing page's circle reveal (growing outward from the button).
+- [ ] **R5-12. Greeting name.** "Hello, <name>" must not just use the part of the email before
+  "@": use the account's real name (Cognito `name`/`given_name`) and fall back sensibly.
+- [ ] **R5-13. Upcoming / Recent files panels.** Their background is a different shade from the
+  page and the edges look janky: make them sit cleanly on the background.
+- [ ] **R5-14. Subject colours.** When adding (and editing) a subject, a button next to it lets you
+  pick the subject's colour from 6 colours; the colour is saved and shown.
+- [ ] **R5-15. Softer glow.** Tone down the glow of all glowing buttons (New subject, New
+  assignment, …) by 20%, and the Noto orb inside the app by 20%.
+- [ ] **R5-16. Sign-in page fits one screen.** Everything visible without scrolling; the
+  "Assignments, deadlines and notes, kept in one place." text must not overlap the animation;
+  remove the three bullet points ("See what is due next", "Keep notes together by subject",
+  "Open them from any browser").
+- [ ] **R5-17. Home button and signed-in landing.** In the app, a "Home" button to the left of
+  "Sign out" goes to the top of the landing page. When signed in, the landing page shows "Signed
+  in" with a round avatar (the account's initial) instead of "Sign in"/"Create account"; clicking
+  it opens a menu: Dashboard, Assignments, Subjects, Notes, Sign out.
+- [ ] **R5-18. Open into the dashboard.** When signed in, opening the site (`/`) goes straight to
+  the dashboard. The landing page shows only when the user clicks Home (or is signed out).
+- [ ] **R5-19. Night orbs.** In Night the scroll orbs use the same orange and dark purple as Day,
+  but swapped: purple on the left, orange on the right.
+- [ ] **R5-20. Wrap-up.** Update the E2E checks, run all tests, update CHANGELOG / PROJECT_CONTEXT /
+  HANDOFF, commit and push the branch, run locally. No Amplify deploy, no merge.
+
+### Round 5 notes
+
+(Filled in as tasks are finished: what changed, where, how it was checked.)
