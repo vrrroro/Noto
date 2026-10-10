@@ -308,3 +308,35 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
   run.mjs 38/38 on a demo server (name field; Day/Night only; Home; account menu; `/` opens the
   dashboard); backend 37/37; frontend unit 20/20; production build OK. Docs updated (CHANGELOG,
   PROJECT_CONTEXT, HANDOFF, CLAUDE.md). Branch pushed; not merged, not deployed.
+
+## Round 6 (2026-10-11, branch `feature/round6`, from `feature/landing-round5`)
+
+Owner's list, in their order. This round ends with a merge into `main` and an Amplify deploy
+(asked for by the owner). Each box is ticked and committed when done and checked locally.
+
+- [ ] **R6-1. Faster drop, sooner ripple, slow colour.** The orb falls faster and the ripple
+  starts sooner, but the "Noto" word still takes its colour back slowly.
+- [ ] **R6-2. Slower HUD brand.** In the scrolled HUD, the ball, then its line, then "Noto"
+  appear a little more slowly.
+- [ ] **R6-3. Night negative text.** In Night, where the orbs pass over the statement, the text
+  shows in negative white/black exactly like Day.
+- [ ] **R6-4. Inside the app expands inline.** Clicking a row (Dashboard …) pushes the content
+  below down and shows the details under it (no popup), with a minimise button to close it.
+- [ ] **R6-5. How it works: bigger animations.** Diagrams under the text, bigger than now, with
+  proper spacing.
+- [ ] **R6-6. Theme switch position.** Top bar: right of the section links, left of "Sign in".
+  Scrolled HUD: inside the capsule, after "Under the hood", with a "|" divider before it.
+- [ ] **R6-7. Copy.** "We built Noto" → "I built Noto" (solo project).
+- [ ] **R6-8. App account menu.** Remove the sidebar's Home button; clicking the account opens a
+  dropdown: Rename (first), Home, Sign out.
+- [ ] **R6-9. Sign-in page left half.** Arch and text centred in the left half, the vine animation
+  slower, and both larger, with proper spacing (still one screen).
+- [ ] **R6-10. Subject colour button.** Sits to the left of "Add subject", with a small "V"
+  chevron under the colour orb; the six colours drop down with an animation.
+- [ ] **R6-11. Automatic subject colour.** If no colour is picked by hand, the picker moves on to
+  the next colour automatically (not always violet).
+- [ ] **R6-12. Meter elasticity back.** The 100% bar springs (overshoots and settles) like before,
+  but never touches the "100%" label.
+- [ ] **R6-13. Ship.** Tests, docs, merge into `main`, push, deploy to Amplify, verify live.
+
+### Round 6 notes
