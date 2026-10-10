@@ -1,5 +1,5 @@
 // Motion and interaction checks for the landing page in headless Chrome: the
-// first-load intro (grey page, falling dot, colour ripple), the Noto wordmark,
+// first-load intro (grey wordmark, falling dot, colour ripple), the Noto wordmark,
 // the palette and Day/Night (orb colours included), the nav and
 // HUD (ball, brand drawing, glider, underglow), the intro orbs, the stacking
 // cards, the process timeline, in-page jumps, the AWS tiles, the scroll pin,
@@ -40,14 +40,18 @@ page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 await page.setViewport({ width: 1440, height: 900 });
 // Start in Day on every load, whatever the machine's theme.
 await page.evaluateOnNewDocument(() => localStorage.setItem('scm.theme', 'light'));
-// Watches the first-load intro on every frame of each load: the grey layer,
-// the dot's fall and squash, the ripple's radius, and when it all ends.
+// Watches the first-load intro on every frame of each load: the grey copy of
+// the wordmark (and whether the page itself stays in colour), the dot's fall
+// and squash, when the ripple starts and its radius, and when it all ends.
 await page.evaluateOnNewDocument(() => {
-  const s = (window.__intro = { mono: '', minY: 0, maxSx: 1, maxR: 0, fall: 0, settled: 0, monoGone: 0 });
+  const s = (window.__intro = { mono: '', pageGrey: false, minY: 0, maxSx: 1, maxR: 0, fall: 0, settled: 0, rippleAt: 0, monoGone: 0, frames: 0 });
   const tick = (now) => {
+    s.frames += 1;
     const dot = document.querySelector('.l-mark-dot');
-    const mono = document.querySelector('.l-mono');
-    if (mono && !s.mono) s.mono = getComputedStyle(mono).backdropFilter;
+    const mono = document.querySelector('.l-mark-mono');
+    if (document.querySelector('.l-mono')) s.pageGrey = true;
+    if (mono && !s.mono) s.mono = getComputedStyle(mono).filter;
+    if (mono && !s.rippleAt && parseFloat(getComputedStyle(mono).getPropertyValue('--l-r')) > 0) s.rippleAt = now;
     if (mono) s.maxR = Math.max(s.maxR, parseFloat(getComputedStyle(mono).getPropertyValue('--l-r')) || 0);
     if (!mono && s.mono && !s.monoGone) s.monoGone = now;
     if (dot) {
@@ -58,7 +62,8 @@ await page.evaluateOnNewDocument(() => {
       s.maxSx = Math.max(s.maxSx, sx);
       if (s.fall && !s.settled && !dot.style.translate) s.settled = now;
     }
-    if (!s.settled || !s.monoGone) requestAnimationFrame(tick);
+    // Stops once it is all over (or after ~6 s, so it can never keep the page busy).
+    if ((!s.settled || !s.monoGone) && s.frames < 400) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
 });
@@ -68,25 +73,26 @@ const to = (y) => page.evaluate((v) => scrollTo({ top: v, behavior: 'instant' })
 const top = (sel) => page.$eval(sel, (e) => e.getBoundingClientRect().top + scrollY);
 const navState = () => page.$eval('.l-nav', (e) => ({ morphed: e.classList.contains('is-morphed') }));
 
-// 0. Wordmark: the page opens grey, the dot falls, squashes and settles, its
-// ripple brings the colour back; scrolling spreads the letters; no yellow anywhere
+// 0. Wordmark: the word rises in grey (the page stays in colour), the dot
+// falls, squashes and settles, then its ripple brings the word's colour back;
+// scrolling spreads the letters; no yellow anywhere
 await page.waitForFunction(() => window.__intro.settled && window.__intro.monoGone, { timeout: 6000 }).catch(() => {});
-const firstLoad = await page.evaluate(() => ({ ...window.__intro, diag: Math.hypot(innerWidth, innerHeight) }));
-check('Intro: the page opens in grey (one grayscale layer), only the dot in colour', firstLoad.mono === 'grayscale(1)', firstLoad.mono);
+const firstLoad = await page.evaluate(() => ({ ...window.__intro, word: document.querySelector('.l-mark-word').getBoundingClientRect().width }));
+check('Intro: only the wordmark starts grey (a greyed copy of the letters); the page stays in colour', firstLoad.mono === 'grayscale(1)' && !firstLoad.pageGrey, firstLoad.mono);
 check(
   'Intro: the dot falls from above the screen, squashes on impact and settles within 2 s',
   firstLoad.minY < -450 && firstLoad.maxSx > 1.2 && firstLoad.settled > 0 && firstLoad.settled - firstLoad.fall < 2000 && (await page.$$('.l-mark-glyph')).length === 4,
   `from ${firstLoad.minY.toFixed(0)}px, squash ${firstLoad.maxSx.toFixed(2)}, settled in ${(firstLoad.settled - firstLoad.fall).toFixed(0)} ms`,
 );
 check(
-  'Intro: one ripple grows past the screen corners and the grey layer is removed',
-  firstLoad.maxR > firstLoad.diag * 0.5 && firstLoad.monoGone > 0 && !(await page.$('.l-mono')),
-  `ripple ${firstLoad.maxR.toFixed(0)}px`,
+  'Intro: after the last bounce one ripple from the dot covers the word and the grey copy is removed',
+  firstLoad.rippleAt > firstLoad.fall + 600 && firstLoad.maxR > firstLoad.word * 0.9 && firstLoad.monoGone > 0 && !(await page.$('.l-mark-mono')),
+  `ripple starts ${(firstLoad.rippleAt - firstLoad.fall).toFixed(0)} ms after the fall, reaches ${firstLoad.maxR.toFixed(0)}px`,
 );
 await page.hover('.l-mark-dot'); await sleep(300);
 check(
   'Intro: plays once; pointing at the dot does not replay it',
-  await page.evaluate(() => !document.querySelector('.l-mono') && !document.querySelector('.l-mark-dot').style.translate),
+  await page.evaluate(() => !document.querySelector('.l-mark-mono') && !document.querySelector('.l-mark-dot').style.translate),
 );
 check(
   'Copy: no "student" or "project" on the page; the footer credit reads "bloomed by Rohit"',
@@ -121,8 +127,8 @@ const night = await look();
 check('Theme: the switch turns Day into Night (page and saved choice)',
   day.theme === 'light' && night.theme === 'dark' && night.saved === 'dark' && day.bg !== night.bg, `${day.bg} → ${night.bg}`);
 check('Theme: the Noto orange (wordmark dot, scroll pin) is the same in both', day.dot === night.dot && day.pin === night.pin && day.pin === 'rgb(255, 107, 53)');
-check('Orbs: Day is Noto orange + dark purple, Night light orange + light purple',
-  day.orbA.includes('255, 107, 53') && day.orbB.includes('45, 27, 78') && night.orbA.includes('255, 195, 163') && night.orbB.includes('211, 195, 255'));
+check('Orbs: Day is Noto orange (left) + dark purple (right); Night the same two colours swapped',
+  day.orbA.includes('255, 107, 53') && day.orbB.includes('45, 27, 78') && night.orbA.includes('45, 27, 78') && night.orbB.includes('255, 107, 53'));
 check('Orbs: the merge is a light purplish grey by Day and a dark one by Night',
   day.lens.includes('220, 213, 230') && night.lens.includes('39, 32, 48'));
 await page.click('.l-nav-primary .l-nav-actions .l-theme'); await sleep(1000);
@@ -220,8 +226,9 @@ for (let i = 0; i < 4; i++) {
   });
   check(`Process: step ${i + 1} open, line on its dot`, r.active === i && r.opened === 1 && r.gap < 2, `active ${r.active}, gap ${r.gap.toFixed(1)}px`);
 }
-// With step 4 open, 04 still sits at the very end of the line and the four
-// steps are evenly spaced (the open step's text shows beside the list).
+// With step 4 open, 04 still sits at the very end of the line, the four
+// steps are evenly spaced, and the open step's text and diagram sit under its
+// title, clear of the next step.
 const ends = await page.evaluate(() => {
   const ys = [...document.querySelectorAll('.l-step-dot')].map((d) => { const r = d.getBoundingClientRect(); return r.top + r.height / 2; });
   const track = document.querySelector('.l-track').getBoundingClientRect();
@@ -229,6 +236,15 @@ const ends = await page.evaluate(() => {
   return { first: Math.abs(track.top - ys[0]), last: Math.abs(track.bottom - ys[3]), spread: Math.max(...gaps) - Math.min(...gaps) };
 });
 check('Process: the line runs from 01 to 04, evenly spaced, with 04 at its end', ends.first < 2 && ends.last < 2 && ends.spread < 2, JSON.stringify(ends));
+await to(proc + (1.5 / 4) * (procH - 900)); await sleep(1300);
+const under = await page.evaluate(() => {
+  const steps = [...document.querySelectorAll('.l-step')];
+  const title = steps[1].querySelector('.l-step-title').getBoundingClientRect();
+  const body = steps[1].querySelector('.l-step-body').getBoundingClientRect();
+  const next = steps[2].querySelector('.l-step-title').getBoundingClientRect();
+  return { below: Math.round(body.top - title.bottom), left: Math.round(body.left - title.left), clear: Math.round(next.top - body.bottom) };
+});
+check('Process: the open step text and diagram sit under its title, clear of the next step', under.below >= 0 && Math.abs(under.left) < 4 && under.clear >= 0, JSON.stringify(under));
 
 // 5. Idle: the shared loop stops when nothing moves
 await sleep(1500);
@@ -271,9 +287,37 @@ for (let i = 0; i < 40; i++) {
 const awsTop = await page.$eval('#aws', (e) => e.getBoundingClientRect().top);
 check('Anchor: "Under the hood" goes straight to Built on AWS, never through How it works', seenHow === 0 && Math.abs(awsTop) < 4, `${seenHow} frames in How it works, lands at ${awsTop.toFixed(1)}px`);
 
-// 8b. Built on AWS: the glows live inside the tiles only
-const tiles = await page.$$eval('.l-aws-card', (els) => els.map((e) => getComputedStyle(e).overflow + '/' + getComputedStyle(e, '::before').backgroundImage.includes('radial-gradient')));
-check('AWS: four tiles clip their own glows, no free-floating orbs', tiles.length === 4 && tiles.every((t) => t === 'hidden/true') && !(await page.$('.l-lens')), tiles.join(' '));
+// 8b. Built on AWS: one soft orange-to-purple tint inside the tiles (no orbs),
+// and every tile's service name on the same line
+const tiles = await page.$$eval('.l-aws-card', (els) =>
+  els.map((e) => ({
+    tint: getComputedStyle(e, '::before').backgroundImage,
+    label: Math.round(e.querySelector('.l-aws-service').getBoundingClientRect().top),
+  })),
+);
+check(
+  'AWS: four tiles share one orange-to-purple tint (no orbs) and their headers line up',
+  tiles.length === 4 && tiles.every((t) => t.tint.startsWith('linear-gradient') && !t.tint.includes('radial')) && new Set(tiles.map((t) => t.label)).size === 1,
+  tiles.map((t) => t.label).join(' '),
+);
+
+// 8c. Inside the app: pointing at a row lifts it into a card with an orange
+// title; the footer has no closing "Sign in" and its credit is centred
+await page.$eval('#app', (e) => e.scrollIntoView({ behavior: 'instant' })); await sleep(500);
+const row = await page.$eval('.l-rows li:nth-child(2) .l-row', (e) => { const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+await page.mouse.move(row.x, row.y); await sleep(500);
+const hovered = await page.$eval('.l-rows li:nth-child(2) .l-row', (e) => ({
+  card: getComputedStyle(e, '::before').opacity,
+  title: getComputedStyle(e.querySelector('.l-row-title')).color,
+}));
+check('Inside the app: a hovered row becomes a card and its title turns orange', +hovered.card > 0.99 && hovered.title === 'rgb(255, 107, 53)', JSON.stringify(hovered));
+await page.mouse.move(5, 5);
+const foot = await page.evaluate(() => {
+  const credit = [...document.querySelectorAll('.l-footer-credits > *')][1].getBoundingClientRect();
+  const box = document.querySelector('.l-footer-credits').getBoundingClientRect();
+  return { cta: Boolean(document.querySelector('.l-app-cta')), off: credit.left + credit.width / 2 - (box.left + box.width / 2) };
+});
+check('Footer: no closing "Sign in" button, and the credit sits in the centre', !foot.cta && Math.abs(foot.off) < 2, `${foot.off.toFixed(1)}px off centre`);
 
 // 8c. The scroll pin replaces the scrollbar and scrolls on click
 await page.addStyleTag({ content: '.scroll-pin{pointer-events:auto!important}' }); // headless reports a coarse pointer

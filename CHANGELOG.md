@@ -5,6 +5,43 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (round 5, branch `feature/landing-round5`, not deployed)
+
+Full list with notes per item in `LANDING_TASKS.md` (Round 5).
+
+- **Intro.** Only the big "Noto" word starts grey (a greyed copy of its letters, synced to their
+  rise); after the dot's last bounce one ripple from the dot gives the word its colour back. The
+  rest of the page is in colour from the start. The dot's glow no longer snaps darker when its
+  breathing starts.
+- **Landing layout.** One section gap everywhere (`--l-section` 5rem, About pulled up into the
+  intro's empty half screen), fuller About text and feature cards, the hero headline a little
+  higher. "How it works" is back to the text and diagram under each step's title, with 01–04 in
+  equal quarters. "Inside the app" rows become a card with an orange title on hover. The closing
+  "Sign in" button is gone and the footer credit is centred. The AWS tiles lose their orbs for one
+  soft orange-to-purple tint inside the tiles, and their headers line up. Night's scroll orbs use
+  Day's orange and dark purple, swapped (purple left, orange right). "Noto" in running text is set
+  in the logo's Playfair italic (`NotoWord.jsx`).
+- **Signed in.** `/` opens the dashboard when signed in; the sidebar has **Home** (left of Sign
+  out) to `/home`, the landing page for everyone, which shows "Signed in" with the account's
+  initial and a menu (Dashboard, Assignments, Subjects, Notes, Sign out) in place of Sign in /
+  Create account.
+- **App.** Theme is Day or Night only (no System) and switches with the landing page's circle
+  reveal (`switchTheme`). Sign-up asks for a name (Cognito's standard `name` attribute); the
+  greeting uses it, and accounts without one are asked once on the dashboard. Subjects get a
+  colour picker (six colours) when added. The completion meter's spring stays inside its track at
+  100%. The dashboard's lower panels sit on the page (no second-shade band). Button and dot glows
+  are 20% softer. The sign-in page fits one screen (the three bullet points are gone, the heading
+  sits under the arch).
+- **Backend.** `POST /subjects` accepts an optional `color` (one of `SUBJECT_COLORS`). Not deployed:
+  until the Lambda is updated, the live API ignores it and the app remembers the pick in the browser.
+
+### Tests (round 5)
+
+- Landing motion 41 checks (was 38): the grey wordmark only, the ripple after the last bounce, the
+  swapped Night orbs, the AWS tint and aligned headers, steps under their titles, the row hover
+  card, the footer. Demo E2E 38 checks (was 34): Day/Night only, Home, the account menu, opening
+  into the dashboard. Backend 37 (subject colour test), frontend unit 20. All passing locally.
+
 ### Changed (landing round 4, branch `feature/landing-round4`, not deployed)
 
 - **First-load intro.** The landing page now opens in grey (Day: white, greys and black; Night:

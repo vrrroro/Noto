@@ -240,7 +240,7 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
   the dashboard. The landing page shows only when the user clicks Home (or is signed out).
 - [x] **R5-19. Night orbs.** In Night the scroll orbs use the same orange and dark purple as Day,
   but swapped: purple on the left, orange on the right.
-- [ ] **R5-20. Wrap-up.** Update the E2E checks, run all tests, update CHANGELOG / PROJECT_CONTEXT /
+- [x] **R5-20. Wrap-up.** Update the E2E checks, run all tests, update CHANGELOG / PROJECT_CONTEXT /
   HANDOFF, commit and push the branch, run locally. No Amplify deploy, no merge.
 
 ### Round 5 notes
@@ -303,3 +303,8 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
   (phone menu too); About's CTA and the footer's Account column switch to app links.
 - R5-18: `/` = dashboard when signed in, landing when signed out; `/home` = landing for everyone
   (App.jsx). Sign-in still lands on the dashboard.
+- R5-20: landing-motion.mjs 41/41 (new: grey wordmark only, ripple after the last bounce, swapped
+  Night orbs, AWS tint + aligned headers, steps under titles, row hover card, centred footer);
+  run.mjs 38/38 on a demo server (name field; Day/Night only; Home; account menu; `/` opens the
+  dashboard); backend 37/37; frontend unit 20/20; production build OK. Docs updated (CHANGELOG,
+  PROJECT_CONTEXT, HANDOFF, CLAUDE.md). Branch pushed; not merged, not deployed.

@@ -595,6 +595,7 @@ textarea {
   font-style: italic;
   font-weight: 600;
   letter-spacing: -0.02em;
+  text-transform: none; /* the name keeps its case inside upper-case labels */
 }
 
 /* ---------- Buttons: tactile press physics ---------- */

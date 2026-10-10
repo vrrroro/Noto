@@ -77,6 +77,7 @@ const count = (selector) => page.$$eval(selector, (els) => els.length);
 
 async function register(email, password) {
   await page.goto(`${BASE}/register`);
+  await fill('#register-name', 'Rohit Sharma');
   await fill('#register-email', email);
   await fill('#register-password', password);
   await fill('#register-confirm', password);
@@ -101,7 +102,7 @@ try {
   const authLinks = await page.$$eval('.landing a[href="/register"], .landing a[href="/login"]', (links) => links.length);
   check('Landing links to sign-up and sign-in', authLinks >= 4);
   // After the first-load intro: the grey layer is gone and the dot has settled.
-  await page.waitForFunction(() => !document.querySelector('.l-mono') && !document.querySelector('.l-mark-dot')?.style.translate, { timeout: 6000 });
+  await page.waitForFunction(() => !document.querySelector('.l-mark-mono') && !document.querySelector('.l-mark-dot')?.style.translate, { timeout: 6000 });
   await shot('app-00-landing');
   await click('.l-nav-primary .l-signin');
   await page.waitForSelector('#login-email');
@@ -113,6 +114,7 @@ try {
   await shot('app-01-login');
 
   await page.goto(`${BASE}/register`);
+  await fill('#register-name', 'Rohit Sharma');
   await fill('#register-email', 'rohit@college.edu');
   await fill('#register-password', 'Passw0rd!');
   await fill('#register-confirm', 'Different1');
@@ -130,6 +132,7 @@ try {
   check('Register + verify email works', true);
 
   await page.goto(`${BASE}/register`);
+  await fill('#register-name', 'Rohit Sharma');
   await fill('#register-email', 'rohit@college.edu');
   await fill('#register-password', 'Passw0rd');
   await fill('#register-confirm', 'Passw0rd');
@@ -147,6 +150,24 @@ try {
   await waitText('Recent files');
   const dash = await text();
   check('Login lands on dashboard with greeting', dash.includes('Hello, Rohit'));
+
+  // Home: the sidebar's Home opens the landing page, signed in (an account
+  // menu instead of Sign in / Create account), and "/" is still the dashboard.
+  const themeLabel = await page.$$eval('.nav-button', (els) => els.map((e) => e.textContent).find((t) => t.includes('Theme')));
+  check('Theme switch offers only Day and Night', /Day|Night/.test(themeLabel) && !/System/.test(themeLabel), themeLabel);
+  await click('.sidebar-actions a[href="/home"]');
+  await page.waitForSelector('.l-nav-primary .l-account-btn');
+  check(
+    'Home opens the landing page signed in, with the account initial and no Sign in',
+    (await page.$eval('.l-nav-primary .l-account-avatar', (e) => e.textContent)) === 'R' && !(await page.$('.l-nav-primary .l-signin')),
+  );
+  await click('.l-nav-primary .l-account-btn');
+  await click('.l-nav-primary .l-account-menu a[href="/"]');
+  await waitText('Upcoming', 10000);
+  check('The account menu goes back to the dashboard', new URL(page.url()).pathname === '/');
+  await page.goto(BASE);
+  await waitText('Upcoming', 10000);
+  check('Opening the site signed in goes straight to the dashboard', !(await page.$('.landing')));
   const stats = await page.$$eval('.stat-value', (els) => els.map((e) => e.textContent));
   check('Dashboard stats computed from data', JSON.stringify(stats) === '["6","5","1","1"]', stats.join(','));
   await shot('app-03-dashboard');
