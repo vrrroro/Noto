@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { UpperTitle } from './IconButton.jsx';
 import ProcessDiagram from './ProcessDiagram.jsx';
+import { withNoto } from '../NotoWord.jsx';
 import { STEPS } from './content.js';
 import { clamp01, useScrollFrame } from '../../hooks/useScrollFrame.js';
 
@@ -93,7 +94,7 @@ export default function ProcessTimeline({ motion }) {
                       </button>
                     </h3>
                     <div id={`l-step-${i}`} className="l-step-body">
-                      <p>{step.body}</p>
+                      <p>{withNoto(step.body)}</p>
                       <ProcessDiagram kind={step.diagram} />
                     </div>
                   </li>

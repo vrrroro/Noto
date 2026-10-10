@@ -57,7 +57,7 @@ export default function Landing() {
         <AboutSection />
         <FeatureStack motion={motion} />
         <ProcessTimeline motion={motion} />
-        <StackSection motion={motion} />
+        <StackSection />
         <AppTour />
       </main>
       <LandingFooter />

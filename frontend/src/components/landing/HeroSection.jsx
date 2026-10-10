@@ -1,4 +1,5 @@
 import NotoMark from './NotoMark.jsx';
+import { NotoWord } from '../NotoWord.jsx';
 
 // A full first screen: the headline (grey line resolving into an ink line,
 // "sorted." in the purple gradient) and the sub-copy on top, the animated
@@ -14,7 +15,7 @@ export default function HeroSection({ motion }) {
         </h1>
         <div className="l-hero-side">
           <p className="l-text-large">
-            Noto keeps your assignments, deadlines and notes in one place, so the evening goes on the work and not on
+            <NotoWord /> keeps your assignments, deadlines and notes in one place, so the evening goes on the work and not on
             finding it.
           </p>
         </div>

@@ -199,22 +199,22 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
 - [x] **R5-2. Grey only on the wordmark.** The first-load monochrome is limited to the big "Noto"
   word (not the whole page). The word starts grey, and after the dot finishes bouncing a ripple
   from the dot gives the word back its colour.
-- [ ] **R5-3. Fuller sections, Noto in the logo font.** Less empty space around the content in
+- [x] **R5-3. Fuller sections, Noto in the logo font.** Less empty space around the content in
   every section (wider/larger content, tighter padding). Every "Noto" inside running text is set
   in the logo's font (Playfair, like the wordmark).
-- [ ] **R5-4. How it works: body under the step again.** Go back to the earlier design where each
+- [x] **R5-4. How it works: body under the step again.** Go back to the earlier design where each
   step's animation/text opens under its title, but keep 01–04 equally spaced along the line.
-- [ ] **R5-5. Inside the app hover.** Hovering a row (Dashboard, Assignments …) highlights the
+- [x] **R5-5. Inside the app hover.** Hovering a row (Dashboard, Assignments …) highlights the
   whole row card so it reads as a button, and its title turns orange. Click still expands.
-- [ ] **R5-6. Footer.** Remove the closing "Sign in" button at the end of the page; centre
+- [x] **R5-6. Footer.** Remove the closing "Sign in" button at the end of the page; centre
   "This was bloomed by Rohit".
-- [ ] **R5-7. Built on AWS tiles.** The orbs live inside the cards, not behind them: one very
+- [x] **R5-7. Built on AWS tiles.** The orbs live inside the cards, not behind them: one very
   subtle orange→purple gradient stretched across all four cards (from "Sign in, handled" to
   "Served and watched"). Fix the 4th card (Amplify/CloudWatch) so its header lines up with the
   other three.
-- [ ] **R5-8. Hero tagline higher.** Move "Your semester, sorted." up a little (properly spaced,
+- [x] **R5-8. Hero tagline higher.** Move "Your semester, sorted." up a little (properly spaced,
   not much).
-- [ ] **R5-9. Even section spacing.** Equal, appropriate spacing between every section (the gap
+- [x] **R5-9. Even section spacing.** Equal, appropriate spacing between every section (the gap
   between "Built on AWS" and "Inside the app" is too big).
 - [ ] **R5-10. Progress bar overshoot (app).** At 100% complete the progress bar's stretch
   animation must stay inside its track and not run into the "100%" label.
@@ -238,7 +238,7 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
   it opens a menu: Dashboard, Assignments, Subjects, Notes, Sign out.
 - [ ] **R5-18. Open into the dashboard.** When signed in, opening the site (`/`) goes straight to
   the dashboard. The landing page shows only when the user clicks Home (or is signed out).
-- [ ] **R5-19. Night orbs.** In Night the scroll orbs use the same orange and dark purple as Day,
+- [x] **R5-19. Night orbs.** In Night the scroll orbs use the same orange and dark purple as Day,
   but swapped: purple on the left, orange on the right.
 - [ ] **R5-20. Wrap-up.** Update the E2E checks, run all tests, update CHANGELOG / PROJECT_CONTEXT /
   HANDOFF, commit and push the branch, run locally. No Amplify deploy, no merge.
@@ -255,3 +255,25 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
   rise animations synced to the real letters' start time), and when the last bounce ends one
   ripple (`--l-r` on its mask, 700 ms, same easing as the Day/Night switch) spreads from the dot
   and removes the copy. Checked with frame captures in Day and Night.
+- R5-3: `--l-section` 7.5rem → 5rem (one gap for every section); About text wider (cols 4–12) and
+  larger; feature cards wider (cols 3–11), taller, larger text; AWS stage and app rows pulled up.
+  New `components/NotoWord.jsx` (`<NotoWord />`, `withNoto(text)`) + `.noto-word` in global.css:
+  every "Noto" in running text (hero, About, closing line, intro statement, step and panel copy,
+  footer ©, dashboard empty state) is in Playfair italic like the logo.
+- R5-4: steps get equal quarters of the list (`flex: 1 1 0`); the open step's text and diagram sit
+  under its title (side by side on desktop, stacked on tablet/phone); the title row shrinks on short
+  screens (`--l-row: clamp(3.5rem, 9vh, 5rem)`); the line ends at 04's dot (`bottom: 25% - row/2`).
+  Checked at 1440×900, 1280×720, 768×1024, 390×844.
+- R5-5: `.l-row::before` is a card (border, radius, soft shadow) that fades in on hover/focus; the
+  title turns orange and the circle fills purple. No layout shift. Checked in Night.
+- R5-6: closing "Sign in" button and `.l-app-cta` removed; footer credits are a 1fr/auto/1fr grid
+  so "This was bloomed by Rohit" is centred (stacked and centred on phones).
+- R5-7: orbs removed from the AWS tiles (and StackSection's pointer tracking); each tile paints its
+  quarter of one soft orange→purple gradient (`color-mix` at `--i × 25%`). Tiles are top-aligned
+  (icon, then text from a fixed line), so every service name/title lines up.
+- R5-8: hero gap `clamp(2rem, 9svh, 6rem)`: the headline sits ~45px higher at 900px tall.
+- R5-9: section gaps measured (`main > section` content edges): 160px between sections at 1440;
+  the About section pulls up into the intro's empty half screen (`margin-top: calc(-50svh + 10rem
+  + 2 × --l-section)`) under motion.
+- R5-19: Night orbs use the Day colours swapped: dark purple orb on the left, Noto orange on the
+  right (white ink on both); the lens stays greyish purplish black.

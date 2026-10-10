@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { INTRO_STATEMENT } from './content.js';
+import { NotoWord } from '../NotoWord.jsx';
 import { clamp01, damp, useScrollFrame } from '../../hooks/useScrollFrame.js';
 
 const WORDS = INTRO_STATEMENT.split(' ');
@@ -10,7 +11,7 @@ const wordStart = (i) => ((i / (WORDS.length - 1)) * 0.75).toFixed(4);
 function Words() {
   return WORDS.map((word, i) => (
     <span key={i} className="l-word" style={{ '--s': wordStart(i) }}>
-      {word}{' '}
+      {word === 'Noto' ? <NotoWord /> : word}{' '}
     </span>
   ));
 }

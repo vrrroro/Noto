@@ -1,43 +1,12 @@
-import { useRef } from 'react';
 import Icon from '../Icon.jsx';
 import IconButton from './IconButton.jsx';
 import { STACK } from './content.js';
-import { damp, requestScrollFrame, useScrollFrame } from '../../hooks/useScrollFrame.js';
 
-// "Built on AWS": four tiles with a pair of faded light orbs, orange and
-// purple, visible only through the tiles (see .l-aws-card::before). The orbs
-// drift as the pointer moves across the section (horizontal position only,
-// eased, resting in the middle).
-export default function StackSection({ motion }) {
-  const sectionRef = useRef(null);
-  const pointer = useRef({ target: 0.5, current: 0.5 });
-
-  useScrollFrame((dt) => {
-    const p = pointer.current;
-    return () => {
-      p.current = damp(p.current, p.target, 220, dt);
-      const section = sectionRef.current;
-      section?.style.setProperty('--m', p.current.toFixed(4));
-      section?.style.setProperty('--d', Math.abs(p.current - 0.5).toFixed(4));
-      return Math.abs(p.current - p.target) > 0.0005;
-    };
-  }, motion);
-
-  function onPointerMove(e) {
-    if (e.pointerType !== 'mouse') return;
-    const r = sectionRef.current.getBoundingClientRect();
-    pointer.current.target = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-    requestScrollFrame();
-  }
-
+// "Built on AWS": four tiles that share one very soft orange-to-purple tint,
+// painted inside the tiles themselves (see .l-aws-card::before).
+export default function StackSection() {
   return (
-    <section
-      id="aws"
-      ref={sectionRef}
-      className="l-section l-aws"
-      aria-labelledby="l-aws-title"
-      onPointerMove={motion ? onPointerMove : undefined}
-    >
+    <section id="aws" className="l-section l-aws" aria-labelledby="l-aws-title">
       <div className="l-container">
         <h2 id="l-aws-title" className="l-h3 l-aws-title">
           Built on AWS

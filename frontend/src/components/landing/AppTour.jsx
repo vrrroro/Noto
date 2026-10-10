@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from '../Icon.jsx';
-import IconButton, { UpperTitle } from './IconButton.jsx';
+import { withNoto } from '../NotoWord.jsx';
+import { UpperTitle } from './IconButton.jsx';
 import { SCREENS } from './content.js';
 
 // A screenshot in both themes. Both are in the page and CSS shows the one that
@@ -15,8 +16,8 @@ function ThemeImage({ image, alt }) {
   );
 }
 
-// "Inside the app": one row per screen, with no hover effect. Clicking a row
-// opens a side panel (a native modal <dialog>, so focus is trapped, Escape
+// "Inside the app": one row per screen. Pointing at a row lifts it into a card
+// with an orange title, so it reads as a button; clicking it opens a side panel (a native modal <dialog>, so focus is trapped, Escape
 // closes it and focus returns to the row).
 export default function AppTour() {
   const [openIndex, setOpenIndex] = useState(null);
@@ -73,12 +74,6 @@ export default function AppTour() {
             </li>
           ))}
         </ul>
-
-        <div className="l-app-cta">
-          <IconButton to="/login" variant="hot" className="l-underglow">
-            Sign in
-          </IconButton>
-        </div>
       </div>
 
       <dialog
@@ -110,9 +105,9 @@ export default function AppTour() {
             </div>
             <div className="l-popup-body">
               <p className="l-upper">What it does</p>
-              <p>{screen.does}</p>
+              <p>{withNoto(screen.does)}</p>
               <p className="l-upper">Why it helps</p>
-              <p>{screen.helps}</p>
+              <p>{withNoto(screen.helps)}</p>
               <ThemeImage image={screen.image} alt={screen.alt} />
             </div>
           </>

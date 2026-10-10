@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from '../Icon.jsx';
+import { NotoWord } from '../NotoWord.jsx';
 import { UpperTitle } from './IconButton.jsx';
 import { FEATURES } from './content.js';
 import { clamp01, useScrollFrame } from '../../hooks/useScrollFrame.js';
@@ -69,7 +70,7 @@ export default function FeatureStack({ motion }) {
         </ul>
         <div className="l-closing l-reveal" data-reveal>
           <p>
-            Noto doesn’t try to be everything. It keeps the four things a semester runs on, and makes them easy to
+            <NotoWord /> doesn’t try to be everything. It keeps the four things a semester runs on, and makes them easy to
             find.
           </p>
           <a className="l-circle-link" href="#how" aria-label="Next: how it works">

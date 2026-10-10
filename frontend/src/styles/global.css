@@ -576,6 +576,16 @@ textarea {
   font-size: 96px;
 }
 
+/* "Noto" inside a sentence, in the logo's face (NotoWord.jsx). A touch larger,
+   since Playfair's italic runs small next to the sans. */
+.noto-word {
+  font-family: var(--font-serif);
+  font-size: 1.08em;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 /* ---------- Buttons: tactile press physics ---------- */
 
 .btn {

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Brand from '../Brand.jsx';
+import { NotoWord } from '../NotoWord.jsx';
 import { NAV_LINKS } from './content.js';
 
 // Dark plum footer with a violet glow. Links use the two-phase underline: it draws in from the left
@@ -60,7 +61,9 @@ export default function LandingFooter() {
         </div>
 
         <div className="l-footer-credits">
-          <p>© {new Date().getFullYear()} Noto. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} <NotoWord />. All rights reserved.
+          </p>
           <p>This was bloomed by Rohit</p>
           <a className="l-uline" href="#top">
             Back to top

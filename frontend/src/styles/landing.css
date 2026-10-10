@@ -64,7 +64,7 @@
 
   --l-gutter: 4rem;
   --l-gap: 1.25rem;
-  --l-section: 7.5rem;
+  --l-section: 5rem; /* one gap for every section, top and bottom */
 
   --l-h1: 7rem;
   --l-h3: 4rem;
@@ -923,7 +923,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: clamp(1rem, 4svh, 3rem);
+  gap: clamp(2rem, 9svh, 6rem);
   min-height: 100svh;
   padding-top: 8.5rem;
 }
@@ -1141,9 +1141,10 @@
 }
 
 /* Two orbs over the statement, no blending: every colour is chosen.
-   - Night: a light-orange orb (a) and a light-purple orb (b); where they
-     merge, a greyish purplish black lens. Day: a Noto-orange orb and a dark
-     purple orb; where they merge, a lightish purplish grey lens.
+   - Day: a Noto-orange orb on the left and a dark purple orb on the right;
+     where they merge, a lightish purplish grey lens. Night: the same two
+     colours swapped (purple left, orange right); where they merge, a
+     greyish purplish black lens.
    - The negative: each orb (and the lens) carries its own copy of the
      statement, aligned exactly over the real one and inked in the opposite
      tone, and clips it to its circle. So the words flip wherever an orb or
@@ -1157,18 +1158,19 @@
   --xb: calc((1 - var(--k, 0)) * 34vw);
   --os: calc(0.7 + 0.42 * var(--k, 0));
   --ow: min(28vw, 400px);
-  /* Orb a: Noto orange by Day, light orange by Night. */
-  --a0: light-dark(#ffd2bf, #ffffff);
-  --a1: light-dark(#ff8a5c, #ffe3d4);
-  --a2: light-dark(#ff6b35, #ffc3a3);
-  --a3: light-dark(#c9441a, #f29466);
-  --a-ink: light-dark(#ffffff, #2d1b4e);
-  /* Orb b: dark purple by Day, light purple by Night. */
-  --b0: light-dark(#8a6bc4, #ffffff);
-  --b1: light-dark(#5a3d8a, #efe8ff);
-  --b2: light-dark(#2d1b4e, #d3c3ff);
-  --b3: light-dark(#1b0f30, #a688fb);
-  --b-ink: light-dark(#ffffff, #1d1033);
+  /* The same Noto orange and dark purple in both themes, swapped by Night:
+     orb a (the left one) is orange by Day and purple by Night, orb b (the
+     right one) the other way round. */
+  --a0: light-dark(#ffd2bf, #8a6bc4);
+  --a1: light-dark(#ff8a5c, #5a3d8a);
+  --a2: light-dark(#ff6b35, #2d1b4e);
+  --a3: light-dark(#c9441a, #1b0f30);
+  --a-ink: #ffffff;
+  --b0: light-dark(#8a6bc4, #ffd2bf);
+  --b1: light-dark(#5a3d8a, #ff8a5c);
+  --b2: light-dark(#2d1b4e, #ff6b35);
+  --b3: light-dark(#1b0f30, #c9441a);
+  --b-ink: #ffffff;
   /* The merge: lightish purplish grey by Day, greyish purplish black by Night. */
   --m0: light-dark(#f1edf6, #3d3449);
   --m1: light-dark(#dcd5e6, #272030);
@@ -1266,11 +1268,28 @@
 /* ---------- About ---------- */
 
 .l-about-text {
-  grid-column: 6 / 11;
+  grid-column: 4 / 12;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2.5rem;
+  gap: 2rem;
+}
+
+.l-about-text .l-text-large {
+  font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* The pinned intro above leaves half a screen, less half its statement
+   (about 10rem), of air under the statement when it lets go; pull "Who it's
+   for" up into it, so the gap matches the other sections' (2 x --l-section)
+   on any screen height. */
+@media (prefers-reduced-motion: no-preference) {
+  .l-intro + .l-about {
+    margin-top: calc(-50svh + 10rem + 2 * var(--l-section));
+    padding-top: 0;
+  }
 }
 
 /* ---------- Feature stack ---------- */
@@ -1280,8 +1299,8 @@
 }
 
 .l-cards {
-  grid-column: 4 / 10;
-  margin: 3.75rem 0 0;
+  grid-column: 3 / 11;
+  margin: 2.5rem 0 0;
   padding: 0 0 8rem;
   list-style: none;
 }
@@ -1291,9 +1310,9 @@
   top: calc(20vh + var(--i) * 20px);
   display: flex;
   align-items: center;
-  min-height: 8.5rem;
+  min-height: 10rem;
   margin-bottom: 1.25rem;
-  padding: 1.5rem;
+  padding: 2rem 2.5rem;
   border: 1px solid var(--l-g200);
   border-radius: 1rem;
   background: var(--l-canvas);
@@ -1309,8 +1328,13 @@
 .l-card-text {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  width: 70%;
+  gap: 0.75rem;
+  max-width: 38rem;
+}
+
+.l-card-text p {
+  font-size: 1.125rem;
+  line-height: 1.35;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1518,63 +1542,75 @@
   color: var(--l-g950);
 }
 
-/* With motion the four steps never move: 01 to 04 sit evenly from the top of
-   the line to its bottom (the line runs from the first dot to the last), and
-   the open step's text and diagram show beside the list on desktop and under
-   it on tablets and phones, cross-fading as the steps change. (Under reduced
+/* With motion the four steps never move: each gets an equal quarter of the
+   list, so 01 to 04 sit evenly spaced, and the line runs from the first dot
+   to the last. The open step's text and diagram show under its title, in the
+   room its quarter leaves, cross-fading as the steps change. (Under reduced
    motion every step is open, so the stacked accordion above stays.) */
 @media (prefers-reduced-motion: no-preference) {
+  /* Shorter screens get a shorter title row, so a quarter still holds the body. */
   .l-steps-wrap {
-    --l-row: 5rem;
-    grid-column: 5 / 9;
-  }
-
-  .l-steps {
-    justify-content: space-between;
+    --l-row: clamp(3.5rem, 9vh, 5rem);
+    grid-column: 6 / 13;
   }
 
   .l-step,
   .l-step.is-active {
-    flex: none;
+    flex: 1 1 0;
     min-height: 0;
     overflow: visible;
   }
 
+  .l-step-btn {
+    height: var(--l-row);
+  }
+
   .l-step-title {
+    font-size: min(clamp(2.5rem, 4.2vw, 4rem), 7vh);
     white-space: nowrap;
   }
 
+  /* The last dot is the top of the last quarter, plus half a row. */
   .l-track {
     top: calc(var(--l-row) / 2);
-    bottom: calc(var(--l-row) / 2);
+    bottom: calc(25% - var(--l-row) / 2);
   }
 
   .l-track-fill {
     height: max(0px, calc(var(--fill, 0px) - var(--l-row) / 2));
   }
 
-  /* Desktop: the body takes the next four columns, centred on the list. */
+  /* The text and the diagram side by side under the title. */
   .l-step-body {
-    position: absolute;
-    top: 50%;
-    left: calc(100% + var(--l-gap));
-    width: 100%;
-    padding: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 2.5rem;
+    padding: 0.25rem 0 0;
     visibility: hidden;
-    translate: 0 calc(-50% + 1.5rem);
+    translate: 0 1rem;
     transition:
       opacity 0.3s ease-in-out,
       translate 0.3s ease-in-out,
       visibility 0s linear 0.3s;
   }
 
+  .l-step-body p {
+    flex: 0 1 24rem;
+  }
+
   .l-step.is-active .l-step-body {
     visibility: visible;
-    translate: 0 -50%;
+    translate: 0 0;
     transition:
-      opacity 0.5s ease-out 0.2s,
-      translate 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
+      opacity 0.5s ease-out 0.15s,
+      translate 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
       visibility 0s;
+  }
+
+  /* A quarter of the slab, less the title row and a little air. */
+  .l-step-body .l-diagram {
+    flex: none;
+    height: clamp(56px, calc((min(100vh, 1080px) - 10rem) / 4 - var(--l-row) - 1.5rem), 150px);
   }
 }
 
@@ -1811,16 +1847,11 @@
   color: var(--l-g950);
 }
 
-/* A query container, so the tiles can place their glows in the stage's own
-   coordinates (cqw) and line them up as one picture. */
 .l-aws-stage {
   position: relative;
-  margin-top: 6rem;
-  container-type: inline-size;
-  --aws-glow-hot: light-dark(rgb(255 107 53 / 30%), rgb(255 130 80 / 30%));
-  --aws-glow-hot-2: light-dark(rgb(255 150 110 / 10%), rgb(255 150 110 / 9%));
-  --aws-glow-violet: light-dark(rgb(123 47 255 / 24%), rgb(170 130 255 / 30%));
-  --aws-glow-violet-2: light-dark(rgb(160 120 255 / 9%), rgb(170 130 255 / 10%));
+  margin-top: 4rem;
+  --aws-hot: light-dark(rgb(255 107 53 / 13%), rgb(255 107 53 / 16%));
+  --aws-violet: light-dark(rgb(123 47 255 / 13%), rgb(150 90 255 / 20%));
 }
 
 .l-aws-cards {
@@ -1832,51 +1863,40 @@
   list-style: none;
 }
 
+/* Icon on top, then the text from a fixed line, so the service names and
+   titles line up across the four tiles however long each one is. */
 .l-aws-card {
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
-  gap: 2rem;
+  gap: 2.5rem;
   position: relative;
   isolation: isolate;
   min-width: 0;
-  aspect-ratio: 1;
+  min-height: 21rem;
   padding: 2.5rem;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--l-ink) 8%, transparent);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--l-ink) 4%, transparent);
+  background: color-mix(in srgb, var(--l-ink) 3%, transparent);
 }
 
-/* Two faded light orbs, orange and purple, that exist only inside the tiles.
-   Every tile paints the same stage-wide picture, shifted by its own place in
-   the row (--i), so the orbs read as one pair seen through four windows and
-   never spill into the gaps. They drift with the pointer (--m) and part as
-   it leaves the middle (--d). */
+/* The tint is part of the tiles: one very soft orange-to-purple gradient
+   that runs from the first tile to the last. Each tile paints its own quarter
+   of it (from --i / 4 to (--i + 1) / 4), so it reads as one wash across the
+   four, never spills into the gaps, and still works when the tiles scroll
+   sideways on smaller screens. */
 .l-aws-card::before {
-  --tile: calc((100cqw - 3 * var(--l-gap)) / 4);
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(
-      18cqw 18cqw at calc(40% + (var(--m, 0.5) - 0.5) * 22% - var(--d, 0) * 6%) 58%,
-      var(--aws-glow-hot) 0,
-      var(--aws-glow-hot-2) 55%,
-      transparent 100%
-    ),
-    radial-gradient(
-      20cqw 20cqw at calc(61% + (var(--m, 0.5) - 0.5) * 22% + var(--d, 0) * 6%) 44%,
-      var(--aws-glow-violet) 0,
-      var(--aws-glow-violet-2) 55%,
-      transparent 100%
-    );
-  background-size: 100cqw 100%;
-  background-position: calc(var(--i, 0) * -1 * (var(--tile) + var(--l-gap))) 0;
-  background-repeat: no-repeat;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--aws-violet) calc(var(--i, 0) * 25%), var(--aws-hot)),
+    color-mix(in srgb, var(--aws-violet) calc((var(--i, 0) + 1) * 25%), var(--aws-hot))
+  );
   pointer-events: none;
 }
 
@@ -1909,27 +1929,58 @@
 /* ---------- Inside the app ---------- */
 
 .l-rows {
-  margin: 4rem 0 0;
+  margin: 2rem 0 0;
   padding: 0;
   list-style: none;
 }
 
+/* Each row is a button. Pointing at one lifts it into a card (the card is a
+   layer behind the row, so nothing moves) and turns its title orange. */
 .l-row {
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 3rem 0;
+  padding: 2.5rem 1.5rem;
   border: 0;
   border-bottom: 1px solid var(--l-g200);
   background: none;
   color: inherit;
   text-align: left;
+  cursor: pointer;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.l-row::before {
+  content: '';
+  position: absolute;
+  inset: 0.5rem 0;
+  z-index: -1;
+  border: 1px solid var(--l-g200);
+  border-radius: 1rem;
+  background: light-dark(#faf8ff, #22163d); /* a lift off the flow in both themes */
+  box-shadow: 0 12px 32px -18px color-mix(in srgb, var(--l-purple) 45%, transparent);
+  opacity: 0;
+  scale: 0.985;
+  transition:
+    opacity 0.3s ease-in-out,
+    scale 0.3s ease-in-out;
+}
+
+.l-row:is(:hover, :focus-visible) {
+  border-bottom-color: transparent;
+}
+
+.l-row:is(:hover, :focus-visible)::before {
+  opacity: 1;
+  scale: 1;
 }
 
 .l-row:focus-visible {
-  outline-offset: -2px;
+  outline-offset: -0.5rem;
+  outline-width: 0;
 }
 
 .l-row-meta {
@@ -1984,22 +2035,14 @@
     color 0.4s ease-in-out;
 }
 
-.l-row:focus-visible .l-row-title {
+.l-row:is(:hover, :focus-visible) .l-row-title {
   color: var(--l-hot);
 }
 
-.l-row:focus-visible .l-row-circle {
+.l-row:is(:hover, :focus-visible) .l-row-circle {
   border-color: var(--l-purple);
   background: var(--l-purple);
   color: #fff;
-}
-
-.l-app-cta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 4rem;
 }
 
 /* Screenshots come in both themes; show the one that matches. The conditions
@@ -2129,7 +2172,7 @@
 .l-footer {
   position: relative;
   z-index: 1;
-  padding: 5.5rem 0 1.5rem;
+  padding: var(--l-section) 0 1.5rem;
   color: var(--l-ink);
 }
 
@@ -2178,16 +2221,30 @@
   color: var(--l-accent);
 }
 
+/* Three equal columns, so the credit sits in the true centre whatever the
+   lengths of the outer two. */
 .l-footer-credits {
   grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
   gap: 1rem;
   font-family: var(--font-mono);
   font-size: 0.875rem;
   text-transform: uppercase;
   color: var(--l-g950);
+}
+
+.l-footer-credits > :first-child {
+  justify-self: start;
+}
+
+.l-footer-credits > :nth-child(2) {
+  text-align: center;
+}
+
+.l-footer-credits > :last-child {
+  justify-self: end;
 }
 
 /* Switching themes: the new one opens as a circle from the switch. */
@@ -2295,26 +2352,20 @@
     left: calc(-4.4rem + 3.5px);
   }
 
+  /* Narrower: the text over the diagram, both under the title. */
   @media (prefers-reduced-motion: no-preference) {
-    .l-steps-wrap {
-      grid-column: 5 / 13;
-      height: auto;
-      align-self: start;
-    }
-
-    .l-steps {
-      height: auto;
-    }
-
     .l-step-body {
-      top: calc(100% + 1.5rem);
-      left: 0;
-      width: 100%;
-      translate: 0 1.5rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
     }
 
-    .l-step.is-active .l-step-body {
-      translate: 0 0;
+    .l-step-body p {
+      flex: none;
+    }
+
+    .l-step-body .l-diagram {
+      height: clamp(40px, calc((100svh - 11.25rem) / 4 - var(--l-row) - 4.5rem), 120px);
     }
   }
 
@@ -2342,12 +2393,6 @@
   .l-aws-card {
     flex: 0 0 40%;
     scroll-snap-align: start;
-  }
-
-  /* The tiles scroll sideways here, so each one shows its own pair of glows. */
-  .l-aws-card::before {
-    background-size: 100% 100%;
-    background-position: 0 0;
   }
 
   .l-popup {
@@ -2464,7 +2509,8 @@
     font-size: 0.875rem;
   }
 
-  .l-step {
+  .l-step,
+  .l-step.is-active {
     flex-basis: 3.5rem;
     min-height: 3.5rem;
   }
@@ -2474,8 +2520,8 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .l-steps-wrap {
-      flex: none;
+    .l-step-body .l-diagram {
+      height: clamp(32px, calc((100svh - 14rem) / 4 - var(--l-row) - 5rem), 100px);
     }
   }
 
@@ -2516,7 +2562,7 @@
       'title circle'
       'meta circle';
     row-gap: 0.75rem;
-    padding: 2rem 0;
+    padding: 2rem 1rem;
   }
 
   .l-row-title {
@@ -2552,6 +2598,11 @@
   }
 
   .l-footer-credits {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .l-footer .l-footer-credits > * {
+    justify-self: center;
   }
 }

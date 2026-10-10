@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
 import Icon from '../components/Icon.jsx';
+import { NotoWord } from '../components/NotoWord.jsx';
 import { LoadingState, ErrorState, EmptyState } from '../components/StatusViews.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { useAuth } from '../hooks/useAuth.jsx';
@@ -82,7 +83,7 @@ function NextUp({ next, total, colorOf, completing, onComplete }) {
             </>
           ) : (
             <>
-              <span>Start with one assignment.</span> <span className="quiet">Add a deadline and Noto keeps track of it.</span>
+              <span>Start with one assignment.</span> <span className="quiet">Add a deadline and <NotoWord /> keeps track of it.</span>
             </>
           )}
         </h2>
