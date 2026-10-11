@@ -5,6 +5,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (round 10, merged into `main` and deployed 2026-10-11)
+
+- **HUD brand.** The small "Noto" animation is 40% faster (1.08 s), and its ball ends on the
+  baseline after the word, as in the big logo, instead of sitting high.
+- **Nav.** The desktop capsule is centred on the screen at every width with room for it (1280px
+  up); on narrower desktops it moves left only as far as it must.
+
+### Tests (round 10)
+
+- Landing motion 47 (brand finishes in about a second, ball on the baseline, capsule centred);
+  responsive 12 (capsule centred from 1280 up).
+
 ### Changed (round 9, merged into `main` and deployed 2026-10-11)
 
 - **HUD brand.** The small "Noto" in the nav no longer follows the scroll: it waits until the hero

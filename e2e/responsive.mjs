@@ -82,22 +82,26 @@ try {
   }
 
   // 2. Landing: the two nav islands never touch, from 992px (where they
-  // start) up; scrolled, so the brand in the centre island is whole.
+  // start) up; scrolled, so the brand in the centre island is whole. The
+  // capsule is centred on the screen wherever there is room (1280 up).
   const touching = [];
+  const offCentre = [];
   for (const width of [992, 1024, 1280, 1359, 1360, 1440, 1920]) {
     await page.setViewport({ width, height: 800 });
     await page.goto(`${BASE}/home`);
     await sleep(600);
     await page.evaluate(() => scrollTo(0, 1500));
-    await sleep(900);
-    const gap = await page.evaluate(() => {
+    await sleep(1500);
+    const { gap, off } = await page.evaluate(() => {
       const a = document.querySelector('.l-capsule').getBoundingClientRect();
       const b = document.querySelector('.l-nav-islands .l-nav-actions').getBoundingClientRect();
-      return Math.round(b.left - a.right);
+      return { gap: Math.round(b.left - a.right), off: Math.round(a.left + a.width / 2 - document.documentElement.clientWidth / 2) };
     });
     if (gap < 24) touching.push(`${width}px: ${gap}px`);
+    if (width >= 1280 && Math.abs(off) > 1) offCentre.push(`${width}px: ${off}px`);
   }
   check('Landing: the nav islands keep a clear gap at every desktop width', touching.length === 0, touching.join(', '));
+  check('Landing: the nav capsule is centred on the screen from 1280px up', offCentre.length === 0, offCentre.join(', '));
 
   // 3. Landing hero: the whole wordmark is on the first screen, in every shape.
   const cut = [];

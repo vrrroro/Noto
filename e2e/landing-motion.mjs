@@ -189,10 +189,25 @@ const goneY = await page.evaluate(() => Math.ceil(document.querySelector('.l-her
 await to(goneY);
 await sleep(450);
 const early = await brand();
-await sleep(2200);
+await sleep(850);
 const done = await brand();
-check('Nav: once the hero wordmark is off the screen, the small "Noto" animates in on its own (not with the scroll)',
+check('Nav: once the hero wordmark is off the screen, the small "Noto" animates in on its own (not with the scroll), in about a second',
   early.b > 0 && early.b < 0.9 && done.b === 1 && done.word === 1, JSON.stringify({ early, done }));
+// Whole: the ball sits on the baseline after "Noto", as in the big logo, and
+// the capsule is centred on the screen.
+const placed = await page.evaluate(() => {
+  const word = document.querySelector('.l-capsule .l-hud-word');
+  const probe = document.createElement('span');
+  probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+  word.appendChild(probe);
+  const baseline = probe.getBoundingClientRect().top;
+  probe.remove();
+  const dot = document.querySelector('.l-capsule .l-hud-dot').getBoundingClientRect();
+  const cap = document.querySelector('.l-capsule').getBoundingClientRect();
+  return { dotBottom: dot.bottom - baseline, centre: cap.left + cap.width / 2 - document.documentElement.clientWidth / 2 };
+});
+check('Nav: the small "Noto" ends with its ball on the baseline (as in the logo), in a capsule centred on the screen',
+  Math.abs(placed.dotBottom) <= 1 && Math.abs(placed.centre) <= 1, JSON.stringify(placed));
 // Back up until the wordmark is on the screen again: it plays back out.
 await to(Math.max(0, fadedY - 200)); await sleep(2400);
 const back = await brand();

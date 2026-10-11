@@ -1,9 +1,10 @@
 // The landing page's small wordmark: at the top of the page only the orange
 // ball shows (the big hero wordmark is the logo there). Once the hero
 // wordmark is entirely off the screen, the nav gets .is-branded and this
-// plays by itself (--b runs 0 → 1 over 1.8 s, landing.css): the word slot
+// plays by itself (--b runs 0 → 1 over 1.08 s, landing.css): the word slot
 // opens and the ball rides a vine line that draws itself, then "Noto" rises in
-// behind it and the line fades, leaving "Noto" with its dot. When the hero
+// behind it and the line fades, leaving "Noto" with its dot on the baseline,
+// as in the big logo. When the hero
 // wordmark comes back into view it plays back the other way.
 // `hideIdle` hides the ball as well until the brand starts (the phone bar's
 // copy, so nothing sits in the corner at the top of the page).

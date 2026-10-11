@@ -494,3 +494,22 @@ Owner's list. Ends with a merge into `main`, a push and an Amplify deploy.
   it returns; orb words are white/black by Day/Night and the page's ink in the merge. Demo E2E 43/43,
   responsive 11/11, frontend unit 21/21. Merged into `main`, pushed, deployed with
   `deploy.ps1 -FrontendOnly` (no backend changes).
+
+## Round 10 (2026-10-11, branch `feature/round10`, from `main`)
+
+Owner's list. Ends with a merge into `main`, a push and an Amplify deploy.
+
+- [x] **R10-1. HUD brand 40% faster.** The small "Noto" animation now runs in 1.08 s instead of 1.8 s
+  (the `--b` transition on `.l-nav`).
+- [x] **R10-2. The ball sits like the logo's.** Once "Noto" is in, the ball sits on the baseline after
+  the word, like a full stop, as in the big hero wordmark (it was centred, so it sat high). On its
+  own at the top of the page it is still in the middle of the capsule; it settles onto the baseline
+  as the word comes in, and ends at the logo's size (0.2em).
+- [x] **R10-3. HUD centred.** The desktop islands are a three-column grid: the capsule is centred on
+  the screen at every width with room for it (1280px up; it used to move to the left edge below
+  1360px), and the account island sits at the right. On narrower desktops (992-1279px) only the
+  left column gives way, so the capsule stays as near the centre as it can with a clear gap.
+- [x] **R10-4. Tests and release.** Landing motion now 47 checks (the brand finishes in about a
+  second; ball on the baseline; capsule centred). Responsive now 12 (capsule centred from 1280 up).
+  Demo E2E 43/43, frontend unit 21/21. Merged into `main`, pushed, deployed with
+  `deploy.ps1 -FrontendOnly` (no backend changes).

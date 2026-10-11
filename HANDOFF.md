@@ -24,6 +24,7 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 - Optional extras are done too: search, filters, sorting, dark mode, upload progress, a public landing page.
 - Still open: sign-up with a real email through the UI, the alert email, CloudFront, console screenshots.
 - Landing page round 4 (grey intro and colour ripple, spaced-out steps, copy and nav fixes) is on branch `feature/landing-round4`, pushed but not merged or deployed.
+- Round 10 (HUD brand 40% faster, ball on the baseline, capsule centred; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).
 - Round 9 (HUD brand plays once the hero wordmark is off screen; Night orbs in negative; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).
 - Round 8 (responsive pass across 10 screen shapes, phones to ultra-wide; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).
 - Round 7 (island nav, scroll-linked brand, app polish; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).
@@ -65,8 +66,8 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 - Backend unit: `cd backend && npm test` (36/36).
 - Frontend unit: `cd frontend && npm test` (21/21).
 - Demo end-to-end: `cd e2e && npm test` (43/43). It needs a dev server in demo mode; set `E2E_BASE_URL` if that server is not on 5173.
-- Landing motion: `node e2e/landing-motion.mjs` with a dev server running (46/46).
-- Responsive: `node e2e/responsive.mjs` with a demo-mode dev server running (11/11): no sideways scroll
+- Landing motion: `node e2e/landing-motion.mjs` with a dev server running (47/47).
+- Responsive: `node e2e/responsive.mjs` with a demo-mode dev server running (12/12): no sideways scroll
   on the landing page and the four app pages at 10 screen shapes, plus layout checks per shape.
 - Headless Chrome quirk: after a UI sign-up, the same tab may stop receiving key presses (its
   save-password prompt). A test that signs up and then types should sign in from a fresh tab, or
