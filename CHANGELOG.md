@@ -5,6 +5,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (round 8, responsive; merged into `main` and deployed 2026-10-11)
+
+Full list in `LANDING_TASKS.md` (Round 8). Every page was checked at 10 screen shapes, from a 320px
+phone to a 2560px ultra-wide, portrait and landscape.
+
+- **Landing.** Phones and portrait tablets: the first screen is centred and the headline stacks
+  above its line at a width-based size. Phones held sideways: the hero, the "Who it's for"
+  statement, the card stack and "How it works" are sized from the height (the open step shows its
+  text). From 992 to 1359px the centre nav island moves to the left, so it no longer overlaps
+  Sign in / Create account. Section labels stay on one line.
+- **App.** Assignments no longer scroll sideways on 320-360px phones. The floating top bar no longer
+  grows on short pages. Subjects on phones: name on its own line, colour and Add subject beneath.
+  Phones held sideways get smaller titles and spacing. Ultra-wide screens: the panel and page sit
+  centred together (max 1920px).
+
+### Tests (round 8)
+
+- New `e2e/responsive.mjs`, 11 checks (sideways scroll on 5 pages x 10 shapes, nav islands apart,
+  hero on the first screen, step text sideways, tablet bar, ultra-wide layout).
+
 ### Changed (round 7, merged into `main` and deployed 2026-10-11)
 
 Full list with notes per item in `LANDING_TASKS.md` (Round 7).

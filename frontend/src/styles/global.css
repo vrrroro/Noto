@@ -2068,6 +2068,7 @@ select:disabled {
 .assignment-card {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-md);
   padding: var(--space-md) var(--space-md) var(--space-md) calc(var(--space-md) + 14px);
   border-radius: var(--r-card);
@@ -2096,6 +2097,11 @@ select:disabled {
   gap: var(--space-sm);
   justify-items: start;
   min-width: 0;
+}
+
+/* Nothing in the card grows wider than it, however narrow the phone. */
+.assignment-main > * {
+  max-width: 100%;
 }
 
 .assignment-title-row {
@@ -2144,6 +2150,7 @@ select:disabled {
 }
 
 .meta-list dd {
+  min-width: 0;
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--fs-label);
@@ -3048,8 +3055,23 @@ select:disabled {
     box-shadow: 0 12px 30px -12px var(--float-shadow);
   }
 
+  /* The bar keeps its own height, even on a page shorter than the screen
+     (the shell's spare height goes to the page, never to the bar). */
+  .app-shell {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .sidebar {
+    align-self: start;
+  }
+
   .brand-word {
     font-size: 28px;
+  }
+
+  /* A full-height tap target for the brand. */
+  .sidebar-top .brand {
+    padding-block: 8px;
   }
 
   .menu-toggle {
@@ -3189,6 +3211,26 @@ select:disabled {
     min-height: 52px;
   }
 
+  /* Subjects: the name on its own line, the colour and Add subject under it. */
+  .giant-bar:has(.color-picker) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .giant-bar:has(.color-picker) input {
+    grid-column: 1 / -1;
+  }
+
+  .meta-list dt {
+    width: 84px;
+  }
+
+  .meta-list .chip {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
   .toolbar select {
     flex: 1 1 150px;
     min-width: 0;
@@ -3246,6 +3288,51 @@ select:disabled {
 
   .brand-large .brand-word {
     font-size: 64px;
+  }
+}
+
+/* Phones held sideways (and other short screens): smaller titles and
+   spacing, so a page shows more than its heading. */
+@media (orientation: landscape) and (max-height: 520px) {
+  :root {
+    --fs-hero: 48px;
+    --fs-display: 30px;
+    --space-lg: 24px;
+    --space-xl: 48px;
+  }
+
+  .page {
+    padding-top: var(--space-md);
+  }
+
+  .sidebar-panel {
+    padding-top: 80px;
+  }
+
+  .nav-link {
+    min-height: 48px;
+    font-size: 32px;
+  }
+
+  .stat-tile {
+    min-height: 120px;
+  }
+
+  .section-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brand-large .brand-word {
+    font-size: 48px;
+  }
+}
+
+/* Very wide screens: the app (panel and page together) stops growing and
+   sits centred, so cards and their buttons stay within reach of each other. */
+@media (min-width: 1800px) {
+  .app-shell {
+    max-width: 1920px;
+    margin-inline: auto;
   }
 }
 

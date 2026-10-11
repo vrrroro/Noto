@@ -219,12 +219,13 @@ To run the local dev server against the deployed backend, run `deploy.ps1` once 
 
 | Suite | Command | Result |
 | --- | --- | --- |
-| Backend unit tests (validation, CRUD, ownership, errors, S3 presigning, DynamoDB expressions) | `cd backend && npm test` | 36 / 36 passing |
-| Frontend unit tests (dates, filters, dashboard maths and next-up pick, subject colours, demo backend) | `cd frontend && npm test` | 19 / 19 passing |
-| End-to-end browser run (headless Chrome, demo mode, includes password reset) | `cd e2e && npm test` (with `npm run dev` running) | 34 / 34 checks passing (2026-10-10) |
-| Live API against the deployed stack (Cognito sign-in, self-service sign-up, password reset, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 44 / 44 passing (2026-10-10) |
-| Live website in headless Chrome (sign-in, CRUD, S3 upload/download, sign-out) | `node e2e/live-site.mjs` | 17 / 17 passing (2026-10-08) |
-| Landing page motion (wordmark, palette, Day/Night and orbs, HUD, glider, in-page jumps, AWS tiles, scroll pin, card stack, timeline, dialog, reduced motion) | `node e2e/landing-motion.mjs` | 32 / 32 passing (2026-10-10, local and live) |
+| Backend unit tests (validation, CRUD, ownership, errors, S3 presigning, DynamoDB expressions) | `cd backend && npm test` | 37 / 37 passing |
+| Frontend unit tests (dates, filters, dashboard maths and next-up pick, subject colours, demo backend) | `cd frontend && npm test` | 21 / 21 passing |
+| End-to-end browser run (headless Chrome, demo mode, includes password reset) | `cd e2e && npm test` (with `npm run dev` running) | 43 / 43 checks passing (2026-10-11) |
+| Live API against the deployed stack (Cognito sign-in, self-service sign-up, password reset, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 46 / 46 passing (2026-10-11) |
+| Live website in headless Chrome (sign-in, CRUD, S3 upload/download, sign-out) | `node e2e/live-site.mjs` | 17 / 17 passing (2026-10-11) |
+| Landing page motion (wordmark, palette, Day/Night and orbs, HUD, glider, in-page jumps, AWS tiles, scroll pin, card stack, timeline, dialog, reduced motion) | `node e2e/landing-motion.mjs` | 43 / 43 passing (2026-10-11, local and live) |
+| Responsive layout (landing and app pages at 10 screen shapes, phones to ultra-wide, portrait and landscape) | `node e2e/responsive.mjs` | 11 / 11 passing (2026-10-11) |
 | Infrastructure lint | `cfn-lint infrastructure/template.yaml` | 0 findings |
 
 Still to do by hand: sign-up with a real email inbox. [TESTING.md](TESTING.md) contains the

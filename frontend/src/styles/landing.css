@@ -229,6 +229,7 @@
   line-height: 1.2;
   letter-spacing: 0;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* Only where the label has a column of its own, so content never scrolls under it. */
@@ -815,6 +816,15 @@
 .l-nav-islands .l-nav-actions {
   position: absolute;
   right: var(--l-gutter);
+}
+
+/* Narrower desktops (and tablets held sideways): the centre island would
+   reach the account island, so it moves to the left edge. */
+@media (max-width: 1359px) {
+  .l-nav-islands {
+    --l-gutter: 1.5rem;
+    justify-content: flex-start;
+  }
 }
 
 .l-capsule-rule {
@@ -2617,5 +2627,105 @@
 
   .l-footer .l-footer-credits > * {
     justify-self: center;
+  }
+}
+
+/* ---------- Other shapes: portrait tablets and phones, phones held sideways ---------- */
+
+/* Portrait screens below desktop: the headline and its line stack, the
+   headline sized to the width so it keeps two lines, and the whole first
+   screen sits centred instead of leaving a gap at the top. */
+@media (max-width: 991px) and (orientation: portrait) {
+  .landing {
+    --l-h1: clamp(3.25rem, 11vw, 7rem);
+  }
+
+  .l-hero {
+    justify-content: center;
+  }
+
+  .l-hero .l-h1,
+  .l-hero-side {
+    grid-column: 1 / -1;
+  }
+
+  .l-hero-grid {
+    row-gap: clamp(1.25rem, 3svh, 2.5rem);
+  }
+
+  .l-mark-word {
+    font-size: min(31vw, 22rem);
+  }
+}
+
+/* Phones held sideways and other short, wide screens: everything is sized
+   from the height so each section still fits its screen. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .landing {
+    --l-h1: clamp(2.5rem, 13svh, 4rem);
+    --l-h3: 2.25rem;
+    --l-h4: 1.75rem;
+    --l-large: 1.0625rem;
+    --l-section: 3rem;
+  }
+
+  .l-hero {
+    min-height: 100svh;
+    gap: 1rem;
+    padding-top: 4.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .l-mark-word {
+    font-size: clamp(4.5rem, min(22vw, (100svh - 12rem) * 0.92), 12rem);
+  }
+
+  .l-intro-text {
+    width: min(34rem, 62vw);
+    font-size: clamp(1.125rem, 6svh, 1.75rem);
+  }
+
+  .l-orbs {
+    --ow: min(24vw, 52svh);
+  }
+
+  .l-card {
+    top: calc(4.5rem + var(--i) * 10px);
+  }
+
+  /* How it works: short rows and no diagrams, so the open step has room
+     for its text. */
+  .l-process-slab {
+    padding: 1rem 2rem;
+  }
+
+  .l-steps-wrap {
+    --l-row: 2.6rem;
+  }
+
+  .l-step {
+    flex-basis: var(--l-row);
+    min-height: var(--l-row);
+  }
+
+  .l-step-btn {
+    height: var(--l-row);
+  }
+
+  .l-step-title {
+    font-size: 1.5rem;
+  }
+
+  .l-step-body .l-diagram,
+  .l-diagram {
+    display: none;
+  }
+
+  .l-step-body p {
+    font-size: 0.9375rem;
+  }
+
+  .l-row {
+    padding-block: 1.25rem;
   }
 }

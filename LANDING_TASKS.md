@@ -435,3 +435,40 @@ for by the owner), and the docs (HANDOFF, CLAUDE, PROJECT_CONTEXT, CHANGELOG) up
 - R7-15: landing motion 43/43, demo E2E 43/43, frontend unit 21/21 locally; then merged, pushed,
   deployed (frontend only, no backend changes). Verified live on
   https://main.dg6fh880g1p8b.amplifyapp.com: live site 17/17, live API 46/46, landing motion 43/43.
+
+## Round 8 (2026-10-11, branch `feature/round8-responsive`, from `main`)
+
+Owner's ask: optimise the website and the app for phones and other aspect ratios, then deploy to
+Amplify and push to `main`. Audited every page at 10 shapes (phones 320/360/390/430, a phone held
+sideways 844x390, tablet 768x1024 both ways, a short laptop 1280x600, a square 1000x1000 and an
+ultra-wide 2560x1080) for sideways scroll, clipped content, overlaps and tap targets.
+
+- [x] **R8-1. Landing hero, portrait phones and tablets.** The headline and its line stack, the
+  headline is sized to the width (`clamp(3.25rem, 11vw, 7rem)`) so it keeps two lines, and the first
+  screen is centred instead of leaving an empty band at the top.
+- [x] **R8-2. Landing, phones held sideways (landscape, height <= 520px).** Everything is sized from
+  the height: smaller headline and wordmark (the whole wordmark fits the first screen), smaller
+  "Who it's for" statement and orbs, the stacked cards sit under the bar, and "How it works" has
+  short rows and no diagrams so the open step shows its text.
+- [x] **R8-3. Nav islands on narrower desktops.** From 992 to 1359px the centre island sat on top of
+  Sign in / Create account (it overlapped at 1000 and 1024 wide); there it now starts at the left
+  edge with a 1.5rem gutter, so the two islands always keep a clear gap.
+- [x] **R8-4. Section labels.** "WHO IT'S FOR" / "WHAT'S INSIDE" no longer break over three lines on
+  phones (`white-space: nowrap`).
+- [x] **R8-5. Assignments on small phones.** Cards scrolled sideways at 320 and 360 wide (long
+  subject chips, the title row). The card's column is `minmax(0, 1fr)`, its contents never exceed
+  it, the label column is narrower on phones and long subject names wrap.
+- [x] **R8-6. App top bar on short pages (tablets and phones).** The shell's spare height went to the
+  bar row, leaving an empty box under the bar on short pages (Notes, Subjects on a tablet); the bar
+  now keeps its own height. The brand in the bar got a full-height tap target.
+- [x] **R8-7. Subjects form on phones.** The name gets its own line; the colour picker and Add subject
+  share the line under it.
+- [x] **R8-8. App, phones held sideways.** Smaller page titles, spacing, menu links and stat tiles,
+  section heads in one column, a smaller brand on the sign-in pages.
+- [x] **R8-9. App, ultra-wide screens.** The panel and the page grow to 1920px and sit centred
+  together, so cards and their buttons are not 2000px apart.
+- [x] **R8-10. Tests and release.** New `e2e/responsive.mjs` (11 checks: no sideways scroll for the
+  landing page and the four app pages at all 10 shapes, nav islands apart at every desktop width,
+  hero wordmark on the first screen in every shape, step text on screen sideways, tablet bar height,
+  ultra-wide panel and page together). Then merged into `main`, pushed and deployed with
+  `deploy.ps1 -FrontendOnly` (no backend changes).
