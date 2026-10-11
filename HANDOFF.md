@@ -24,7 +24,7 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 - Optional extras are done too: search, filters, sorting, dark mode, upload progress, a public landing page.
 - Still open: sign-up with a real email through the UI, the alert email, CloudFront, console screenshots.
 - Landing page round 4 (grey intro and colour ripple, spaced-out steps, copy and nav fixes) is on branch `feature/landing-round4`, pushed but not merged or deployed.
-- Round 5 (19 owner changes, landing page and app) is on `feature/landing-round5` (built on round 4), pushed but not merged or deployed; the owner is reviewing it locally. Checklist: `LANDING_TASKS.md`, Round 5. Its `POST /subjects` colour field is not on the live Lambda yet.
+- Rounds 4, 5 and 6 (landing page and app changes, checklists in `LANDING_TASKS.md`) are merged into `main` and deployed with `deploy.ps1 -NoCloudFront` (2026-10-11), including the subjects Lambda's colour field.
 - Landing page round 3 (one continuous purple flow, new orbs, glass HUD, orange scroll pin, theme-matched screenshots) is merged into `main` and deployed (2026-10-10, verified live); every task and its notes are in `LANDING_TASKS.md`.
 
 ## Architecture
@@ -60,9 +60,9 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 ## Test it
 
 - Backend unit: `cd backend && npm test` (36/36).
-- Frontend unit: `cd frontend && npm test` (20/20).
-- Demo end-to-end: `cd e2e && npm test` (38/38). It needs a dev server in demo mode; set `E2E_BASE_URL` if that server is not on 5173.
-- Landing motion: `node e2e/landing-motion.mjs` with a dev server running (41/41).
+- Frontend unit: `cd frontend && npm test` (21/21).
+- Demo end-to-end: `cd e2e && npm test` (39/39). It needs a dev server in demo mode; set `E2E_BASE_URL` if that server is not on 5173.
+- Landing motion: `node e2e/landing-motion.mjs` with a dev server running (42/42).
 - Live API: `node e2e/live-api.mjs` (44/44). Live website: `node e2e/live-site.mjs` (17/17).
 - The live tests create and delete their own temporary Cognito users.
 - Run the landing motion test against production with `E2E_BASE_URL=https://main.dg6fh880g1p8b.amplifyapp.com`.

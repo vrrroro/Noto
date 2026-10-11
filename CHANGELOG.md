@@ -5,6 +5,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (round 6; rounds 4–6 merged into `main` and deployed 2026-10-11)
+
+Full list with notes per item in `LANDING_TASKS.md` (Round 6).
+
+- **Intro.** The dot falls faster (0.3 s) and its first impact starts the colour ripple, which now
+  spreads slowly (1.5 s) so the word's colour still returns gently.
+- **Nav.** The Day/Night switch sits left of "Sign in" in the top bar, and inside the HUD capsule
+  after "Under the hood" (behind a rule). The HUD's ball → line → "Noto" sequence is slower.
+- **Landing.** Night's orbs show the statement in the same white/black negative as Day. "Inside
+  the app" opens each screen's details inline under its row (the rows below slide down) with a
+  Minimise button, instead of a popup. "How it works" shows each open step's text with a much
+  larger diagram underneath (the open step grows; the line still ends at 04). "I built Noto".
+- **App.** The account in the sidebar opens a menu: Rename, Home, Sign out (the separate Home button
+  is gone). The sign-in illustration and heading are centred in their half, larger, and the vine
+  climbs more slowly. The subject colour button sits next to "Add subject" with a chevron and an
+  animated drop-down, and a new subject gets the next unused colour unless one is picked. The
+  completion meter springs again, with room so it never touches "100%".
+
+### Tests (round 6)
+
+- Landing motion 42 checks (inline app details, switch placement, the first-impact slow ripple);
+  demo E2E 39 (the account menu); frontend unit 21 (next subject colour); backend 37.
+
 ### Changed (round 5, branch `feature/landing-round5`, not deployed)
 
 Full list with notes per item in `LANDING_TASKS.md` (Round 5).
