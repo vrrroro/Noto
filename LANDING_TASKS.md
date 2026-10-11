@@ -405,7 +405,7 @@ for by the owner), and the docs (HANDOFF, CLAUDE, PROJECT_CONTEXT, CHANGELOG) up
 - [x] **R7-13. Meter.** Less space between the bar and "100%"; no elasticity, a plain loading bar.
 - [x] **R7-14. Notes header.** "Add a file. It is stored privately, and only you can open it." goes
   back above the upload card instead of inside it.
-- [ ] **R7-15. Ship.** Tests, docs, merge into `main`, push, deploy to Amplify, verify live.
+- [x] **R7-15. Ship.** Tests, docs, merge into `main`, push, deploy to Amplify, verify live.
 
 ### Round 7 notes
 
@@ -433,4 +433,5 @@ for by the owner), and the docs (HANDOFF, CLAUDE, PROJECT_CONTEXT, CHANGELOG) up
   its end, 24px from the label.
 - R7-14: `FileUpload.jsx`: the section head sits above the card in `.upload-section`.
 - R7-15: landing motion 43/43, demo E2E 43/43, frontend unit 21/21 locally; then merged, pushed,
-  deployed (frontend only, no backend changes) and verified live (see CHANGELOG).
+  deployed (frontend only, no backend changes). Verified live on
+  https://main.dg6fh880g1p8b.amplifyapp.com: live site 17/17, live API 46/46, landing motion 43/43.
