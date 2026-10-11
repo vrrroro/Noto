@@ -74,7 +74,7 @@ const top = (sel) => page.$eval(sel, (e) => e.getBoundingClientRect().top + scro
 const navState = () => page.$eval('.l-nav', (e) => ({ glass: e.classList.contains('is-scrolled') }));
 
 // 0. Wordmark: the word rises in grey (the page stays in colour), the dot
-// falls, squashes and settles, then its ripple brings the word's colour back;
+// falls, squashes and settles, and only then its ripple brings the word's colour back;
 // scrolling spreads the letters; no yellow anywhere
 await page.waitForFunction(() => window.__intro.settled && window.__intro.monoGone, { timeout: 6000 }).catch(() => {});
 const firstLoad = await page.evaluate(() => ({ ...window.__intro, word: document.querySelector('.l-mark-word').getBoundingClientRect().width }));
@@ -85,10 +85,10 @@ check(
   `from ${firstLoad.minY.toFixed(0)}px, squash ${firstLoad.maxSx.toFixed(2)}, settled in ${(firstLoad.settled - firstLoad.fall).toFixed(0)} ms`,
 );
 check(
-  'Intro: the first impact starts one slow ripple from the dot that covers the word, then the grey copy is removed',
-  firstLoad.rippleAt > firstLoad.fall && firstLoad.rippleAt - firstLoad.fall < 500 && firstLoad.monoGone - firstLoad.rippleAt > 1200 &&
+  'Intro: the word stays grey until the dot has finished bouncing; then one slow ripple from the dot covers it and the grey copy is removed',
+  firstLoad.settled > 0 && firstLoad.rippleAt >= firstLoad.settled && firstLoad.rippleAt - firstLoad.settled < 100 && firstLoad.monoGone - firstLoad.rippleAt > 1200 &&
     firstLoad.maxR > firstLoad.word * 0.9 && firstLoad.monoGone > 0 && !(await page.$('.l-mark-mono')),
-  `ripple starts ${(firstLoad.rippleAt - firstLoad.fall).toFixed(0)} ms after the fall, takes ${(firstLoad.monoGone - firstLoad.rippleAt).toFixed(0)} ms, reaches ${firstLoad.maxR.toFixed(0)}px`,
+  `ripple starts ${(firstLoad.rippleAt - firstLoad.settled).toFixed(0)} ms after the dot settles (${(firstLoad.rippleAt - firstLoad.fall).toFixed(0)} ms after the fall), takes ${(firstLoad.monoGone - firstLoad.rippleAt).toFixed(0)} ms, reaches ${firstLoad.maxR.toFixed(0)}px`,
 );
 await page.hover('.l-mark-dot'); await sleep(300);
 check(

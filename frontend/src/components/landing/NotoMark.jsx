@@ -4,9 +4,9 @@ import { clamp01, damp, requestScrollFrame, useScrollFrame } from '../../hooks/u
 
 // The Noto wordmark as the hero's centrepiece. On arrival the four letters
 // rise out of the floor one after another (CSS keyframes in landing.css) in
-// grey; the orange dot falls like a drop of water and bounces, and its first
-// impact starts one slow ripple that spreads across the word and brings its
-// colour back (dropIntro.js; once per page load). After that:
+// grey; the orange dot falls like a drop of water and bounces, and once it has
+// stopped bouncing one slow ripple spreads from it across the word and brings
+// its colour back (dropIntro.js; once per page load). After that:
 // - scrolling the hero away spreads the letters apart, swells the dot and
 //   fades them out (--p), with nothing clipping them;
 // - the pointer leans the word and nudges the dot towards it (--px), and the

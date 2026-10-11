@@ -5,6 +5,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (round 11, merged into `main` and deployed 2026-10-11)
+
+- **Hero wordmark intro.** "Noto" stays grey until the orange ball has finished bouncing; only then
+  does the ripple spread from the ball and bring the word's colour back (it used to start at the
+  first impact).
+
 ### Changed (round 10, merged into `main` and deployed 2026-10-11)
 
 - **HUD brand.** The small "Noto" animation is 40% faster (1.08 s), and its ball ends on the

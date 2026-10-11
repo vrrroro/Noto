@@ -513,3 +513,15 @@ Owner's list. Ends with a merge into `main`, a push and an Amplify deploy.
   second; ball on the baseline; capsule centred). Responsive now 12 (capsule centred from 1280 up).
   Demo E2E 43/43, frontend unit 21/21. Merged into `main`, pushed, deployed with
   `deploy.ps1 -FrontendOnly` (no backend changes).
+
+## Round 11 (2026-10-11, branch `feature/round11`, from `main`)
+
+Owner's list. Ends with a merge into `main`, a push and an Amplify deploy.
+
+- [x] **R11-1. The wordmark's colour comes back only after the bounce.** On first load the hero "Noto"
+  stays grey while the orange ball falls and bounces; the ripple that turns it from grey to colour
+  now starts from the ball only once it has finished bouncing and lies still (it used to start at
+  the first impact). The ripple itself is unchanged (1.5 s). `dropIntro.js` starts it in the frame
+  the ball settles.
+- [x] **R11-2. Tests and release.** The landing motion intro check now requires the ripple to start
+  after the ball settles (47/47). Merged into `main`, pushed, deployed with `deploy.ps1 -FrontendOnly`.

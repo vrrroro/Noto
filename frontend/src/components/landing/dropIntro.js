@@ -2,9 +2,10 @@
 // grey (the rest of the page is in colour), the dot falls like a drop of
 // water and bounces with real physics: gravity, a squash while it is in
 // contact (longer for harder hits), a stretch while it flies, energy lost on
-// every bounce, and a short wobble as it settles. Its first impact starts one
-// slow ripple that spreads across the word and gives the letters their colour
-// back, the same circle reveal as the Day/Night switch. About two seconds.
+// every bounce, and a short wobble as it settles. Only once it has finished
+// bouncing and lies still does one slow ripple spread from it across the word
+// and give the letters their colour back, the same circle reveal as the
+// Day/Night switch. About three seconds.
 //
 // The grey is a copy of the four letters laid exactly over the real ones
 // (same classes, so they rise in step), greyed with a filter, with a hole in
@@ -20,8 +21,8 @@ const MAX_SQUASH = 0.38; // squash on the first, hardest impact
 const MAX_STRETCH = 0.22; // stretch at full falling speed
 const WOBBLE = { k: 900, c: 19 }; // the shape's spring after each launch and at rest
 // The ripple: the Day/Night switch's circle reveal (switchTheme), from the
-// dot. It starts at the first impact but spreads slowly, so the word takes its
-// colour back gently while the dot is still bouncing.
+// dot. It starts once the dot has stopped bouncing and spreads slowly, so the
+// word takes its colour back gently.
 const RIPPLE = { duration: 1500, easing: 'cubic-bezier(0.45, 0, 0.25, 1)' };
 
 let played = false;
@@ -93,8 +94,6 @@ export function playDropIntro(dot) {
     ripple.finished.then(() => overlay.remove()).catch(() => {});
   }
 
-  let hit = false; // set on the step of the first impact
-
   function step(dt) {
     if (s.phase === 'air') {
       s.v += g * dt;
@@ -110,7 +109,6 @@ export function playDropIntro(dot) {
         s.launch = speed * RESTITUTION;
         s.sq = 0;
         s.sv = 0;
-        hit = true;
         return;
       }
     } else if (s.phase === 'contact') {
@@ -163,14 +161,13 @@ export function playDropIntro(dot) {
     const sy = 1 - s.sq * 0.9 + stretch;
     apply(s.y, sx, sy);
 
-    // The colour starts to come back the moment the dot first lands.
-    if (hit && !ripple) startRipple(cx, floor - h / 2);
-
+    // Still at last: the bouncing is over, and the colour comes back from the dot.
     const settled = s.phase === 'rest' && Math.abs(s.sq) < 0.002 && Math.abs(s.sv) < 0.05;
     if (settled) {
       finished = true;
       dot.style.removeProperty('translate');
       dot.style.removeProperty('scale');
+      startRipple(cx, floor - h / 2);
       return;
     }
     raf = requestAnimationFrame(frame);
