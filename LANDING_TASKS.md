@@ -337,7 +337,7 @@ Owner's list, in their order. This round ends with a merge into `main` and an Am
   the next colour automatically (not always violet).
 - [x] **R6-12. Meter elasticity back.** The 100% bar springs (overshoots and settles) like before,
   but never touches the "100%" label.
-- [ ] **R6-13. Ship.** Tests, docs, merge into `main`, push, deploy to Amplify, verify live.
+- [x] **R6-13. Ship.** Tests, docs, merge into `main`, push, deploy to Amplify, verify live.
 
 ### Round 6 notes
 
@@ -369,3 +369,11 @@ Owner's list, in their order. This round ends with a merge into `main` and an Am
   and moves on after each new subject unless one is picked by hand (+ unit test).
 - R6-12: the meter springs again (transform/left with `--ease-spring`), on a track that stops 11%
   short so the peak overshoot stays ~46 px clear of the "100%" label.
+- R6-13: merged `feature/round6` (which carries rounds 4 and 5) into `main` (fast-forward), pushed.
+  Backend: `sam deploy` (samconfig's changeset prompt cannot be answered non-interactively, so
+  `--no-confirm-changeset`; changeset was code-only: 3 Lambdas + HttpApi modified, no
+  replacements). Website: `deploy.ps1 -FrontendOnly`. The live site test caught a real bug: a long
+  email widened the new account button and the sidebar footer over the page (invisible rows
+  intercepting clicks); fixed (`grid-template-columns: minmax(0, 1fr)`, `.account { min-width: 0 }`)
+  and redeployed, with a demo E2E check. Verified live: API 46/46 (incl. subject colour saved /
+  bad colour rejected), website 17/17, landing motion 42/42.

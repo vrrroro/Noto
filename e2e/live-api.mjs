@@ -153,6 +153,11 @@ async function main() {
   const subjects = await A('GET', '/subjects');
   check('List subjects', subjects.status === 200 && subjects.json.data.some((s) => s.name === 'DBMS'));
   check('User B sees no subjects of A', (await B('GET', '/subjects')).json?.data?.length === 0);
+  const colored = await A('POST', '/subjects', { name: 'Robotics', color: 'green' });
+  const listed = (await A('GET', '/subjects')).json?.data?.find((x) => x.name === 'Robotics');
+  check('Subject colour is saved and listed', colored.status === 201 && listed?.color === 'green', JSON.stringify(listed));
+  check('Unknown subject colour → 400', (await A('POST', '/subjects', { name: 'Art', color: 'orange' })).status === 400);
+  if (colored.json?.data?.subjectId) await A('DELETE', `/subjects/${colored.json.data.subjectId}`);
 
   // ---- Assignments ---------------------------------------------------------
   const created = await A('POST', '/assignments', {
