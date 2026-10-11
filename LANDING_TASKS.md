@@ -541,5 +541,5 @@ Owner's list. Ends with a merge into `main`, a push and an Amplify deploy.
   grey, copies aligned, the ripple reaches them, copies removed). Responsive 12/12, demo E2E 43/43,
   unit 21/21.
 - [x] **R11-2. Tests and release.** The landing motion intro checks now require the ripple to start
-  after the ball settles, the ball to settle within 1.1 s and the ripple to take under a second
+  after the ball settles, the ball to settle within 1.2 s and the ripple to take under a second
   (47/47). Merged into `main`, pushed, deployed with `deploy.ps1 -FrontendOnly`.

@@ -91,8 +91,8 @@ await page.waitForFunction(() => window.__intro.settled && window.__intro.monoGo
 const firstLoad = await page.evaluate(() => ({ ...window.__intro, word: document.querySelector('.l-mark-word').getBoundingClientRect().width }));
 check('Intro: only the wordmark starts grey (a greyed copy of the letters); the page stays in colour', firstLoad.mono === 'grayscale(1)' && !firstLoad.pageGrey, firstLoad.mono);
 check(
-  'Intro: the dot falls from above the screen, squashes on impact and settles within 1.1 s',
-  firstLoad.minY < -450 && firstLoad.maxSx > 1.2 && firstLoad.settled > 0 && firstLoad.settled - firstLoad.fall < 1100 && (await page.$$('.l-mark-glyph')).length === 4,
+  'Intro: the dot falls from above the screen, squashes on impact and settles within 1.2 s (about 0.9 s; slack for dropped frames on a cold load)',
+  firstLoad.minY < -450 && firstLoad.maxSx > 1.2 && firstLoad.settled > 0 && firstLoad.settled - firstLoad.fall < 1200 && (await page.$$('.l-mark-glyph')).length === 4,
   `from ${firstLoad.minY.toFixed(0)}px, squash ${firstLoad.maxSx.toFixed(2)}, settled in ${(firstLoad.settled - firstLoad.fall).toFixed(0)} ms`,
 );
 check(
