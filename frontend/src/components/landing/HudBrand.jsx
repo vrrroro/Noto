@@ -1,9 +1,10 @@
-// The landing page's small wordmark, driven by the scroll (--b on the nav,
-// 0 → 1, see LandingNav): at the top of the page only the orange ball shows
-// (the big hero wordmark is the logo there). As the hero wordmark fades, the
-// word slot opens and the ball rides a vine line that draws itself, then
-// "Noto" rises in behind it and the line fades, leaving "Noto" with its dot,
-// complete exactly when the hero wordmark is gone. Scrolling back reverses it.
+// The landing page's small wordmark: at the top of the page only the orange
+// ball shows (the big hero wordmark is the logo there). Once the hero
+// wordmark is entirely off the screen, the nav gets .is-branded and this
+// plays by itself (--b runs 0 → 1 over 1.8 s, landing.css): the word slot
+// opens and the ball rides a vine line that draws itself, then "Noto" rises in
+// behind it and the line fades, leaving "Noto" with its dot. When the hero
+// wordmark comes back into view it plays back the other way.
 // `hideIdle` hides the ball as well until the brand starts (the phone bar's
 // copy, so nothing sits in the corner at the top of the page).
 export default function HudBrand({ hideIdle = false, className = '' }) {

@@ -6,7 +6,7 @@ import HudBrand from './HudBrand.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 import AccountMenu, { APP_LINKS } from './AccountMenu.jsx';
 import { NAV_LINKS } from './content.js';
-import { clamp01, useScrollFrame } from '../../hooks/useScrollFrame.js';
+import { useScrollFrame } from '../../hooks/useScrollFrame.js';
 import { isNight, useTheme } from '../../hooks/useTheme.js';
 import { useAuth } from '../../hooks/useAuth.jsx';
 
@@ -24,18 +24,12 @@ function useMediaQuery(query) {
 const GLASS_AT = 50; // px of scroll before the islands get their glass and borders
 const SECTION_IDS = NAV_LINKS.map((link) => link.href.slice(1));
 
-// The brand's progress (--b, 0 → 1) follows the hero wordmark's fade: the
-// wordmark starts to fade at about 22% of the hero's scroll (--p) and is gone
-// at 84% (opacity 1.35 - 1.6p, NotoMark / landing.css), so the small "Noto" is
-// only complete once the big one has left.
-const FADE_START = 0.22;
-const FADE_END = 0.84;
-function brandProgress() {
-  const hero = document.querySelector('.l-hero');
-  if (!hero) return 1;
-  const r = hero.getBoundingClientRect();
-  const p = clamp01(-r.top / (r.height * 0.8));
-  return clamp01((p - FADE_START) / (FADE_END - FADE_START));
+// The small "Noto" plays its own animation (HudBrand, .is-branded) once the
+// hero wordmark is entirely off the top of the screen, and plays it back when
+// the wordmark comes back into view. It is not tied to the scroll position.
+function heroMarkGone() {
+  const word = document.querySelector('.l-hero .l-mark-word');
+  return !word || word.getBoundingClientRect().bottom <= 0;
 }
 
 // The account actions: Sign in and Create account, or, signed in, the
@@ -64,15 +58,15 @@ function Actions({ signedIn, className = '' }) {
 // switch; the right one the account actions. At the top they have no glass or
 // borders; after 50px of scrolling those fade in. A glider slides under the
 // link you point at and otherwise rests on the section you are reading. The
-// small "Noto" draws itself in with the scroll (HudBrand, --b) and is whole
-// only once the hero wordmark has faded away.
+// small "Noto" animates in by itself once the hero wordmark has left the screen.
 // Phones and tablets: a bar with the brand, the switch and a menu button.
 export default function LandingNav() {
   const desktop = useMediaQuery('(min-width: 992px)');
   const [scrolled, setScrolled] = useState(false);
   const [current, setCurrent] = useState('');
+  const [branded, setBranded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const last = useRef({ scrolled: false, current: '', b: -1 });
+  const last = useRef({ scrolled: false, current: '', branded: false });
   const headerRef = useRef(null);
   const pillRef = useRef(null);
   const hovered = useRef(null);
@@ -89,12 +83,12 @@ export default function LandingNav() {
       const r = document.getElementById(id)?.getBoundingClientRect();
       if (r && r.top <= mid && r.bottom > mid) section = id;
     }
-    const b = brandProgress();
+    const gone = heroMarkGone();
     return () => {
       const s = last.current;
       if ((y > GLASS_AT) !== s.scrolled) setScrolled((s.scrolled = y > GLASS_AT));
       if (section !== s.current) setCurrent((s.current = section));
-      if (Math.abs(b - s.b) > 0.0005) headerRef.current?.style.setProperty('--b', (s.b = b).toFixed(4));
+      if (gone !== s.branded) setBranded((s.branded = gone));
     };
   });
 
@@ -135,7 +129,7 @@ export default function LandingNav() {
   };
 
   return (
-    <header ref={headerRef} className={`l-nav ${scrolled ? 'is-scrolled' : ''}`}>
+    <header ref={headerRef} className={`l-nav ${scrolled ? 'is-scrolled' : ''} ${branded ? 'is-branded' : ''}`}>
       <a className="skip-link" href="#l-main">
         Skip to content
       </a>

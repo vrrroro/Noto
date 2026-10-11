@@ -472,3 +472,25 @@ ultra-wide 2560x1080) for sideways scroll, clipped content, overlaps and tap tar
   hero wordmark on the first screen in every shape, step text on screen sideways, tablet bar height,
   ultra-wide panel and page together). Then merged into `main`, pushed and deployed with
   `deploy.ps1 -FrontendOnly` (no backend changes).
+
+## Round 9 (2026-10-11, branch `feature/round9`, from `main`)
+
+Owner's list. Ends with a merge into `main`, a push and an Amplify deploy.
+
+- [x] **R9-1. HUD brand plays after the hero wordmark is gone, not with the scroll.** The small "Noto"
+  in the Noto island waits (only the ball) until the hero wordmark is entirely off the top of the
+  screen, then animates in by itself (slot opens, vine draws, "Noto" rises in, vine fades) over
+  1.8 s with no further scrolling. Scrolling back until the wordmark is on the screen plays it back
+  out. `LandingNav` toggles `.is-branded` when `.l-hero .l-mark-word` has its bottom above the
+  screen; `--b` is a registered `@property` number that transitions 0 -> 1 (none under reduced
+  motion), and `HudBrand`'s CSS reads it as before.
+- [x] **R9-2. Night orbs show the negative like Day.** By Day the words turn white inside the orange
+  and purple orbs and are the page's dark ink in the merge. Night now does the same in negative:
+  black words inside both orbs, white words in the blackish merge. The Night purple orb is a lilac
+  purple (`#efe8ff -> #c9b3ff -> #9d7bf5 -> #6f4ad6`) so the black words read on it; it stays on the
+  left, the orange on the right.
+- [x] **R9-3. Tests and release.** Landing motion now 46 checks: the brand waits while the faded
+  wordmark is still on screen, animates in on its own once it is off screen, and plays back out when
+  it returns; orb words are white/black by Day/Night and the page's ink in the merge. Demo E2E 43/43,
+  responsive 11/11, frontend unit 21/21. Merged into `main`, pushed, deployed with
+  `deploy.ps1 -FrontendOnly` (no backend changes).

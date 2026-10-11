@@ -5,6 +5,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (round 9, merged into `main` and deployed 2026-10-11)
+
+- **HUD brand.** The small "Noto" in the nav no longer follows the scroll: it waits until the hero
+  wordmark is entirely off the screen, then animates in by itself (1.8 s), and plays back out when
+  the wordmark comes back into view.
+- **Night orbs.** The words inside the orbs now flip to black by Night (white in the blackish
+  merge), the negative of Day's white-in-the-orbs; the Night purple orb is a lighter lilac so the
+  black words read on it.
+
+### Tests (round 9)
+
+- Landing motion 46 (brand waits while the wordmark is on screen, plays on its own once it is off,
+  plays back out; orb word colours per theme).
+
 ### Changed (round 8, responsive; merged into `main` and deployed 2026-10-11)
 
 Full list in `LANDING_TASKS.md` (Round 8). Every page was checked at 10 screen shapes, from a 320px

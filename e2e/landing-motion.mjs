@@ -1,7 +1,7 @@
 // Motion and interaction checks for the landing page in headless Chrome: the
 // first-load intro (grey wordmark, falling dot, colour ripple), the Noto wordmark,
 // the palette and Day/Night (orb colours included), the nav and
-// island nav (bare at the top, glass on scroll, scroll-linked brand, glider, underglow), the intro orbs, the stacking
+// island nav (bare at the top, glass on scroll, brand that plays once the hero wordmark is off screen, glider, underglow), the intro orbs, the stacking
 // cards, the process timeline, in-page jumps, the AWS tiles, the scroll pin,
 // the inline app details, route changes, the idle animation loop and reduced motion.
 // Usage:  (terminal 1) cd frontend && npm run dev
@@ -120,6 +120,10 @@ const look = () => page.evaluate(() => {
     orbA: cs('.l-orb.is-a > .l-orb-skin', 'backgroundImage'),
     orbB: cs('.l-orb.is-b > .l-orb-skin', 'backgroundImage'),
     lens: cs('.l-orb-lens', 'backgroundImage'),
+    inkA: cs('.l-orb.is-a', 'color'),
+    inkB: cs('.l-orb.is-b', 'color'),
+    inkLens: cs('.l-orb-lens', 'color'),
+    page: cs('.l-intro-stage > .l-intro-text', 'color'),
   };
 });
 const day = await look();
@@ -128,8 +132,15 @@ const night = await look();
 check('Theme: the switch turns Day into Night (page and saved choice)',
   day.theme === 'light' && night.theme === 'dark' && night.saved === 'dark' && day.bg !== night.bg, `${day.bg} → ${night.bg}`);
 check('Theme: the Noto orange (wordmark dot, scroll pin) is the same in both', day.dot === night.dot && day.pin === night.pin && day.pin === 'rgb(255, 107, 53)');
-check('Orbs: Day is Noto orange (left) + dark purple (right); Night the same two colours swapped',
-  day.orbA.includes('255, 107, 53') && day.orbB.includes('45, 27, 78') && night.orbA.includes('45, 27, 78') && night.orbB.includes('255, 107, 53'));
+check('Orbs: Day is Noto orange (left) + dark purple (right); Night a lilac purple (left) + the orange (right)',
+  day.orbA.includes('255, 107, 53') && day.orbB.includes('45, 27, 78') && night.orbA.includes('157, 123, 245') && night.orbB.includes('255, 107, 53'));
+// The negative: the words in the orbs are white by Day and black by Night (the
+// opposite of the page's ink); in the merge they are the page's ink again.
+const dark = (c) => c.match(/\d+/g).slice(0, 3).every((v) => +v < 60);
+const light = (c) => c.match(/\d+/g).slice(0, 3).every((v) => +v > 230);
+check('Orbs: the words flip to the negative in the orbs in both themes (white by Day, black by Night), and back in the merge',
+  light(day.inkA) && light(day.inkB) && dark(day.inkLens) && dark(night.inkA) && dark(night.inkB) && light(night.inkLens),
+  JSON.stringify({ day: [day.inkA, day.inkB, day.inkLens], night: [night.inkA, night.inkB, night.inkLens] }));
 check('Orbs: the merge is a light purplish grey by Day and a blackish gradient by Night',
   day.lens.includes('220, 213, 230') && night.lens.includes('20, 16, 25'));
 await page.click('.l-capsule .l-theme'); await sleep(1000);
@@ -144,8 +155,9 @@ const yellow = await page.evaluate(() => {
 check('Palette: no Noto yellow left on the landing page', yellow === 0, `${yellow} element(s)`);
 
 // 1. Nav: the islands are there from the top, bare; their glass comes in after
-// 50px; the small "Noto" follows the scroll and is whole only once the hero
-// wordmark has faded away; the switch is in the Noto island
+// 50px; the small "Noto" animates in by itself only once the hero wordmark is
+// entirely off the screen (and back out when it returns); the switch is in the
+// Noto island
 const brand = () => page.evaluate(() => ({
   b: +getComputedStyle(document.querySelector('.l-nav')).getPropertyValue('--b') || 0,
   word: +getComputedStyle(document.querySelector('.l-capsule .l-hud-word')).opacity,
@@ -158,15 +170,34 @@ check('Nav: the islands are there at the top, bare (no glass), with only the bal
 await to(120); await sleep(800); s = await navState();
 const glassLine = await page.evaluate(() => getComputedStyle(document.querySelector('.l-capsule')).borderTopColor);
 check('Nav: after 50px the islands get their glass and borders', s.glass && !/rgba\(0, 0, 0, 0\)/.test(glassLine), glassLine);
-let halfway = null;
-for (const y of [250, 400, 550, 700, 900]) {
-  await to(y); await sleep(1100);
-  const st = await brand();
-  if (!halfway && st.hero > 0.2 && st.hero < 0.8) halfway = st;
+// The hero wordmark faded but still on the screen: no brand yet.
+const heroAt = () => page.evaluate(() => ({
+  bottom: document.querySelector('.l-hero .l-mark-word').getBoundingClientRect().bottom,
+  hero: +getComputedStyle(document.querySelector('.l-mark-glyph')).opacity,
+}));
+let fadedY = null;
+for (let y = 300; y < 1600 && fadedY === null; y += 40) {
+  await to(y); await sleep(250);
+  const h = await heroAt();
+  if (h.hero === 0 && h.bottom > 40) fadedY = y;
 }
+await sleep(2200);
+const faded = await brand();
+check('Nav: the small "Noto" waits while the hero wordmark is still on the screen (even faded)', fadedY !== null && faded.b === 0 && faded.word === 0, JSON.stringify({ fadedY, faded }));
+// Off the screen: it plays by itself, with no more scrolling, and finishes.
+const goneY = await page.evaluate(() => Math.ceil(document.querySelector('.l-hero .l-mark-word').getBoundingClientRect().bottom + scrollY + 40));
+await to(goneY);
+await sleep(450);
+const early = await brand();
+await sleep(2200);
 const done = await brand();
-check('Nav: the small "Noto" follows the scroll, partway while the hero wordmark is still fading, whole once it is gone',
-  halfway && halfway.word < 0.9 && done.word === 1 && done.hero === 0, JSON.stringify({ halfway, done }));
+check('Nav: once the hero wordmark is off the screen, the small "Noto" animates in on its own (not with the scroll)',
+  early.b > 0 && early.b < 0.9 && done.b === 1 && done.word === 1, JSON.stringify({ early, done }));
+// Back up until the wordmark is on the screen again: it plays back out.
+await to(Math.max(0, fadedY - 200)); await sleep(2400);
+const back = await brand();
+check('Nav: the small "Noto" plays back out when the hero wordmark returns', back.b === 0 && back.word === 0, JSON.stringify(back));
+await to(goneY); await sleep(2200);
 check(
   'Nav: the Day/Night switch is in the Noto island, after "Under the hood" and a rule; the account island has none',
   await page.evaluate(() => {

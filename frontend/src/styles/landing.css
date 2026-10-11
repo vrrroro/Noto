@@ -483,10 +483,34 @@
     background-color 0.25s ease;
 }
 
-/* The small wordmark (HudBrand.jsx), scrubbed by --b (0 -> 1, LandingNav):
+/* The small wordmark (HudBrand.jsx), driven by --b (0 -> 1): a registered
+   number, so it animates. It is 0 until the hero wordmark is entirely off the
+   screen; then the nav gets .is-branded and --b runs to 1 over 1.8 s on its
+   own (not with the scroll), and back to 0 when the wordmark returns.
    0-60%: the word slot opens as the vine line draws and carries the ball
    along; 45-100%: "Noto" rises in and the ball shrinks to its dot; 80-100%:
-   the line fades. Complete exactly when the hero wordmark has faded away. */
+   the line fades. */
+@property --b {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+.l-nav {
+  --b: 0;
+  transition: --b 1.8s cubic-bezier(0.45, 0, 0.25, 1);
+}
+
+.l-nav.is-branded {
+  --b: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .l-nav {
+    transition: none;
+  }
+}
+
 .l-hud-brand {
   --open: clamp(0, var(--b, 0) / 0.6, 1);
   --word: clamp(0, (var(--b, 0) - 0.45) / 0.55, 1);
@@ -1199,10 +1223,11 @@
 }
 
 /* Two orbs over the statement, no blending: every colour is chosen.
-   - Day: a Noto-orange orb on the left and a dark purple orb on the right;
-     where they merge, a lightish purplish grey lens. Night: the same two
-     colours swapped (purple left, orange right); where they merge, a
-     blackish gradient.
+   - Day: a Noto-orange orb on the left and a dark purple orb on the right,
+     both with white words; where they merge, a lightish purplish grey lens
+     with black words. Night, the negative of that: a lilac purple orb on the
+     left and the orange one on the right, both with black words (light
+     enough for them); where they merge, a blackish gradient with white words.
    - The negative: each orb (and the lens) carries its own copy of the
      statement, aligned exactly over the real one and inked in the opposite
      tone, and clips it to its circle. So the words flip wherever an orb or
@@ -1216,19 +1241,19 @@
   --xb: calc((1 - var(--k, 0)) * 34vw);
   --os: calc(0.7 + 0.42 * var(--k, 0));
   --ow: min(28vw, 400px);
-  /* The same Noto orange and dark purple in both themes, swapped by Night:
-     orb a (the left one) is orange by Day and purple by Night, orb b (the
-     right one) the other way round. */
-  --a0: light-dark(#ffd2bf, #8a6bc4);
-  --a1: light-dark(#ff8a5c, #5a3d8a);
-  --a2: light-dark(#ff6b35, #2d1b4e);
-  --a3: light-dark(#c9441a, #1b0f30);
-  --a-ink: #ffffff;
+  /* Orb a (the left one) is orange by Day and a lilac purple by Night, orb b
+     (the right one) dark purple by Day and orange by Night. The words in them
+     are white by Day and black by Night, the negative of the page's ink. */
+  --a0: light-dark(#ffd2bf, #efe8ff);
+  --a1: light-dark(#ff8a5c, #c9b3ff);
+  --a2: light-dark(#ff6b35, #9d7bf5);
+  --a3: light-dark(#c9441a, #6f4ad6);
+  --a-ink: light-dark(#ffffff, #0d0716);
   --b0: light-dark(#8a6bc4, #ffd2bf);
   --b1: light-dark(#5a3d8a, #ff8a5c);
   --b2: light-dark(#2d1b4e, #ff6b35);
   --b3: light-dark(#1b0f30, #c9441a);
-  --b-ink: #ffffff;
+  --b-ink: light-dark(#ffffff, #0d0716);
   /* The merge: a lightish purplish grey with black ink by Day; a blackish
      gradient with light ink by Night. */
   --m0: light-dark(#f1edf6, #2a2433);
