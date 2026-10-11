@@ -5,6 +5,30 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (round 7, merged into `main` and deployed 2026-10-11)
+
+Full list with notes per item in `LANDING_TASKS.md` (Round 7).
+
+- **Nav.** The landing page opens with the same two floating islands as the scrolled HUD (the
+  brand, section links and Day/Night switch in the centre; Sign in and Create account on the
+  right), bare at the top; their glass and borders fade in once you scroll. The small "Noto" draws
+  itself in with the scroll and is complete only when the hero wordmark has faded away. The
+  buttons' glow is a quarter of what it was, and Create account / the signed-in button use a soft
+  purple tint instead of bright purple.
+- **Landing.** The hero wordmark is sized to the window, so it is never cut off. Night's orb merge
+  is a blackish gradient. "Make your account" is gone from Who it's for. The step diagrams are
+  smaller and sit right under their text. "Inside the app" has fresh screenshots of the current
+  app, no inner Minimise button, and opening a lower row no longer makes it jump up.
+- **App.** Overdue is a neon red (`--red`), distinct from Completed. The completion meter is a plain
+  loading bar that reaches the end of its track, a normal gap from "100%". On Notes, "Add a file."
+  sits above the upload card again.
+
+### Tests (round 7)
+
+- Landing motion 43 (islands bare then glass, scroll-linked brand, switch in the Noto island, soft
+  buttons, blackish Night merge, rows switching without a jump); demo E2E 43 (overdue red, meter
+  gap, Notes heading).
+
 ### Changed (round 6; rounds 4–6 merged into `main` and deployed 2026-10-11)
 
 Full list with notes per item in `LANDING_TASKS.md` (Round 6).

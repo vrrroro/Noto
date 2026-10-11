@@ -37,6 +37,7 @@ for (const theme of ['light', 'dark']) {
   if (!webp) await shot('login');
 
   await page.goto(`${BASE}/register`);
+  await fill('#register-name', 'Rohit Sharma');
   await fill('#register-email', 'rohit@college.edu');
   await fill('#register-password', 'Passw0rd');
   await fill('#register-confirm', 'Passw0rd');

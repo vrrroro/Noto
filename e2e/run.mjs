@@ -104,7 +104,7 @@ try {
   // After the first-load intro: the grey layer is gone and the dot has settled.
   await page.waitForFunction(() => !document.querySelector('.l-mark-mono') && !document.querySelector('.l-mark-dot')?.style.translate, { timeout: 6000 });
   await shot('app-00-landing');
-  await click('.l-nav-primary .l-signin');
+  await click('.l-nav-islands .l-signin');
   await page.waitForSelector('#login-email');
 
   // --- Auth ---
@@ -150,6 +150,17 @@ try {
   await waitText('Recent files');
   const dash = await text();
   check('Login lands on dashboard with greeting', dash.includes('Hello, Rohit'));
+  const look = await page.evaluate(() => {
+    const dot = (label) => {
+      const tile = [...document.querySelectorAll('.stat-tile')].find((t) => t.textContent.includes(label));
+      return getComputedStyle(tile.querySelector('.stat-label'), '::before').backgroundColor;
+    };
+    const track = document.querySelector('.meter-track').getBoundingClientRect();
+    const label = document.querySelector('.meter-label').getBoundingClientRect();
+    return { overdue: dot('Overdue'), completed: dot('Completed'), gap: Math.round(label.left - track.right) };
+  });
+  check('Overdue is neon red, unlike Completed', look.overdue === 'rgb(255, 31, 79)' && look.overdue !== look.completed, JSON.stringify(look));
+  check('The meter sits a normal gap from its label', look.gap <= 32, `${look.gap}px`);
 
   // Home: the account menu's Home opens the landing page, signed in (an account
   // menu instead of Sign in / Create account), and "/" is still the dashboard.
@@ -168,13 +179,13 @@ try {
   const accountItems = await page.$$eval('.account-menu .account-item', (els) => els.map((e) => e.textContent.trim()).join(','));
   check('The account menu offers Rename, Home and Sign out (no separate Home button)', accountItems === 'Rename,Home,Sign out' && !(await page.$('.sidebar-actions')), accountItems);
   await click('.account-menu a[href="/home"]');
-  await page.waitForSelector('.l-nav-primary .l-account-btn');
+  await page.waitForSelector('.l-nav-islands .l-account-btn');
   check(
     'Home opens the landing page signed in, with the account initial and no Sign in',
-    (await page.$eval('.l-nav-primary .l-account-avatar', (e) => e.textContent)) === 'R' && !(await page.$('.l-nav-primary .l-signin')),
+    (await page.$eval('.l-nav-islands .l-account-avatar', (e) => e.textContent)) === 'R' && !(await page.$('.l-nav-islands .l-signin')),
   );
-  await click('.l-nav-primary .l-account-btn');
-  await click('.l-nav-primary .l-account-menu a[href="/"]');
+  await click('.l-nav-islands .l-account-btn');
+  await click('.l-nav-islands .l-account-menu a[href="/"]');
   await waitText('Upcoming', 10000);
   check('The account menu goes back to the dashboard', new URL(page.url()).pathname === '/');
   await page.goto(BASE);
@@ -251,6 +262,10 @@ try {
   // --- Notes ---
   await click('a.nav-link[href="/notes"]');
   await page.waitForSelector('.file-card');
+  check(
+    'Notes: "Add a file" heading sits above the upload card, not inside it',
+    await page.evaluate(() => !document.querySelector('.upload-card .section-head') && Boolean(document.querySelector('.upload-section > .section-head + .upload-card'))),
+  );
   const pdf = path.join(SRC, 'DBMS_Unit_3.pdf');
   fs.writeFileSync(pdf, '%PDF-1.4\n% demo file\n' + 'x'.repeat(5000));
   const big = path.join(SRC, 'Huge_Lecture.pdf');

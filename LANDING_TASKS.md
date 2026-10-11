@@ -383,28 +383,54 @@ Owner's list, in their order. This round ends with a merge into `main` and an Am
 Owner's list, in their order. Ends with a merge into `main`, a push and an Amplify deploy (asked
 for by the owner), and the docs (HANDOFF, CLAUDE, PROJECT_CONTEXT, CHANGELOG) updated.
 
-- [ ] **R7-1. Hero wordmark higher.** The big "Noto" sits higher so it is not cut off at a normal
+- [x] **R7-1. Hero wordmark higher.** The big "Noto" sits higher so it is not cut off at a normal
   100% browser view.
-- [ ] **R7-2. One island nav from the top.** The landing page opens with the same floating islands
+- [x] **R7-2. One island nav from the top.** The landing page opens with the same floating islands
   as the scrolled HUD (Noto island in the centre, account island on the right) but without their
   borders/glass; the borders animate in once you scroll.
-- [ ] **R7-3. Scroll-linked brand.** The small "Noto" in the island draws in with scrolling and is
+- [x] **R7-3. Scroll-linked brand.** The small "Noto" in the island draws in with scrolling and is
   only complete when the hero wordmark has fully faded away.
-- [ ] **R7-4. Switch in the Noto island.** The Day/Night switch belongs to the Noto island (top and
+- [x] **R7-4. Switch in the Noto island.** The Day/Night switch belongs to the Noto island (top and
   scrolled), never the account island.
-- [ ] **R7-5. Softer button glow.** Sign in / Create account underglow cut by at least 75%.
-- [ ] **R7-6. Button colours.** No bright purple: Create account and the signed-in button use a
+- [x] **R7-5. Softer button glow.** Sign in / Create account underglow cut by at least 75%.
+- [x] **R7-6. Button colours.** No bright purple: Create account and the signed-in button use a
   purple slightly darker than the Sign in button's tint.
-- [ ] **R7-7. Night merge.** Where the orbs merge in Night: a blackish gradient.
-- [ ] **R7-8. Who it's for.** Remove the "Make your account" button at the end.
-- [ ] **R7-9. How it works.** Smaller diagrams that sit snugly under their text.
-- [ ] **R7-10. Inside the app screenshots.** Regenerate the images from the current app.
-- [ ] **R7-11. Inside the app details.** Remove the Minimise button inside (the row's circle does
+- [x] **R7-7. Night merge.** Where the orbs merge in Night: a blackish gradient.
+- [x] **R7-8. Who it's for.** Remove the "Make your account" button at the end.
+- [x] **R7-9. How it works.** Smaller diagrams that sit snugly under their text.
+- [x] **R7-10. Inside the app screenshots.** Regenerate the images from the current app.
+- [x] **R7-11. Inside the app details.** Remove the Minimise button inside (the row's circle does
   it); when another row is opened while one above is open, the new one must not jump upwards.
-- [ ] **R7-12. Overdue colour.** Overdue uses a bright neon red, distinct from Completed.
-- [ ] **R7-13. Meter.** Less space between the bar and "100%"; no elasticity, a plain loading bar.
-- [ ] **R7-14. Notes header.** "Add a file. It is stored privately, and only you can open it." goes
+- [x] **R7-12. Overdue colour.** Overdue uses a bright neon red, distinct from Completed.
+- [x] **R7-13. Meter.** Less space between the bar and "100%"; no elasticity, a plain loading bar.
+- [x] **R7-14. Notes header.** "Add a file. It is stored privately, and only you can open it." goes
   back above the upload card instead of inside it.
 - [ ] **R7-15. Ship.** Tests, docs, merge into `main`, push, deploy to Amplify, verify live.
 
 ### Round 7 notes
+
+- R7-1: hero `padding-top` 7rem, bottom `clamp(1rem, 4svh, 3rem)`, gap `clamp(1.5rem, 5svh, 4rem)`;
+  the wordmark is sized from the height left (`min(28vw, (100svh - 25.5rem) * 0.92)`), so the
+  whole word, swash included, is above the fold at 1280x650, 1440x800, 1536x730 and 1920x950
+  (before: the baseline sat below the window at 1536x730).
+- R7-2/3/4: `LandingNav.jsx` rewritten. Desktop always renders the two islands (`.l-nav-islands`:
+  `.l-capsule` with brand, links, rule, switch; `.l-nav-actions` with Sign in / Create account or
+  the account menu). `.is-scrolled` (> 50px) fades in border, glass, blur and a soft shadow. The
+  scroll frame sets `--b` on the nav from the hero's scroll (`(p - 0.22) / 0.62`, the window in
+  which the hero wordmark fades), and `HudBrand` is pure CSS on `--b` (slot opens + vine draws
+  0-60%, word in 45-100%, vine fades 80-100%). Checked: brand 0.98 when the hero is at 0.02.
+  Phones keep the bar (brand hidden until `--b` > 0, switch, menu).
+- R7-5/6: underglow alphas x 0.25; `--l-btn-soft` (Sign in, 8% purple) and `--l-btn-deep`
+  (20% / 32% Night) for Create account and the signed-in button, ink text, no bright purple.
+- R7-7: Night merge lens `#2a2433 -> #141019 -> #050407` with light ink.
+- R7-8: "Make your account" (and its signed-in variant) removed from Who it's for.
+- R7-9: step diagrams `clamp(84px, 16vh, 150px)` (tablet 80-130, phone 64-110), 0.9rem under the text.
+- R7-10: `e2e/app-screens.mjs` (now fills the Name field) regenerated all 8 WebP screenshots.
+- R7-11: no Minimise button inside the details; opening a lower row while an upper one is open
+  holds the clicked row in place (rAF `scrollBy` for 0.7 s while the upper one folds). Test: < 4px drift.
+- R7-12: `--red: #ff1f4f`, `--tone-danger` (overdue pills, Overdue tile, always red now).
+- R7-13: meter is a plain eased bar (0.9 s, no overshoot) across the full track; the dot rests at
+  its end, 24px from the label.
+- R7-14: `FileUpload.jsx`: the section head sits above the card in `.upload-section`.
+- R7-15: landing motion 43/43, demo E2E 43/43, frontend unit 21/21 locally; then merged, pushed,
+  deployed (frontend only, no backend changes) and verified live (see CHANGELOG).

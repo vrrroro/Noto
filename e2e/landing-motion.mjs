@@ -1,7 +1,7 @@
 // Motion and interaction checks for the landing page in headless Chrome: the
 // first-load intro (grey wordmark, falling dot, colour ripple), the Noto wordmark,
 // the palette and Day/Night (orb colours included), the nav and
-// HUD (ball, brand drawing, glider, underglow), the intro orbs, the stacking
+// island nav (bare at the top, glass on scroll, scroll-linked brand, glider, underglow), the intro orbs, the stacking
 // cards, the process timeline, in-page jumps, the AWS tiles, the scroll pin,
 // the inline app details, route changes, the idle animation loop and reduced motion.
 // Usage:  (terminal 1) cd frontend && npm run dev
@@ -71,7 +71,7 @@ await page.goto(BASE + '/', { waitUntil: 'networkidle0' });
 await sleep(800);
 const to = (y) => page.evaluate((v) => scrollTo({ top: v, behavior: 'instant' }), y);
 const top = (sel) => page.$eval(sel, (e) => e.getBoundingClientRect().top + scrollY);
-const navState = () => page.$eval('.l-nav', (e) => ({ morphed: e.classList.contains('is-morphed') }));
+const navState = () => page.$eval('.l-nav', (e) => ({ glass: e.classList.contains('is-scrolled') }));
 
 // 0. Wordmark: the word rises in grey (the page stays in colour), the dot
 // falls, squashes and settles, then its ripple brings the word's colour back;
@@ -102,7 +102,7 @@ check(
     return !/student|project/i.test(text) && /bloomed by rohit/i.test(text);
   }),
 );
-check('Nav: nothing in the top-left corner at the top of the page', await page.$eval('.l-nav-primary .l-hud-brand', (e) => getComputedStyle(e).opacity === '0'));
+check('Nav: nothing in the top-left corner at the top of the page (the islands are centred and right)', await page.evaluate(() => document.querySelector('.l-capsule').getBoundingClientRect().left > 200 && !document.querySelector('.l-nav-primary')));
 await page.mouse.move(5, 450);
 check('Landing: no "Create your account" button', !(await page.evaluate(() => document.querySelector('.landing').innerText.includes('Create your account'))));
 
@@ -123,16 +123,16 @@ const look = () => page.evaluate(() => {
   };
 });
 const day = await look();
-await page.click('.l-nav-primary .l-nav-actions .l-theme'); await sleep(1000);
+await page.click('.l-capsule .l-theme'); await sleep(1000);
 const night = await look();
 check('Theme: the switch turns Day into Night (page and saved choice)',
   day.theme === 'light' && night.theme === 'dark' && night.saved === 'dark' && day.bg !== night.bg, `${day.bg} → ${night.bg}`);
 check('Theme: the Noto orange (wordmark dot, scroll pin) is the same in both', day.dot === night.dot && day.pin === night.pin && day.pin === 'rgb(255, 107, 53)');
 check('Orbs: Day is Noto orange (left) + dark purple (right); Night the same two colours swapped',
   day.orbA.includes('255, 107, 53') && day.orbB.includes('45, 27, 78') && night.orbA.includes('45, 27, 78') && night.orbB.includes('255, 107, 53'));
-check('Orbs: the merge is the same light purplish grey (black ink) by Day and by Night',
-  day.lens.includes('220, 213, 230') && night.lens.includes('220, 213, 230'));
-await page.click('.l-nav-primary .l-nav-actions .l-theme'); await sleep(1000);
+check('Orbs: the merge is a light purplish grey by Day and a blackish gradient by Night',
+  day.lens.includes('220, 213, 230') && night.lens.includes('20, 16, 25'));
+await page.click('.l-capsule .l-theme'); await sleep(1000);
 check('Theme: switching back restores Day', (await look()).bg === day.bg);
 const yellow = await page.evaluate(() => {
   const props = ['color', 'backgroundColor', 'borderTopColor', 'fill', 'stroke', 'outlineColor'];
@@ -143,23 +143,39 @@ const yellow = await page.evaluate(() => {
 });
 check('Palette: no Noto yellow left on the landing page', yellow === 0, `${yellow} element(s)`);
 
-// 1. Nav: the ball alone at the top, the HUD after 50px, the brand draws itself after 160px
-const brandShown = () => page.$eval('.l-capsule .l-hud-brand', (e) => e.classList.contains('is-shown'));
+// 1. Nav: the islands are there from the top, bare; their glass comes in after
+// 50px; the small "Noto" follows the scroll and is whole only once the hero
+// wordmark has faded away; the switch is in the Noto island
+const brand = () => page.evaluate(() => ({
+  b: +getComputedStyle(document.querySelector('.l-nav')).getPropertyValue('--b') || 0,
+  word: +getComputedStyle(document.querySelector('.l-capsule .l-hud-word')).opacity,
+  hero: +getComputedStyle(document.querySelector('.l-mark-glyph')).opacity,
+}));
 let s = await navState();
-check('Nav: wide bar at the top, no brand in the corner (no "Noto", no ball)',
-  !s.morphed && (await page.$eval('.l-nav-primary .l-hud-brand', (e) => !e.classList.contains('is-shown') && getComputedStyle(e).opacity === '0')));
-await to(100); await sleep(700); s = await navState();
-check('Nav: the HUD after 50px, still only the ball', s.morphed && !(await brandShown()));
-await to(300); await sleep(1500);
-check('Nav: after a little more scrolling the small "Noto" draws itself in', await brandShown());
+const bare = await page.evaluate(() => getComputedStyle(document.querySelector('.l-capsule')).borderTopColor);
+check('Nav: the islands are there at the top, bare (no glass), with only the ball',
+  !s.glass && /rgba\(0, 0, 0, 0\)|transparent/.test(bare) && (await brand()).word === 0, bare);
+await to(120); await sleep(800); s = await navState();
+const glassLine = await page.evaluate(() => getComputedStyle(document.querySelector('.l-capsule')).borderTopColor);
+check('Nav: after 50px the islands get their glass and borders', s.glass && !/rgba\(0, 0, 0, 0\)/.test(glassLine), glassLine);
+let halfway = null;
+for (const y of [250, 400, 550, 700, 900]) {
+  await to(y); await sleep(1100);
+  const st = await brand();
+  if (!halfway && st.hero > 0.2 && st.hero < 0.8) halfway = st;
+}
+const done = await brand();
+check('Nav: the small "Noto" follows the scroll, partway while the hero wordmark is still fading, whole once it is gone',
+  halfway && halfway.word < 0.9 && done.word === 1 && done.hero === 0, JSON.stringify({ halfway, done }));
 check(
-  'Nav: the Day/Night switch sits left of Sign in in the top bar, and after "Under the hood" (behind a rule) in the HUD',
+  'Nav: the Day/Night switch is in the Noto island, after "Under the hood" and a rule; the account island has none',
   await page.evaluate(() => {
-    const top = [...document.querySelector('.l-nav-primary .l-nav-actions').children].map((e) => e.className);
     const cap = [...document.querySelector('.l-capsule').children].map((e) => e.className);
-    return top[0].includes('l-theme') && top[1].includes('l-signin') && cap.at(-1).includes('l-theme') && cap.at(-2).includes('l-capsule-rule') && cap.at(-3).includes('l-pill');
+    const actions = document.querySelector('.l-nav-islands .l-nav-actions');
+    return cap.at(-1).includes('l-theme') && cap.at(-2).includes('l-capsule-rule') && cap.at(-3).includes('l-pill') && !actions.querySelector('.l-theme');
   }),
 );
+await to(300); await sleep(1200);
 const spread = await page.$eval('.l-mark', (e) => +e.style.getPropertyValue('--p'));
 const glyphOpacity = await page.$eval('.l-mark-glyph', (e) => +getComputedStyle(e).opacity);
 check('Wordmark: scrolling the hero away spreads the letters and fades them, with no clipping',
@@ -188,8 +204,14 @@ for (let i = 0; i < 24; i++) {
 }
 check('Nav: the glider never overshoots past "Under the hood"', spill < 1, `${spill.toFixed(1)}px past`);
 await page.mouse.move(700, 600);
-const glows = await page.$$eval('.l-underglow', (els) => els.filter((e) => getComputedStyle(e).boxShadow !== 'none').length);
-check('Nav: Sign in and Create account glow', glows >= 4, `${glows} glowing`);
+// The underglow is a quarter of its first strength, and Create account is a
+// soft purple tint (no bright purple) with ink text.
+const buttons = await page.evaluate(() => {
+  const cta = document.querySelector('.l-nav-cta');
+  const alphas = [...getComputedStyle(cta).boxShadow.matchAll(/rgba?\([^)]*?([\d.]+)\)/g)].map((m) => +m[1]);
+  return { glow: Math.max(...alphas.filter((a) => a < 1)), bg: getComputedStyle(cta.querySelector('.l-ib-bg')).backgroundColor, fg: getComputedStyle(cta).color };
+});
+check('Nav: Sign in and Create account glow softly, and Create account is a soft purple tint', buttons.glow <= 0.15 && !buttons.bg.includes('123, 47, 255)') && buttons.fg !== 'rgb(255, 255, 255)', JSON.stringify(buttons));
 
 // 2. Intro: the words resolve; the orbs carry aligned negative copies of the statement
 const intro = await top('.l-intro'); const introH = await page.$eval('.l-intro', (e) => e.offsetHeight);
@@ -276,30 +298,41 @@ const opened = await page.evaluate(() => ({
   dialog: Boolean(document.querySelector('dialog, .l-popup')),
 }));
 const pushed = (await nextTop()) - before;
-await page.click('.l-row-item.is-open .l-detail-close'); await sleep(900);
+await page.click('.l-row-item.is-open .l-row'); await sleep(900);
 const closed = await page.evaluate(() => ({
   expanded: document.querySelector('.l-row').getAttribute('aria-expanded'),
   height: document.querySelector('.l-detail').getBoundingClientRect().height,
   focus: document.activeElement === document.querySelector('.l-row'),
 }));
 check(
-  'Inside the app: a row opens inline (no popup), pushing the rows below down; Minimise closes it and focus returns',
-  opened.expanded === 'true' && opened.height > 200 && !opened.dialog && pushed > 200 && closed.expanded === 'false' && closed.height < 2 && closed.focus,
+  'Inside the app: a row opens inline (no popup), pushing the rows below down; its own button closes it, with no Minimise button inside',
+  opened.expanded === 'true' && opened.height > 200 && !opened.dialog && pushed > 200 && closed.expanded === 'false' && closed.height < 2 && closed.focus && !(await page.$('.l-detail-close')),
   `pushed ${pushed.toFixed(0)}px, detail ${opened.height.toFixed(0)}px`,
 );
+// Opening a lower row while an upper one is open: the upper one folds away,
+// but the row you clicked stays where it is and opens downwards.
+await page.click('.l-rows li:nth-child(1) .l-row'); await sleep(1000);
+await page.$eval('.l-rows li:nth-child(3)', (e) => e.scrollIntoView({ block: 'center', behavior: 'instant' })); await sleep(300);
+const third = () => page.$eval('.l-rows li:nth-child(3) .l-row', (e) => e.getBoundingClientRect().top);
+const anchor = await third();
+await page.click('.l-rows li:nth-child(3) .l-row');
+let drift = 0;
+for (let i = 0; i < 40; i++) { drift = Math.max(drift, Math.abs((await third()) - anchor)); await sleep(20); }
+check('Inside the app: switching to a lower row keeps it in place while the upper one folds', drift < 4, `${drift.toFixed(1)}px drift`);
+await page.click('.l-rows li:nth-child(3) .l-row'); await sleep(800);
 
 // 7. Leaving a scrolled landing page starts the next page at the top
 await to(3000); await sleep(800);
-await page.click('.l-nav-secondary .l-nav-cta'); await page.waitForSelector('#register-email'); await sleep(300);
+await page.click('.l-nav-islands .l-nav-cta'); await page.waitForSelector('#register-email'); await sleep(300);
 check('Route change: the next page opens at the top', (await page.evaluate(() => scrollY)) === 0);
 
 // 8. Anchor links land on their section; "Under the hood" never stops in "How it works"
 await page.goto(BASE + '/', { waitUntil: 'networkidle0' }); await sleep(500);
-await page.click('.l-nav-links a[href="#how"]'); await sleep(1800);
+await page.click('.l-pill a[href="#how"]'); await sleep(1800);
 const howTop = await page.$eval('#how', (e) => e.getBoundingClientRect().top);
 check('Anchor: "How it works" lands on its section', Math.abs(howTop) < 4, `${howTop.toFixed(1)}px`);
 await to(0); await sleep(600);
-await page.click('.l-nav-links a[href="#aws"]');
+await page.click('.l-pill a[href="#aws"]');
 let seenHow = 0;
 for (let i = 0; i < 40; i++) {
   seenHow += await page.evaluate(() => {

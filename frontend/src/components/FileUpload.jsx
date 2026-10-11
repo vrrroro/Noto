@@ -44,84 +44,87 @@ export default function FileUpload({ subjects, onUploaded }) {
   }
 
   return (
-    <form className="card upload-card" onSubmit={handleSubmit} noValidate>
+    // The heading sits above the card, like the other pages' section heads.
+    <section className="upload-section" aria-labelledby={`${inputId}-title`}>
       <div className="section-head">
         <p className="label">Upload</p>
-        <h2 className="section-title">
+        <h2 id={`${inputId}-title`} className="section-title">
           <span>Add a file.</span> <span className="quiet">It is stored privately, and only you can open it.</span>
         </h2>
       </div>
+      <form className="card upload-card" onSubmit={handleSubmit} noValidate>
 
-      <label
-        htmlFor={inputId}
-        className={`dropzone ${dragging ? 'is-dragging' : ''} ${file ? 'has-file' : ''}`}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          if (!uploading) choose(e.dataTransfer.files?.[0]);
-        }}
-      >
-        <Icon name={file ? 'file' : 'upload'} size={26} />
-        {file ? (
-          <span>
-            <strong>{file.name}</strong>
-            <span className="text-muted"> · {formatBytes(file.size)}</span>
+        <label
+          htmlFor={inputId}
+          className={`dropzone ${dragging ? 'is-dragging' : ''} ${file ? 'has-file' : ''}`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            if (!uploading) choose(e.dataTransfer.files?.[0]);
+          }}
+        >
+          <Icon name={file ? 'file' : 'upload'} size={26} />
+          {file ? (
+            <span>
+              <strong>{file.name}</strong>
+              <span className="text-muted"> · {formatBytes(file.size)}</span>
+            </span>
+          ) : (
+            <span>
+              <strong>Choose a file</strong> or drag it here
+            </span>
+          )}
+          <span className="field-hint">
+            PDF, Word, PowerPoint, text or images · max {formatBytes(MAX_FILE_SIZE)}
           </span>
-        ) : (
-          <span>
-            <strong>Choose a file</strong> or drag it here
-          </span>
-        )}
-        <span className="field-hint">
-          PDF, Word, PowerPoint, text or images · max {formatBytes(MAX_FILE_SIZE)}
-        </span>
-        <input
-          ref={inputRef}
-          id={inputId}
-          type="file"
-          className="visually-hidden"
-          accept={ACCEPT_ATTRIBUTE}
-          disabled={uploading}
-          onChange={(e) => choose(e.target.files?.[0])}
-        />
-      </label>
-
-      <div className="upload-controls">
-        <div className="field">
-          <label htmlFor={`${inputId}-subject`}>Subject</label>
-          <select
-            id={`${inputId}-subject`}
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
+          <input
+            ref={inputRef}
+            id={inputId}
+            type="file"
+            className="visually-hidden"
+            accept={ACCEPT_ATTRIBUTE}
             disabled={uploading}
-          >
-            {subjects.map((s) => (
-              <option key={s.subjectId} value={s.name}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="btn btn-primary" disabled={uploading || !file}>
-          {uploading ? `Uploading ${Math.round(progress * 100)}%` : 'Upload'}
-        </button>
-      </div>
+            onChange={(e) => choose(e.target.files?.[0])}
+          />
+        </label>
 
-      {uploading && (
-        <progress className="progress" value={progress} max={1} aria-label="Upload progress">
-          {Math.round(progress * 100)}%
-        </progress>
-      )}
-      {error && (
-        <p className="alert alert-error" role="alert">
-          {error}
-        </p>
-      )}
-    </form>
+        <div className="upload-controls">
+          <div className="field">
+            <label htmlFor={`${inputId}-subject`}>Subject</label>
+            <select
+              id={`${inputId}-subject`}
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              disabled={uploading}
+            >
+              {subjects.map((s) => (
+                <option key={s.subjectId} value={s.name}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button type="submit" className="btn btn-primary" disabled={uploading || !file}>
+            {uploading ? `Uploading ${Math.round(progress * 100)}%` : 'Upload'}
+          </button>
+        </div>
+
+        {uploading && (
+          <progress className="progress" value={progress} max={1} aria-label="Upload progress">
+            {Math.round(progress * 100)}%
+          </progress>
+        )}
+        {error && (
+          <p className="alert alert-error" role="alert">
+            {error}
+          </p>
+        )}
+      </form>
+    </section>
   );
 }

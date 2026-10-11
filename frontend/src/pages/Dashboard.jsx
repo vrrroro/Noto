@@ -39,7 +39,7 @@ function StatTile({ label, value, tone }) {
   );
 }
 
-// The orange dot springs from 0 to the real completion figure once the data arrives.
+// The bar fills from 0 to the real completion figure once the data arrives.
 function CompletionMeter({ completed, total }) {
   const percent = Math.round((completed / total) * 100);
   const [shown, setShown] = useState(0);
@@ -227,7 +227,7 @@ export default function Dashboard() {
               <StatTile label="Total" value={data.total} tone="neutral" />
               <StatTile label="Pending" value={data.pending} tone="warning" />
               <StatTile label="Completed" value={data.completed} tone="success" />
-              <StatTile label="Overdue" value={data.overdue} tone={data.overdue ? 'danger' : 'success'} />
+              <StatTile label="Overdue" value={data.overdue} tone="danger" />
             </div>
             {data.total > 0 && <CompletionMeter completed={data.completed} total={data.total} />}
           </section>

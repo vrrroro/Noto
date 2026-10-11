@@ -24,6 +24,7 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 - Optional extras are done too: search, filters, sorting, dark mode, upload progress, a public landing page.
 - Still open: sign-up with a real email through the UI, the alert email, CloudFront, console screenshots.
 - Landing page round 4 (grey intro and colour ripple, spaced-out steps, copy and nav fixes) is on branch `feature/landing-round4`, pushed but not merged or deployed.
+- Round 7 (island nav, scroll-linked brand, app polish; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).
 - Rounds 4, 5 and 6 (landing page and app changes, checklists in `LANDING_TASKS.md`) are merged into `main` and deployed with `deploy.ps1 -NoCloudFront` (2026-10-11), including the subjects Lambda's colour field.
 - Landing page round 3 (one continuous purple flow, new orbs, glass HUD, orange scroll pin, theme-matched screenshots) is merged into `main` and deployed (2026-10-10, verified live); every task and its notes are in `LANDING_TASKS.md`.
 
@@ -61,8 +62,8 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 
 - Backend unit: `cd backend && npm test` (36/36).
 - Frontend unit: `cd frontend && npm test` (21/21).
-- Demo end-to-end: `cd e2e && npm test` (40/40). It needs a dev server in demo mode; set `E2E_BASE_URL` if that server is not on 5173.
-- Landing motion: `node e2e/landing-motion.mjs` with a dev server running (42/42).
+- Demo end-to-end: `cd e2e && npm test` (43/43). It needs a dev server in demo mode; set `E2E_BASE_URL` if that server is not on 5173.
+- Landing motion: `node e2e/landing-motion.mjs` with a dev server running (43/43).
 - Live API: `node e2e/live-api.mjs` (46/46). Live website: `node e2e/live-site.mjs` (17/17).
 - The live tests create and delete their own temporary Cognito users.
 - Run the landing motion test against production with `E2E_BASE_URL=https://main.dg6fh880g1p8b.amplifyapp.com`.
@@ -72,6 +73,7 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 - Frontend only: `.\infrastructure\scripts\deploy.ps1 -FrontendOnly` (build, zip, upload to Amplify, wait).
 - Backend or template changes: `.\infrastructure\scripts\deploy.ps1 -NoCloudFront`.
 - Always keep `-NoCloudFront` until AWS verifies the account; otherwise the deploy fails and rolls back.
+- In a non-interactive shell (an agent), `deploy.ps1 -NoCloudFront` stops at SAM's "Deploy this changeset? [y/N]" (`samconfig.toml` confirms changesets). Read the changeset it prints, then run `sam deploy --stack-name student-cloud-manager-dev --parameter-overrides Stage=dev EnableCloudFront=false --no-fail-on-empty-changeset --no-confirm-changeset` from `infrastructure/`, then `deploy.ps1 -FrontendOnly`. Don't pipe the script's output in PowerShell 5.1 (`*>&1`): SAM's progress on stderr becomes an error and stops the script.
 - SAM shows a change set and asks `y/n`; review it before confirming.
 - Stop the dev server before a clean `npm ci`, or it fails with EPERM.
 

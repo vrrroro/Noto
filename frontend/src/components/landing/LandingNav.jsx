@@ -6,7 +6,7 @@ import HudBrand from './HudBrand.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 import AccountMenu, { APP_LINKS } from './AccountMenu.jsx';
 import { NAV_LINKS } from './content.js';
-import { useScrollFrame } from '../../hooks/useScrollFrame.js';
+import { clamp01, useScrollFrame } from '../../hooks/useScrollFrame.js';
 import { isNight, useTheme } from '../../hooks/useTheme.js';
 import { useAuth } from '../../hooks/useAuth.jsx';
 
@@ -21,17 +21,28 @@ function useMediaQuery(query) {
   return matches;
 }
 
-const HUD_AT = 50; // px of scroll before the desktop bar turns into the HUD
-const BRAND_AT = 160; // px of scroll before the small wordmark draws itself in
+const GLASS_AT = 50; // px of scroll before the islands get their glass and borders
 const SECTION_IDS = NAV_LINKS.map((link) => link.href.slice(1));
 
+// The brand's progress (--b, 0 → 1) follows the hero wordmark's fade: the
+// wordmark starts to fade at about 22% of the hero's scroll (--p) and is gone
+// at 84% (opacity 1.35 - 1.6p, NotoMark / landing.css), so the small "Noto" is
+// only complete once the big one has left.
+const FADE_START = 0.22;
+const FADE_END = 0.84;
+function brandProgress() {
+  const hero = document.querySelector('.l-hero');
+  if (!hero) return 1;
+  const r = hero.getBoundingClientRect();
+  const p = clamp01(-r.top / (r.height * 0.8));
+  return clamp01((p - FADE_START) / (FADE_END - FADE_START));
+}
+
 // The account actions: Sign in and Create account, or, signed in, the
-// account menu. In the top bar the Day/Night switch leads them (`theme`); in
-// the HUD the switch lives in the capsule instead, after the section links.
-function Actions({ night, onTheme, signedIn, theme = false, className = '' }) {
+// account menu. The Day/Night switch lives with the brand, never here.
+function Actions({ signedIn, className = '' }) {
   return (
     <div className={`l-nav-actions ${className}`}>
-      {theme && <ThemeToggle night={night} onChange={onTheme} />}
       {signedIn ? (
         <AccountMenu />
       ) : (
@@ -48,21 +59,20 @@ function Actions({ night, onTheme, signedIn, theme = false, className = '' }) {
   );
 }
 
-// Two navs in one fixed header. At the top of the page: a wide bar (the
-// section links, then the actions; nothing in the left corner).
-// After 50px on desktop it lifts away and the HUD rises in: a glass pill in
-// the centre with the brand, the section links and (after a rule) the
-// Day/Night switch, and the account actions in a glass pill on the right.
-// A glider slides under the link you point at and otherwise rests on the
-// section you are reading. After 160px the brand
-// draws itself in (HudBrand). Phones keep the bar, with the switch and a menu.
+// Desktop: two floating islands from the very top of the page. The centre
+// one holds the brand, the section links and (after a rule) the Day/Night
+// switch; the right one the account actions. At the top they have no glass or
+// borders; after 50px of scrolling those fade in. A glider slides under the
+// link you point at and otherwise rests on the section you are reading. The
+// small "Noto" draws itself in with the scroll (HudBrand, --b) and is whole
+// only once the hero wordmark has faded away.
+// Phones and tablets: a bar with the brand, the switch and a menu button.
 export default function LandingNav() {
   const desktop = useMediaQuery('(min-width: 992px)');
   const [scrolled, setScrolled] = useState(false);
-  const [branded, setBranded] = useState(false);
   const [current, setCurrent] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
-  const last = useRef({ scrolled: false, branded: false, current: '' });
+  const last = useRef({ scrolled: false, current: '', b: -1 });
   const headerRef = useRef(null);
   const pillRef = useRef(null);
   const hovered = useRef(null);
@@ -79,11 +89,12 @@ export default function LandingNav() {
       const r = document.getElementById(id)?.getBoundingClientRect();
       if (r && r.top <= mid && r.bottom > mid) section = id;
     }
+    const b = brandProgress();
     return () => {
       const s = last.current;
-      if ((y > HUD_AT) !== s.scrolled) setScrolled((s.scrolled = y > HUD_AT));
-      if ((y > BRAND_AT) !== s.branded) setBranded((s.branded = y > BRAND_AT));
+      if ((y > GLASS_AT) !== s.scrolled) setScrolled((s.scrolled = y > GLASS_AT));
       if (section !== s.current) setCurrent((s.current = section));
+      if (Math.abs(b - s.b) > 0.0005) headerRef.current?.style.setProperty('--b', (s.b = b).toFixed(4));
     };
   });
 
@@ -117,7 +128,6 @@ export default function LandingNav() {
     if (desktop) setMenuOpen(false);
   }, [desktop]);
 
-  const morphed = desktop && scrolled;
   const close = () => setMenuOpen(false);
   const hover = (link) => () => {
     hovered.current = link;
@@ -125,41 +135,15 @@ export default function LandingNav() {
   };
 
   return (
-    <header ref={headerRef} className={`l-nav ${morphed ? 'is-morphed' : ''} ${scrolled ? 'is-scrolled' : ''}`}>
+    <header ref={headerRef} className={`l-nav ${scrolled ? 'is-scrolled' : ''}`}>
       <a className="skip-link" href="#l-main">
         Skip to content
       </a>
 
-      <div className="l-nav-primary" inert={morphed || undefined}>
-        <HudBrand shown={!desktop && branded} hideIdle className="l-nav-brand" />
-        <nav className="l-nav-links" aria-label="Main">
-          {NAV_LINKS.map((link) => (
-            <a key={link.href} className="l-nav-link" href={link.href}>
-              {link.label}
-            </a>
-          ))}
-        </nav>
-        <Actions night={night} onTheme={setTheme} signedIn={signedIn} theme />
-        <div className="l-nav-tools">
-          <ThemeToggle night={night} onChange={setTheme} />
-          <button
-            type="button"
-            className={`l-burger ${menuOpen ? 'is-open' : ''}`}
-            aria-expanded={menuOpen}
-            aria-controls="l-menu"
-            aria-label="Menu"
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            <Icon name="menu" size={20} className="l-burger-open" />
-            <Icon name="close" size={20} className="l-burger-close" />
-          </button>
-        </div>
-      </div>
-
-      {desktop && (
-        <div className="l-nav-secondary" inert={!morphed || undefined}>
+      {desktop ? (
+        <div className="l-nav-islands">
           <div className="l-glass l-capsule">
-            <HudBrand shown={morphed && branded} />
+            <HudBrand />
             <span className="l-capsule-rule" aria-hidden="true" />
             <nav ref={pillRef} className="l-pill" aria-label="Sections" onPointerLeave={hover(null)}>
               <span className="l-pill-glider" aria-hidden="true" />
@@ -180,7 +164,25 @@ export default function LandingNav() {
             <span className="l-capsule-rule" aria-hidden="true" />
             <ThemeToggle night={night} onChange={setTheme} />
           </div>
-          <Actions night={night} onTheme={setTheme} signedIn={signedIn} className="l-glass" />
+          <Actions signedIn={signedIn} className="l-glass" />
+        </div>
+      ) : (
+        <div className="l-nav-primary">
+          <HudBrand hideIdle className="l-nav-brand" />
+          <div className="l-nav-tools">
+            <ThemeToggle night={night} onChange={setTheme} />
+            <button
+              type="button"
+              className={`l-burger ${menuOpen ? 'is-open' : ''}`}
+              aria-expanded={menuOpen}
+              aria-controls="l-menu"
+              aria-label="Menu"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <Icon name="menu" size={20} className="l-burger-open" />
+              <Icon name="close" size={20} className="l-burger-close" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -197,7 +199,7 @@ export default function LandingNav() {
             <>
               {APP_LINKS.map((link, i) => (
                 <li key={link.to}>
-                  <Link className={`l-menu-chip ${i === 0 ? 'is-cta l-underglow' : ''}`} to={link.to}>
+                  <Link className={`l-menu-chip ${i === 0 ? 'is-cta' : ''}`} to={link.to}>
                     {link.label}
                   </Link>
                 </li>
@@ -224,7 +226,7 @@ export default function LandingNav() {
                 </Link>
               </li>
               <li>
-                <Link className="l-menu-chip is-cta l-underglow" to="/register">
+                <Link className="l-menu-chip is-cta" to="/register">
                   Create account
                 </Link>
               </li>
