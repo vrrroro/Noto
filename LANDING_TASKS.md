@@ -314,29 +314,58 @@ agent can resume from the first `[ ]`. Same rules as above (no new dependencies,
 Owner's list, in their order. This round ends with a merge into `main` and an Amplify deploy
 (asked for by the owner). Each box is ticked and committed when done and checked locally.
 
-- [ ] **R6-1. Faster drop, sooner ripple, slow colour.** The orb falls faster and the ripple
+- [x] **R6-1. Faster drop, sooner ripple, slow colour.** The orb falls faster and the ripple
   starts sooner, but the "Noto" word still takes its colour back slowly.
-- [ ] **R6-2. Slower HUD brand.** In the scrolled HUD, the ball, then its line, then "Noto"
+- [x] **R6-2. Slower HUD brand.** In the scrolled HUD, the ball, then its line, then "Noto"
   appear a little more slowly.
-- [ ] **R6-3. Night negative text.** In Night, where the orbs pass over the statement, the text
+- [x] **R6-3. Night negative text.** In Night, where the orbs pass over the statement, the text
   shows in negative white/black exactly like Day.
-- [ ] **R6-4. Inside the app expands inline.** Clicking a row (Dashboard …) pushes the content
+- [x] **R6-4. Inside the app expands inline.** Clicking a row (Dashboard …) pushes the content
   below down and shows the details under it (no popup), with a minimise button to close it.
-- [ ] **R6-5. How it works: bigger animations.** Diagrams under the text, bigger than now, with
+- [x] **R6-5. How it works: bigger animations.** Diagrams under the text, bigger than now, with
   proper spacing.
-- [ ] **R6-6. Theme switch position.** Top bar: right of the section links, left of "Sign in".
+- [x] **R6-6. Theme switch position.** Top bar: right of the section links, left of "Sign in".
   Scrolled HUD: inside the capsule, after "Under the hood", with a "|" divider before it.
-- [ ] **R6-7. Copy.** "We built Noto" → "I built Noto" (solo project).
-- [ ] **R6-8. App account menu.** Remove the sidebar's Home button; clicking the account opens a
+- [x] **R6-7. Copy.** "We built Noto" → "I built Noto" (solo project).
+- [x] **R6-8. App account menu.** Remove the sidebar's Home button; clicking the account opens a
   dropdown: Rename (first), Home, Sign out.
-- [ ] **R6-9. Sign-in page left half.** Arch and text centred in the left half, the vine animation
+- [x] **R6-9. Sign-in page left half.** Arch and text centred in the left half, the vine animation
   slower, and both larger, with proper spacing (still one screen).
-- [ ] **R6-10. Subject colour button.** Sits to the left of "Add subject", with a small "V"
+- [x] **R6-10. Subject colour button.** Sits to the left of "Add subject", with a small "V"
   chevron under the colour orb; the six colours drop down with an animation.
-- [ ] **R6-11. Automatic subject colour.** If no colour is picked by hand, the picker moves on to
+- [x] **R6-11. Automatic subject colour.** If no colour is picked by hand, the picker moves on to
   the next colour automatically (not always violet).
-- [ ] **R6-12. Meter elasticity back.** The 100% bar springs (overshoots and settles) like before,
+- [x] **R6-12. Meter elasticity back.** The 100% bar springs (overshoots and settles) like before,
   but never touches the "100%" label.
 - [ ] **R6-13. Ship.** Tests, docs, merge into `main`, push, deploy to Amplify, verify live.
 
 ### Round 6 notes
+
+- R6-1: `dropIntro.js`: fall 0.42 → 0.30 s, start delay 450 → 250 ms; the ripple starts at the
+  first impact (~270 ms after the fall begins) and lasts 1.5 s (was 0.7 s), so the word's colour
+  returns slowly while the dot is still bouncing.
+- R6-2: HUD brand "show" transitions ~1.6× slower: line + slot 1.2 s, word in at 1.05 s, dot at
+  1.15 s, line fades at 1.6 s.
+- R6-3: the lens (merge) is the light purplish grey with black ink in both themes; orbs keep white
+  ink, so Night shows the same white/black negative as Day.
+- R6-4: `AppTour.jsx` has no `<dialog>`: each row toggles an inline `.l-detail` (grid rows 0fr→1fr,
+  0.6 s; content fades/rises in), the circle becomes a minimise icon, and a "Minimise" button sits
+  at the end of the details (focus returns to the row). One row open at a time. Test: pushes the
+  next row down ~515 px.
+- R6-5: the open step grows (accordion) with its text and a large diagram underneath (up to
+  260 px tall on desktop); closed steps stay one even row each; the line ends at 04's dot via a
+  measured `--last`.
+- R6-6: top bar actions are [switch][Sign in][Create account]; the HUD capsule ends with a rule
+  and the switch after "Under the hood"; the right pill keeps Sign in / Create account.
+- R6-7: intro statement now starts "I built Noto".
+- R6-8: new `AccountButton.jsx`: the sidebar's user box opens a menu upwards: Rename (a small
+  modal, saves via `updateName`), Home (`/home`), Sign out. The separate Home/Sign out buttons are gone.
+- R6-9: auth intro centred in its half (`justify-items: center`, centred heading), arch up to
+  54dvh/540px, heading up to 64px, vine climb 2.6 s and the dot lands at 2.5 s. Sign-in still has
+  no scroll at 1366×768.
+- R6-10: the colour button sits between the input and "Add subject", with a chevron under the orb;
+  the six colours drop down (scale/translate in, then each pops in 35 ms apart).
+- R6-11: `nextSubjectColor(subjects)`: the least used of the six (first on a tie) is preselected
+  and moves on after each new subject unless one is picked by hand (+ unit test).
+- R6-12: the meter springs again (transform/left with `--ease-spring`), on a track that stops 11%
+  short so the peak overshoot stays ~46 px clear of the "100%" label.

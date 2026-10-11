@@ -83,15 +83,27 @@ export function rememberSubjectColor(subjectId, color) {
 // reserved for Noto's dot.
 const ROTATION = ['magenta', 'cyan', 'yellow', 'violet'];
 
-export function subjectColors(subjects = []) {
+// Subject name (lower case) -> colour key.
+function subjectColorKeys(subjects = []) {
   const local = readJson(LOCAL_COLORS_KEY, {});
   const picked = (s) => (SUBJECT_PALETTE[s.color] ? s.color : SUBJECT_PALETTE[local[s.subjectId]] ? local[s.subjectId] : null);
   const byAge = [...subjects].sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
-  const colors = new Map();
+  const keys = new Map();
   let i = 0;
-  for (const s of byAge) {
-    const key = picked(s) ?? ROTATION[i++ % ROTATION.length];
-    colors.set(s.name.toLowerCase(), SUBJECT_PALETTE[key].css);
-  }
-  return (name = '') => colors.get(name.toLowerCase()) ?? 'var(--violet)';
+  for (const s of byAge) keys.set(s.name.toLowerCase(), picked(s) ?? ROTATION[i++ % ROTATION.length]);
+  return keys;
+}
+
+export function subjectColors(subjects = []) {
+  const keys = subjectColorKeys(subjects);
+  return (name = '') => SUBJECT_PALETTE[keys.get(name.toLowerCase())]?.css ?? 'var(--violet)';
+}
+
+// The colour a new subject gets unless one is picked by hand: the least used
+// of the six, the first in SUBJECT_COLORS order on a tie, so each new subject
+// moves on to a fresh colour.
+export function nextSubjectColor(subjects = []) {
+  const used = new Map(SUBJECT_COLORS.map((c) => [c, 0]));
+  for (const key of subjectColorKeys(subjects).values()) used.set(key, (used.get(key) ?? 0) + 1);
+  return SUBJECT_COLORS.reduce((best, c) => (used.get(c) < used.get(best) ? c : best), SUBJECT_COLORS[0]);
 }

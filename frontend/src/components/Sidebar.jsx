@@ -1,9 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { initialOf } from './landing/AccountMenu.jsx';
+import { NavLink, useLocation } from 'react-router-dom';
+import AccountButton from './AccountButton.jsx';
 import Icon from './Icon.jsx';
 import Brand from './Brand.jsx';
-import { useAuth } from '../hooks/useAuth.jsx';
 import { switchTheme, useTheme } from '../hooks/useTheme.js';
 import { isDemoMode } from '../config.js';
 
@@ -17,11 +16,9 @@ const LINKS = [
 const THEME_LABEL = { light: 'Day', dark: 'Night' };
 
 export default function Sidebar() {
-  const { user, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
   useEffect(() => setMenuOpen(false), [location.pathname]);
 
@@ -43,11 +40,6 @@ export default function Sidebar() {
     window.addEventListener('resize', place);
     return () => window.removeEventListener('resize', place);
   }, [location.pathname, menuOpen]);
-
-  async function handleSignOut() {
-    await signOut();
-    navigate('/login', { replace: true });
-  }
 
   return (
     <aside className={`sidebar ${menuOpen ? 'is-open' : ''}`}>
@@ -102,22 +94,7 @@ export default function Sidebar() {
             <span className="nav-button-key">Theme</span>
             {THEME_LABEL[theme]}
           </button>
-          <div className="user-box">
-            <span className="avatar" aria-hidden="true">
-              {initialOf(user)}
-            </span>
-            <span className="user-email" title={user?.email}>
-              {user?.name || user?.email}
-            </span>
-          </div>
-          <div className="sidebar-actions">
-            <Link to="/home" className="nav-link nav-button">
-              Home
-            </Link>
-            <button type="button" className="nav-link nav-button" onClick={handleSignOut}>
-              Sign out
-            </button>
-          </div>
+          <AccountButton />
         </div>
       </div>
     </aside>

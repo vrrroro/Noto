@@ -16,7 +16,7 @@ export const NAV_LINKS = [
 ];
 
 export const INTRO_STATEMENT =
-  'We built Noto for anyone with five subjects, too many PDFs and a deadline they half remember: one place for every assignment, every note and whatever is due next.';
+  'I built Noto for anyone with five subjects, too many PDFs and a deadline they half remember: one place for every assignment, every note and whatever is due next.';
 
 export const FEATURES = [
   {

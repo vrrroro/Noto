@@ -5,9 +5,11 @@ import { withNoto } from '../NotoWord.jsx';
 import { STEPS } from './content.js';
 import { clamp01, useScrollFrame } from '../../hooks/useScrollFrame.js';
 
-// "How it works": a 400vh section whose black slab sticks for three screens
-// of scrolling while the four steps open in turn. The open step grows (flex,
-// 0.8s); the lilac line and the marker follow the active dot. They are measured
+// "How it works": a 400vh section whose slab sticks for three screens of
+// scrolling while the four steps open in turn. The open step grows (flex,
+// 0.8s) to show its text with a large diagram under it; the closed ones stay
+// one even row each. The line runs from the first dot to the last, and the
+// lilac fill and the marker follow the active dot. They are measured
 // with a ResizeObserver on the steps, so they track the accordion while it is
 // still moving instead of waiting for scrolling to stop.
 // Every step is a real button: clicking (or tabbing to) one scrolls to it.
@@ -30,15 +32,18 @@ export default function ProcessTimeline({ motion }) {
     };
   }, motion);
 
-  // Line fill height and marker position = the active dot's centre.
+  // Line fill height and marker position = the active dot's centre; the line
+  // itself ends at the last dot's centre (--last), wherever the steps are.
   useEffect(() => {
     const wrap = wrapRef.current;
     const measure = () => {
       const dots = wrap.querySelectorAll('.l-step-dot');
       const dot = dots[motion ? active : dots.length - 1];
       if (!dot) return;
-      const y = dot.getBoundingClientRect().top - wrap.getBoundingClientRect().top + dot.offsetHeight / 2;
-      wrap.style.setProperty('--fill', `${y.toFixed(1)}px`);
+      const top = wrap.getBoundingClientRect().top;
+      const centre = (d) => d.getBoundingClientRect().top - top + d.offsetHeight / 2;
+      wrap.style.setProperty('--fill', `${centre(dot).toFixed(1)}px`);
+      wrap.style.setProperty('--last', `${centre(dots[dots.length - 1]).toFixed(1)}px`);
     };
     measure();
     const observer = new ResizeObserver(measure);

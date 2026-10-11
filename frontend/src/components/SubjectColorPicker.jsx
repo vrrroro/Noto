@@ -1,9 +1,11 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import Icon from './Icon.jsx';
 import { SUBJECT_COLORS, SUBJECT_PALETTE } from '../utils/format.js';
 
-// A round swatch button showing the chosen colour; it opens a small row of the
-// six subject colours. Escape, a pick or a click elsewhere closes it, and
-// focus goes back to the swatch.
+// A round swatch button showing the chosen colour, with a small chevron under
+// it to say it opens; it drops down a row of the six subject colours, one
+// after another. Escape, a pick or a click elsewhere closes it, and focus goes
+// back to the swatch.
 export default function SubjectColorPicker({ value, onChange, disabled }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
@@ -59,10 +61,11 @@ export default function SubjectColorPicker({ value, onChange, disabled }) {
         onClick={() => setOpen((o) => !o)}
       >
         <span className="color-swatch" aria-hidden="true" />
+        <Icon name="chevronDown" size={14} className="color-chevron" />
       </button>
       {open && (
         <div id={listId} className="color-pop" role="radiogroup" aria-label="Subject colour" onKeyDown={onListKey}>
-          {SUBJECT_COLORS.map((color) => (
+          {SUBJECT_COLORS.map((color, i) => (
             <button
               key={color}
               type="button"
@@ -73,7 +76,7 @@ export default function SubjectColorPicker({ value, onChange, disabled }) {
               tabIndex={color === value ? 0 : -1}
               data-color={color}
               className="color-option"
-              style={{ '--swatch': SUBJECT_PALETTE[color].css }}
+              style={{ '--swatch': SUBJECT_PALETTE[color].css, '--n': i }}
               onClick={() => pick(color)}
             >
               <span className="color-swatch" aria-hidden="true" />

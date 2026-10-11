@@ -25,26 +25,25 @@ const HUD_AT = 50; // px of scroll before the desktop bar turns into the HUD
 const BRAND_AT = 160; // px of scroll before the small wordmark draws itself in
 const SECTION_IDS = NAV_LINKS.map((link) => link.href.slice(1));
 
-// Sign in, the Day/Night switch and Create account: the same group in the
-// top bar and in the HUD. Signed in, the switch and the account menu instead.
-function Actions({ night, onTheme, signedIn, className = '' }) {
-  if (signedIn) {
-    return (
-      <div className={`l-nav-actions ${className}`}>
-        <ThemeToggle night={night} onChange={onTheme} />
-        <AccountMenu />
-      </div>
-    );
-  }
+// The account actions: Sign in and Create account, or, signed in, the
+// account menu. In the top bar the Day/Night switch leads them (`theme`); in
+// the HUD the switch lives in the capsule instead, after the section links.
+function Actions({ night, onTheme, signedIn, theme = false, className = '' }) {
   return (
     <div className={`l-nav-actions ${className}`}>
-      <Link className="l-signin l-underglow" to="/login">
-        Sign in
-      </Link>
-      <ThemeToggle night={night} onChange={onTheme} />
-      <IconButton to="/register" variant="solid" className="l-nav-cta l-underglow">
-        Create account
-      </IconButton>
+      {theme && <ThemeToggle night={night} onChange={onTheme} />}
+      {signedIn ? (
+        <AccountMenu />
+      ) : (
+        <>
+          <Link className="l-signin l-underglow" to="/login">
+            Sign in
+          </Link>
+          <IconButton to="/register" variant="solid" className="l-nav-cta l-underglow">
+            Create account
+          </IconButton>
+        </>
+      )}
     </div>
   );
 }
@@ -52,9 +51,10 @@ function Actions({ night, onTheme, signedIn, className = '' }) {
 // Two navs in one fixed header. At the top of the page: a wide bar (the
 // section links, then the actions; nothing in the left corner).
 // After 50px on desktop it lifts away and the HUD rises in: a glass pill in
-// the centre with the brand and the section links, and the actions in a
-// glass pill on the right. A glider slides under the link you point at and
-// otherwise rests on the section you are reading. After 160px the brand
+// the centre with the brand, the section links and (after a rule) the
+// Day/Night switch, and the account actions in a glass pill on the right.
+// A glider slides under the link you point at and otherwise rests on the
+// section you are reading. After 160px the brand
 // draws itself in (HudBrand). Phones keep the bar, with the switch and a menu.
 export default function LandingNav() {
   const desktop = useMediaQuery('(min-width: 992px)');
@@ -139,7 +139,7 @@ export default function LandingNav() {
             </a>
           ))}
         </nav>
-        <Actions night={night} onTheme={setTheme} signedIn={signedIn} />
+        <Actions night={night} onTheme={setTheme} signedIn={signedIn} theme />
         <div className="l-nav-tools">
           <ThemeToggle night={night} onChange={setTheme} />
           <button
@@ -177,6 +177,8 @@ export default function LandingNav() {
                 </a>
               ))}
             </nav>
+            <span className="l-capsule-rule" aria-hidden="true" />
+            <ThemeToggle night={night} onChange={setTheme} />
           </div>
           <Actions night={night} onTheme={setTheme} signedIn={signedIn} className="l-glass" />
         </div>

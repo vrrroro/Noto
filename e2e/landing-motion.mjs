@@ -3,7 +3,7 @@
 // the palette and Day/Night (orb colours included), the nav and
 // HUD (ball, brand drawing, glider, underglow), the intro orbs, the stacking
 // cards, the process timeline, in-page jumps, the AWS tiles, the scroll pin,
-// the side panel, route changes, the idle animation loop and reduced motion.
+// the inline app details, route changes, the idle animation loop and reduced motion.
 // Usage:  (terminal 1) cd frontend && npm run dev
 //         (terminal 2) node e2e/landing-motion.mjs
 // Env:    E2E_BASE_URL (default http://localhost:5173), CHROME_PATH (auto-detected)
@@ -85,9 +85,10 @@ check(
   `from ${firstLoad.minY.toFixed(0)}px, squash ${firstLoad.maxSx.toFixed(2)}, settled in ${(firstLoad.settled - firstLoad.fall).toFixed(0)} ms`,
 );
 check(
-  'Intro: after the last bounce one ripple from the dot covers the word and the grey copy is removed',
-  firstLoad.rippleAt > firstLoad.fall + 600 && firstLoad.maxR > firstLoad.word * 0.9 && firstLoad.monoGone > 0 && !(await page.$('.l-mark-mono')),
-  `ripple starts ${(firstLoad.rippleAt - firstLoad.fall).toFixed(0)} ms after the fall, reaches ${firstLoad.maxR.toFixed(0)}px`,
+  'Intro: the first impact starts one slow ripple from the dot that covers the word, then the grey copy is removed',
+  firstLoad.rippleAt > firstLoad.fall && firstLoad.rippleAt - firstLoad.fall < 500 && firstLoad.monoGone - firstLoad.rippleAt > 1200 &&
+    firstLoad.maxR > firstLoad.word * 0.9 && firstLoad.monoGone > 0 && !(await page.$('.l-mark-mono')),
+  `ripple starts ${(firstLoad.rippleAt - firstLoad.fall).toFixed(0)} ms after the fall, takes ${(firstLoad.monoGone - firstLoad.rippleAt).toFixed(0)} ms, reaches ${firstLoad.maxR.toFixed(0)}px`,
 );
 await page.hover('.l-mark-dot'); await sleep(300);
 check(
@@ -129,8 +130,8 @@ check('Theme: the switch turns Day into Night (page and saved choice)',
 check('Theme: the Noto orange (wordmark dot, scroll pin) is the same in both', day.dot === night.dot && day.pin === night.pin && day.pin === 'rgb(255, 107, 53)');
 check('Orbs: Day is Noto orange (left) + dark purple (right); Night the same two colours swapped',
   day.orbA.includes('255, 107, 53') && day.orbB.includes('45, 27, 78') && night.orbA.includes('45, 27, 78') && night.orbB.includes('255, 107, 53'));
-check('Orbs: the merge is a light purplish grey by Day and a dark one by Night',
-  day.lens.includes('220, 213, 230') && night.lens.includes('39, 32, 48'));
+check('Orbs: the merge is the same light purplish grey (black ink) by Day and by Night',
+  day.lens.includes('220, 213, 230') && night.lens.includes('220, 213, 230'));
 await page.click('.l-nav-primary .l-nav-actions .l-theme'); await sleep(1000);
 check('Theme: switching back restores Day', (await look()).bg === day.bg);
 const yellow = await page.evaluate(() => {
@@ -151,6 +152,14 @@ await to(100); await sleep(700); s = await navState();
 check('Nav: the HUD after 50px, still only the ball', s.morphed && !(await brandShown()));
 await to(300); await sleep(1500);
 check('Nav: after a little more scrolling the small "Noto" draws itself in', await brandShown());
+check(
+  'Nav: the Day/Night switch sits left of Sign in in the top bar, and after "Under the hood" (behind a rule) in the HUD',
+  await page.evaluate(() => {
+    const top = [...document.querySelector('.l-nav-primary .l-nav-actions').children].map((e) => e.className);
+    const cap = [...document.querySelector('.l-capsule').children].map((e) => e.className);
+    return top[0].includes('l-theme') && top[1].includes('l-signin') && cap.at(-1).includes('l-theme') && cap.at(-2).includes('l-capsule-rule') && cap.at(-3).includes('l-pill');
+  }),
+);
 const spread = await page.$eval('.l-mark', (e) => +e.style.getPropertyValue('--p'));
 const glyphOpacity = await page.$eval('.l-mark-glyph', (e) => +getComputedStyle(e).opacity);
 check('Wordmark: scrolling the hero away spreads the letters and fades them, with no clipping',
@@ -255,14 +264,29 @@ const frames = await page.evaluate(() => new Promise((resolve) => {
 }));
 check('Idle: no animation frames requested while nothing moves', frames === 0, `${frames} frames in 1 s`);
 
-// 6. Dialog: keyboard open, Escape closes, focus returns
+// 6. Inside the app: a row opens its details right under it (the next row
+// moves down), Minimise closes it and focus returns to the row
 await to(await top('.l-app')); await sleep(400);
-await page.focus('.l-row'); await page.keyboard.press('Enter'); await sleep(500);
-const open = await page.$eval('.l-popup', (d) => d.open);
-const inDialog = await page.evaluate(() => !!document.activeElement.closest('.l-popup'));
-await page.keyboard.press('Escape'); await sleep(500);
-const back = await page.evaluate(() => document.activeElement.classList.contains('l-row') && !document.querySelector('.l-popup').open);
-check('Panel: opens from the keyboard with focus inside, Escape closes it and focus returns', open && inDialog && back);
+const nextTop = () => page.$eval('.l-rows li:nth-child(2) .l-row', (e) => e.getBoundingClientRect().top);
+const before = await nextTop();
+await page.focus('.l-row'); await page.keyboard.press('Enter'); await sleep(1000);
+const opened = await page.evaluate(() => ({
+  expanded: document.querySelector('.l-row').getAttribute('aria-expanded'),
+  height: document.querySelector('.l-detail').getBoundingClientRect().height,
+  dialog: Boolean(document.querySelector('dialog, .l-popup')),
+}));
+const pushed = (await nextTop()) - before;
+await page.click('.l-row-item.is-open .l-detail-close'); await sleep(900);
+const closed = await page.evaluate(() => ({
+  expanded: document.querySelector('.l-row').getAttribute('aria-expanded'),
+  height: document.querySelector('.l-detail').getBoundingClientRect().height,
+  focus: document.activeElement === document.querySelector('.l-row'),
+}));
+check(
+  'Inside the app: a row opens inline (no popup), pushing the rows below down; Minimise closes it and focus returns',
+  opened.expanded === 'true' && opened.height > 200 && !opened.dialog && pushed > 200 && closed.expanded === 'false' && closed.height < 2 && closed.focus,
+  `pushed ${pushed.toFixed(0)}px, detail ${opened.height.toFixed(0)}px`,
+);
 
 // 7. Leaving a scrolled landing page starts the next page at the top
 await to(3000); await sleep(800);

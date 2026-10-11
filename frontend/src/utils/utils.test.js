@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, daysUntil, dueStatus, formatDate, parseDate, todayString } from './date.js';
-import { checkFileBeforeUpload, fileTypeLabel, formatBytes, greetingName, subjectColors } from './format.js';
+import { checkFileBeforeUpload, fileTypeLabel, formatBytes, greetingName, nextSubjectColor, subjectColors } from './format.js';
 import { filterAssignments, filterFiles } from './filters.js';
 import { passwordMeetsRules, isValidEmail } from './password.js';
 import { summarize } from '../pages/Dashboard.jsx';
@@ -91,6 +91,15 @@ describe('format utils', () => {
     expect(colorOf('OS')).toBe('var(--green)');
     expect(colorOf('DBMS')).toBe('var(--magenta)');
     expect(colorOf('AI')).toBe('var(--cyan)');
+  });
+
+  it('offers the least used colour for the next subject', () => {
+    expect(nextSubjectColor([])).toBe('violet');
+    const subjects = [
+      { name: 'DBMS', createdAt: '2026-10-01' }, // magenta (rotation)
+      { name: 'OS', createdAt: '2026-10-02', color: 'violet' },
+    ];
+    expect(nextSubjectColor(subjects)).toBe('cyan');
   });
 });
 

@@ -973,14 +973,43 @@ select:disabled {
   min-height: 40px;
 }
 
-/* The subject colour picker: a round swatch in the bar, opening a row of six. */
+/* The subject colour picker: a round swatch (with a chevron under it) just
+   before "Add subject", dropping down a row of six that pop in one by one. */
 .color-picker {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
-.color-swatch-btn,
+.color-swatch-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--r-giant) - 6px);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color var(--t-fast) ease;
+}
+
+.color-swatch-btn:hover,
+.color-swatch-btn[aria-expanded='true'] {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.color-chevron {
+  transition: rotate var(--t-fast) ease;
+}
+
+.color-swatch-btn[aria-expanded='true'] .color-chevron {
+  rotate: 180deg;
+}
+
 .color-option {
   display: grid;
   place-items: center;
@@ -993,20 +1022,20 @@ select:disabled {
   cursor: pointer;
 }
 
-.color-swatch-btn {
-  align-self: center;
-  margin-left: var(--space-2xs, 4px);
-}
-
 .color-swatch {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--swatch);
   box-shadow:
     inset 0 0 0 1px rgb(0 0 0 / 12%),
     0 0 10px color-mix(in srgb, var(--swatch) 45%, transparent);
-  transition: scale var(--t-fast, 0.15s) ease;
+  transition: scale var(--t-fast) ease;
+}
+
+.color-option .color-swatch {
+  width: 26px;
+  height: 26px;
 }
 
 .color-swatch-btn:hover .color-swatch,
@@ -1014,7 +1043,6 @@ select:disabled {
   scale: 1.1;
 }
 
-.color-swatch-btn[aria-expanded='true'] .color-swatch,
 .color-option[aria-checked='true'] .color-swatch {
   box-shadow:
     0 0 0 2px var(--surface),
@@ -1028,8 +1056,8 @@ select:disabled {
 
 .color-pop {
   position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
+  top: calc(100% + 14px);
+  right: 0;
   z-index: 20;
   display: flex;
   gap: 2px;
@@ -1039,13 +1067,32 @@ select:disabled {
   box-shadow:
     0 0 0 1px var(--hairline),
     0 14px 32px -12px var(--float-shadow);
-  animation: color-pop-in 0.18s ease-out;
+  transform-origin: calc(100% - 32px) 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .color-pop {
+    animation: color-pop-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .color-pop .color-option {
+    animation: color-option-in 0.32s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+    animation-delay: calc(60ms + var(--n, 0) * 35ms);
+  }
 }
 
 @keyframes color-pop-in {
   from {
     opacity: 0;
-    translate: 0 -4px;
+    scale: 0.85 0.6;
+    translate: 0 -8px;
+  }
+}
+
+@keyframes color-option-in {
+  from {
+    opacity: 0;
+    scale: 0.4;
   }
 }
 
@@ -1311,15 +1358,93 @@ select:disabled {
   border-top: 1px solid var(--hairline);
 }
 
-/* Home (back to the landing page) to the left of Sign out. */
-.sidebar-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 var(--space-md);
+/* The account (AccountButton.jsx): the user box is a button that opens a
+   small menu upwards: Rename, Home and Sign out. */
+.account {
+  position: relative;
 }
 
-.sidebar-actions .nav-button {
-  width: auto;
+.account-btn {
+  width: 100%;
+  border: 0;
+  border-radius: var(--r-control);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--t-fast) ease;
+}
+
+.account-btn:hover,
+.account-btn[aria-expanded='true'] {
+  background: var(--surface-2);
+}
+
+.account-chevron {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--text-muted);
+  transition: rotate var(--t-fast) ease;
+}
+
+.account-btn[aria-expanded='true'] .account-chevron {
+  rotate: 180deg;
+}
+
+.account-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--hairline),
+    0 18px 40px -16px var(--float-shadow);
+  animation: account-menu-in 0.18s ease-out;
+}
+
+@keyframes account-menu-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 40px;
+  padding: 0 var(--space-sm);
+  border: 0;
+  border-radius: calc(var(--r-card) - 6px);
+  background: none;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.account-item .icon {
+  color: var(--text-muted);
+}
+
+.account-item:is(:hover, :focus-visible) {
+  background: var(--surface-2);
+  color: var(--orange-text);
+}
+
+.account-item.is-signout {
+  border-top: 1px solid var(--hairline);
+  border-radius: 0 0 calc(var(--r-card) - 6px) calc(var(--r-card) - 6px);
 }
 
 .demo-badge {
@@ -1660,17 +1785,11 @@ select:disabled {
   font-variant-numeric: tabular-nums slashed-zero;
 }
 
-/* Completion meter: a 3px track; the orange dot springs to the real figure.
-   The spring runs on --meter itself (a registered number), and the fill and the
-   dot read min(--meter, 100), so the overshoot can stretch the bar but never past
-   the end of the track: at 100% it stops at the end instead of running into
-   the label. The dot stays inside the track at both ends. */
-@property --meter {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0;
-}
-
+/* Completion meter: a 3px track; the orange dot springs to the real figure,
+   overshooting and settling back. The visible track stops --room short of
+   the meter's end and the bar runs on that shorter length, so even the
+   biggest overshoot (about 10% of the travel) stays in that gap and never
+   reaches the "100%" label. */
 .meter {
   display: flex;
   flex-wrap: wrap;
@@ -1680,11 +1799,10 @@ select:disabled {
 }
 
 .meter-track {
-  --at: calc(min(var(--meter), 100) * (100% - 14px) / 100);
+  --room: 11%;
   position: relative;
   flex: 1 1 260px;
   height: 14px;
-  transition: --meter 1100ms var(--ease-spring);
 }
 
 .meter-track::before,
@@ -1693,29 +1811,32 @@ select:disabled {
   position: absolute;
   top: 5.5px;
   left: 0;
+  width: calc(100% - var(--room));
   height: 3px;
   border-radius: 3px;
 }
 
 .meter-track::before {
-  right: 0;
   background: var(--track);
 }
 
 .meter-fill {
-  width: calc(var(--at) + 7px);
   background: var(--cyan);
+  transform: scaleX(calc(var(--meter) / 100));
+  transform-origin: left center;
+  transition: transform 1100ms var(--ease-spring);
 }
 
 .meter-dot {
   position: absolute;
   top: 0;
-  left: var(--at);
+  left: calc((100% - var(--room)) * var(--meter) / 100 - 7px);
   width: 14px;
   height: 14px;
   border-radius: 50%;
   background: var(--orange);
   box-shadow: var(--glow-dot);
+  transition: left 1100ms var(--ease-spring);
 }
 
 .meter-label {
@@ -2682,12 +2803,13 @@ select:disabled {
     animation: dot-land 500ms var(--ease-spring) 550ms both;
   }
 
+  /* An unhurried climb: the vine takes 2.6 s and the dot lands as it ends. */
   .auth-arch .vine {
-    animation: vine-climb 1400ms var(--ease-reveal) both;
+    animation: vine-climb 2600ms var(--ease-reveal) 200ms both;
   }
 
   .auth-arch .bud {
-    animation: dot-land 500ms var(--ease-spring) 1200ms both;
+    animation: dot-land 700ms var(--ease-spring) 2500ms both;
   }
 
   .meter,
@@ -2837,28 +2959,29 @@ select:disabled {
     min-height: max(100dvh, 600px);
   }
 
+  /* Centred in its half: the brand, the arch and the heading under it. */
   .auth-intro {
     display: grid;
     align-content: center;
-    justify-items: start;
-    padding: clamp(24px, 5dvh, 64px) var(--space-xl);
+    justify-items: center;
+    padding: clamp(20px, 4dvh, 56px) var(--space-xl);
     border-right: 1px solid var(--hairline);
+    text-align: center;
   }
 
   .auth-intro-brand {
-    margin-bottom: clamp(12px, 3dvh, 32px);
+    margin-bottom: clamp(12px, 2.5dvh, 28px);
   }
 
-  /* The heading sits under the arch now, not over the vine. */
   .auth-arch {
     width: auto;
-    height: min(46dvh, 440px);
+    height: min(54dvh, 540px);
   }
 
   .auth-intro h2 {
-    max-width: 15ch;
-    margin-top: clamp(16px, 3.5dvh, 36px);
-    font-size: clamp(34px, 5.4dvh, 56px);
+    max-width: 16ch;
+    margin-top: clamp(16px, 3dvh, 32px);
+    font-size: clamp(34px, 5.6dvh, 64px);
   }
 
   .auth-main {

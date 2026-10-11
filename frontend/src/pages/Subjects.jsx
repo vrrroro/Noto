@@ -7,7 +7,7 @@ import { useToast } from '../components/Toast.jsx';
 import { assignmentsApi, filesApi, subjectsApi } from '../services/api.js';
 import { LIMITS } from '@backend/shared/constants.js';
 import SubjectColorPicker from '../components/SubjectColorPicker.jsx';
-import { rememberSubjectColor, subjectColors } from '../utils/format.js';
+import { nextSubjectColor, rememberSubjectColor, subjectColors } from '../utils/format.js';
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -18,7 +18,9 @@ export default function Subjects() {
     return { subjects, assignments, files };
   });
   const [name, setName] = useState('');
-  const [color, setColor] = useState('violet');
+  // The colour for the next subject: picked by hand, or else the next one
+  // in line (nextSubjectColor), which moves on after every new subject.
+  const [pickedColor, setPickedColor] = useState(null);
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
@@ -37,6 +39,7 @@ export default function Subjects() {
   }, [data]);
 
   const colorOf = useMemo(() => subjectColors(data?.subjects), [data]);
+  const color = pickedColor ?? nextSubjectColor(data?.subjects);
 
   async function handleAdd(e) {
     e.preventDefault();
@@ -55,6 +58,7 @@ export default function Subjects() {
         subjects: [...d.subjects, created].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })),
       }));
       setName('');
+      setPickedColor(null);
       toast.success(`Added “${created.name}”.`);
     } catch (err) {
       setFormError(err.message);
@@ -90,7 +94,6 @@ export default function Subjects() {
           </p>
         </div>
         <div className="giant-bar">
-          <SubjectColorPicker value={color} onChange={setColor} disabled={status !== 'success'} />
           <input
             id="subject-name"
             value={name}
@@ -99,6 +102,7 @@ export default function Subjects() {
             maxLength={LIMITS.SUBJECT_NAME_MAX}
             disabled={status !== 'success'}
           />
+          <SubjectColorPicker value={color} onChange={setPickedColor} disabled={status !== 'success'} />
           <button type="submit" className="btn btn-primary" disabled={saving || status !== 'success'}>
             {saving ? 'Adding…' : 'Add subject'}
           </button>

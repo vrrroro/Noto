@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Icon from '../Icon.jsx';
 import { withNoto } from '../NotoWord.jsx';
 import { UpperTitle } from './IconButton.jsx';
@@ -10,35 +10,19 @@ import { SCREENS } from './content.js';
 function ThemeImage({ image, alt }) {
   return (
     <>
-      <img className="l-shot-day" src={image.day} alt={alt} />
-      <img className="l-shot-night" src={image.night} alt={alt} />
+      <img className="l-shot-day" src={image.day} alt={alt} loading="lazy" />
+      <img className="l-shot-night" src={image.night} alt={alt} loading="lazy" />
     </>
   );
 }
 
 // "Inside the app": one row per screen. Pointing at a row lifts it into a card
-// with an orange title, so it reads as a button; clicking it opens a side panel (a native modal <dialog>, so focus is trapped, Escape
-// closes it and focus returns to the row).
+// with an orange title, so it reads as a button. Clicking it opens its details
+// right under it (the rows below slide down; grid rows 0fr → 1fr) and the
+// row's circle becomes a minimise button; clicking again, or "Minimise" at the
+// end of the details, closes it. One row is open at a time.
 export default function AppTour() {
   const [openIndex, setOpenIndex] = useState(null);
-  const dialogRef = useRef(null);
-  const triggerRef = useRef(null);
-
-  useEffect(() => {
-    if (openIndex !== null && !dialogRef.current.open) dialogRef.current.showModal();
-  }, [openIndex]);
-
-  function open(i, trigger) {
-    triggerRef.current = trigger;
-    setOpenIndex(i);
-  }
-
-  function onClose() {
-    setOpenIndex(null);
-    triggerRef.current?.focus();
-  }
-
-  const screen = openIndex === null ? null : SCREENS[openIndex];
 
   return (
     <section id="app" className="l-section l-app" aria-labelledby="l-app-title">
@@ -48,71 +32,62 @@ export default function AppTour() {
           Inside the app
         </h2>
         <ul className="l-rows">
-          {SCREENS.map((s, i) => (
-            <li key={s.title}>
-              <button
-                type="button"
-                className="l-row"
-                aria-label={`${s.title}: more details`}
-                onClick={(e) => open(i, e.currentTarget)}
-              >
-                <span className="l-row-meta">
-                  <Icon name={s.icon} size={40} />
-                  <span className="l-tags">
-                    {s.tags.map((tag) => (
-                      <span key={tag} className="l-tag">
-                        {tag}
-                      </span>
-                    ))}
+          {SCREENS.map((s, i) => {
+            const open = openIndex === i;
+            const close = () => {
+              setOpenIndex(null);
+              document.getElementById(`l-row-${i}`)?.focus({ preventScroll: true });
+            };
+            return (
+              <li key={s.title} className={`l-row-item ${open ? 'is-open' : ''}`}>
+                <button
+                  id={`l-row-${i}`}
+                  type="button"
+                  className="l-row"
+                  aria-expanded={open}
+                  aria-controls={`l-detail-${i}`}
+                  onClick={() => setOpenIndex(open ? null : i)}
+                >
+                  <span className="l-row-meta">
+                    <Icon name={s.icon} size={40} />
+                    <span className="l-tags">
+                      {s.tags.map((tag) => (
+                        <span key={tag} className="l-tag">
+                          {tag}
+                        </span>
+                      ))}
+                    </span>
                   </span>
-                </span>
-                <span className="l-row-title">{s.title}</span>
-                <span className="l-row-circle">
-                  <Icon name="expand" size={18} />
-                </span>
-              </button>
-            </li>
-          ))}
+                  <span className="l-row-title">{s.title}</span>
+                  <span className="l-row-circle" aria-hidden="true">
+                    <Icon name={open ? 'minimize' : 'expand'} size={18} />
+                  </span>
+                  <span className="visually-hidden">{open ? ': hide details' : ': show details'}</span>
+                </button>
+                <div id={`l-detail-${i}`} className="l-detail" role="region" aria-labelledby={`l-row-${i}`} inert={!open || undefined}>
+                  <div className="l-detail-inner">
+                    <div className="l-detail-body">
+                      <div className="l-detail-text">
+                        <p className="l-upper">What it does</p>
+                        <p>{withNoto(s.does)}</p>
+                        <p className="l-upper">Why it helps</p>
+                        <p>{withNoto(s.helps)}</p>
+                        <button type="button" className="l-detail-close" onClick={close}>
+                          <Icon name="minimize" size={16} />
+                          Minimise
+                        </button>
+                      </div>
+                      <div className="l-detail-shot">
+                        <ThemeImage image={s.image} alt={s.alt} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </div>
-
-      <dialog
-        ref={dialogRef}
-        className="l-popup"
-        aria-labelledby="l-popup-title"
-        onClose={onClose}
-        onClick={(e) => e.target === dialogRef.current && dialogRef.current.close()}
-      >
-        {screen && (
-          <>
-            <div className="l-popup-head">
-              <div>
-                <h3 id="l-popup-title" className="l-h3">
-                  {screen.title}
-                </h3>
-                <span className="l-tags">
-                  {screen.tags.map((tag) => (
-                    <span key={tag} className="l-tag is-accent">
-                      {tag}
-                    </span>
-                  ))}
-                </span>
-              </div>
-              <button type="button" className="l-popup-close" onClick={() => dialogRef.current.close()}>
-                Close
-                <Icon name="close" size={16} />
-              </button>
-            </div>
-            <div className="l-popup-body">
-              <p className="l-upper">What it does</p>
-              <p>{withNoto(screen.does)}</p>
-              <p className="l-upper">Why it helps</p>
-              <p>{withNoto(screen.helps)}</p>
-              <ThemeImage image={screen.image} alt={screen.alt} />
-            </div>
-          </>
-        )}
-      </dialog>
     </section>
   );
 }

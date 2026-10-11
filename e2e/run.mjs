@@ -151,11 +151,14 @@ try {
   const dash = await text();
   check('Login lands on dashboard with greeting', dash.includes('Hello, Rohit'));
 
-  // Home: the sidebar's Home opens the landing page, signed in (an account
+  // Home: the account menu's Home opens the landing page, signed in (an account
   // menu instead of Sign in / Create account), and "/" is still the dashboard.
   const themeLabel = await page.$$eval('.nav-button', (els) => els.map((e) => e.textContent).find((t) => t.includes('Theme')));
   check('Theme switch offers only Day and Night', /Day|Night/.test(themeLabel) && !/System/.test(themeLabel), themeLabel);
-  await click('.sidebar-actions a[href="/home"]');
+  await click('.account-btn');
+  const accountItems = await page.$$eval('.account-menu .account-item', (els) => els.map((e) => e.textContent.trim()).join(','));
+  check('The account menu offers Rename, Home and Sign out (no separate Home button)', accountItems === 'Rename,Home,Sign out' && !(await page.$('.sidebar-actions')), accountItems);
+  await click('.account-menu a[href="/home"]');
   await page.waitForSelector('.l-nav-primary .l-account-btn');
   check(
     'Home opens the landing page signed in, with the account initial and no Sign in',
@@ -327,7 +330,8 @@ try {
   // --- Sign out + protected routes ---
   await page.goto(`${BASE}/`);
   await waitText('Recent files');
-  await page.locator('button.nav-button::-p-text(Sign out)').click();
+  await click('.account-btn');
+  await click('.account-menu .is-signout');
   await page.waitForSelector('#login-email');
   await page.goto(`${BASE}/assignments`);
   await page.waitForSelector('#login-email');
@@ -355,7 +359,8 @@ try {
   await click('button[type=submit]');
   await waitText('Recent files', 10000);
   check('Password reset: the old password stops working and the new one signs in', true);
-  await page.locator('button.nav-button::-p-text(Sign out)').click();
+  await click('.account-btn');
+  await click('.account-menu .is-signout');
   await page.waitForSelector('#login-email');
 
   // --- Second user isolation ---

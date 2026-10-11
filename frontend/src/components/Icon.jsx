@@ -33,6 +33,8 @@ const PATHS = {
   activity: 'M3 12h4l2.5-6 5 12 2.5-6h4',
   arrowDown: 'M12 5v14M6 13l6 6 6-6',
   expand: 'M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7',
+  minimize: 'M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7',
+  chevronDown: 'M6 9l6 6 6-6',
   heart: 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z',
 };
 
