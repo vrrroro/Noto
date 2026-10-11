@@ -521,7 +521,12 @@ Owner's list. Ends with a merge into `main`, a push and an Amplify deploy.
 - [x] **R11-1. The wordmark's colour comes back only after the bounce.** On first load the hero "Noto"
   stays grey while the orange ball falls and bounces; the ripple that turns it from grey to colour
   now starts from the ball only once it has finished bouncing and lies still (it used to start at
-  the first impact). The ripple itself is unchanged (1.5 s). `dropIntro.js` starts it in the frame
-  the ball settles.
-- [x] **R11-2. Tests and release.** The landing motion intro check now requires the ripple to start
-  after the ball settles (47/47). Merged into `main`, pushed, deployed with `deploy.ps1 -FrontendOnly`.
+  the first impact). `dropIntro.js` starts it in the frame the ball settles.
+- [x] **R11-3. Quicker bounce and colour (owner's follow-up).** The bounce ends sooner: each bounce
+  keeps 25% of its speed (was 36%), the ball stays down below 300 px/s (was 110) and its squash
+  wobble is stiffer and more damped, so it settles about 0.9 s after it starts to fall (was about
+  1.25 s, two rebounds instead of three). The colour ripple takes 0.75 s (was 1.5 s). The whole
+  intro is about 1.65 s from the fall (was about 2.75 s).
+- [x] **R11-2. Tests and release.** The landing motion intro checks now require the ripple to start
+  after the ball settles, the ball to settle within 1.1 s and the ripple to take under a second
+  (47/47). Merged into `main`, pushed, deployed with `deploy.ps1 -FrontendOnly`.

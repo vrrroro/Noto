@@ -80,13 +80,14 @@ await page.waitForFunction(() => window.__intro.settled && window.__intro.monoGo
 const firstLoad = await page.evaluate(() => ({ ...window.__intro, word: document.querySelector('.l-mark-word').getBoundingClientRect().width }));
 check('Intro: only the wordmark starts grey (a greyed copy of the letters); the page stays in colour', firstLoad.mono === 'grayscale(1)' && !firstLoad.pageGrey, firstLoad.mono);
 check(
-  'Intro: the dot falls from above the screen, squashes on impact and settles within 2 s',
-  firstLoad.minY < -450 && firstLoad.maxSx > 1.2 && firstLoad.settled > 0 && firstLoad.settled - firstLoad.fall < 2000 && (await page.$$('.l-mark-glyph')).length === 4,
+  'Intro: the dot falls from above the screen, squashes on impact and settles within 1.1 s',
+  firstLoad.minY < -450 && firstLoad.maxSx > 1.2 && firstLoad.settled > 0 && firstLoad.settled - firstLoad.fall < 1100 && (await page.$$('.l-mark-glyph')).length === 4,
   `from ${firstLoad.minY.toFixed(0)}px, squash ${firstLoad.maxSx.toFixed(2)}, settled in ${(firstLoad.settled - firstLoad.fall).toFixed(0)} ms`,
 );
 check(
-  'Intro: the word stays grey until the dot has finished bouncing; then one slow ripple from the dot covers it and the grey copy is removed',
-  firstLoad.settled > 0 && firstLoad.rippleAt >= firstLoad.settled && firstLoad.rippleAt - firstLoad.settled < 100 && firstLoad.monoGone - firstLoad.rippleAt > 1200 &&
+  'Intro: the word stays grey until the dot has finished bouncing; then one quick ripple (under a second) from the dot covers it and the grey copy is removed',
+  firstLoad.settled > 0 && firstLoad.rippleAt >= firstLoad.settled && firstLoad.rippleAt - firstLoad.settled < 100 &&
+    firstLoad.monoGone - firstLoad.rippleAt > 600 && firstLoad.monoGone - firstLoad.rippleAt < 1000 &&
     firstLoad.maxR > firstLoad.word * 0.9 && firstLoad.monoGone > 0 && !(await page.$('.l-mark-mono')),
   `ripple starts ${(firstLoad.rippleAt - firstLoad.settled).toFixed(0)} ms after the dot settles (${(firstLoad.rippleAt - firstLoad.fall).toFixed(0)} ms after the fall), takes ${(firstLoad.monoGone - firstLoad.rippleAt).toFixed(0)} ms, reaches ${firstLoad.maxR.toFixed(0)}px`,
 );

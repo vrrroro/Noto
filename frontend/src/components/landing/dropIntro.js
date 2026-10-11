@@ -3,9 +3,9 @@
 // water and bounces with real physics: gravity, a squash while it is in
 // contact (longer for harder hits), a stretch while it flies, energy lost on
 // every bounce, and a short wobble as it settles. Only once it has finished
-// bouncing and lies still does one slow ripple spread from it across the word
-// and give the letters their colour back, the same circle reveal as the
-// Day/Night switch. About three seconds.
+// bouncing and lies still (under a second) does one quick ripple spread from it
+// across the word and give the letters their colour back, the same circle
+// reveal as the Day/Night switch. About two seconds.
 //
 // The grey is a copy of the four letters laid exactly over the real ones
 // (same classes, so they rise in step), greyed with a filter, with a hole in
@@ -15,15 +15,15 @@
 
 const START_DELAY = 250; // ms: the letters are part-way up when the dot falls
 const FALL_S = 0.3; // seconds from above the screen to the baseline
-const RESTITUTION = 0.36; // share of the speed kept by each bounce
-const STOP_SPEED = 110; // px/s: slower than this and the dot stays down
+const RESTITUTION = 0.25; // share of the speed kept by each bounce
+const STOP_SPEED = 300; // px/s: slower than this and the dot stays down
 const MAX_SQUASH = 0.38; // squash on the first, hardest impact
 const MAX_STRETCH = 0.22; // stretch at full falling speed
-const WOBBLE = { k: 900, c: 19 }; // the shape's spring after each launch and at rest
+const WOBBLE = { k: 1400, c: 40 }; // the shape's spring after each launch and at rest
 // The ripple: the Day/Night switch's circle reveal (switchTheme), from the
-// dot. It starts once the dot has stopped bouncing and spreads slowly, so the
-// word takes its colour back gently.
-const RIPPLE = { duration: 1500, easing: 'cubic-bezier(0.45, 0, 0.25, 1)' };
+// dot. It starts once the dot has stopped bouncing and sweeps the word's
+// colour back quickly.
+const RIPPLE = { duration: 750, easing: 'cubic-bezier(0.45, 0, 0.25, 1)' };
 
 let played = false;
 
