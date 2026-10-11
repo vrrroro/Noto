@@ -377,3 +377,34 @@ Owner's list, in their order. This round ends with a merge into `main` and an Am
   intercepting clicks); fixed (`grid-template-columns: minmax(0, 1fr)`, `.account { min-width: 0 }`)
   and redeployed, with a demo E2E check. Verified live: API 46/46 (incl. subject colour saved /
   bad colour rejected), website 17/17, landing motion 42/42.
+
+## Round 7 (2026-10-11, branch `feature/round7`, from `main`)
+
+Owner's list, in their order. Ends with a merge into `main`, a push and an Amplify deploy (asked
+for by the owner), and the docs (HANDOFF, CLAUDE, PROJECT_CONTEXT, CHANGELOG) updated.
+
+- [ ] **R7-1. Hero wordmark higher.** The big "Noto" sits higher so it is not cut off at a normal
+  100% browser view.
+- [ ] **R7-2. One island nav from the top.** The landing page opens with the same floating islands
+  as the scrolled HUD (Noto island in the centre, account island on the right) but without their
+  borders/glass; the borders animate in once you scroll.
+- [ ] **R7-3. Scroll-linked brand.** The small "Noto" in the island draws in with scrolling and is
+  only complete when the hero wordmark has fully faded away.
+- [ ] **R7-4. Switch in the Noto island.** The Day/Night switch belongs to the Noto island (top and
+  scrolled), never the account island.
+- [ ] **R7-5. Softer button glow.** Sign in / Create account underglow cut by at least 75%.
+- [ ] **R7-6. Button colours.** No bright purple: Create account and the signed-in button use a
+  purple slightly darker than the Sign in button's tint.
+- [ ] **R7-7. Night merge.** Where the orbs merge in Night: a blackish gradient.
+- [ ] **R7-8. Who it's for.** Remove the "Make your account" button at the end.
+- [ ] **R7-9. How it works.** Smaller diagrams that sit snugly under their text.
+- [ ] **R7-10. Inside the app screenshots.** Regenerate the images from the current app.
+- [ ] **R7-11. Inside the app details.** Remove the Minimise button inside (the row's circle does
+  it); when another row is opened while one above is open, the new one must not jump upwards.
+- [ ] **R7-12. Overdue colour.** Overdue uses a bright neon red, distinct from Completed.
+- [ ] **R7-13. Meter.** Less space between the bar and "100%"; no elasticity, a plain loading bar.
+- [ ] **R7-14. Notes header.** "Add a file. It is stored privately, and only you can open it." goes
+  back above the upload card instead of inside it.
+- [ ] **R7-15. Ship.** Tests, docs, merge into `main`, push, deploy to Amplify, verify live.
+
+### Round 7 notes
