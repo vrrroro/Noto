@@ -527,6 +527,19 @@ Owner's list. Ends with a merge into `main`, a push and an Amplify deploy.
   wobble is stiffer and more damped, so it settles about 0.9 s after it starts to fall (was about
   1.25 s, two rebounds instead of three). The colour ripple takes 0.75 s (was 1.5 s). The whole
   intro is about 1.65 s from the fall (was about 2.75 s).
+- [x] **R11-4. Colour after the first bounce (owner's follow-up).** The ripple now starts as the ball
+  lands again after its first bounce (about 0.57 s after it starts to fall), and the word takes its
+  colour back while the ball finishes bouncing; the whole intro is about 1.3 s from the fall. Landing
+  motion checks the ripple starts at the second landing and before the ball is still (47/47).
+- [x] **R11-5. The ripple colours "sorted." and the nav buttons too (owner's follow-up).** The
+  headline's "sorted." and, on desktop, the nav's Sign in and Create account now start grey with the
+  wordmark, and the same ripple (one circle on the screen, from the ball) carries on out and gives
+  them their colour back. Each gets a grey copy laid exactly over it (centred on it, so the inline
+  word's letters line up) with a hole that grows with the ripple, while the real one is masked to
+  the inside of the circle, so the buttons' tinted backgrounds are never drawn twice; their glow
+  fades back in once the ripple has passed. Landing motion now 48 checks (the three parts start
+  grey, copies aligned, the ripple reaches them, copies removed). Responsive 12/12, demo E2E 43/43,
+  unit 21/21.
 - [x] **R11-2. Tests and release.** The landing motion intro checks now require the ripple to start
   after the ball settles, the ball to settle within 1.1 s and the ripple to take under a second
   (47/47). Merged into `main`, pushed, deployed with `deploy.ps1 -FrontendOnly`.

@@ -10,7 +10,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Hero wordmark intro.** "Noto" stays grey until the orange ball has finished bouncing; only then
   does the ripple spread from the ball and bring the word's colour back (it used to start at the
   first impact). The bounce ends sooner (about 0.9 s, two rebounds) and the colour sweeps back in
-  0.75 s (was 1.5 s).
+  0.75 s (was 1.5 s). Follow-up: the ripple now starts as the ball lands after its first bounce,
+  so the colour comes back while the ball finishes bouncing. The headline's "sorted." and the nav's
+  Sign in and Create account start grey too, and the same ripple brings their colour back.
 
 ### Changed (round 10, merged into `main` and deployed 2026-10-11)
 

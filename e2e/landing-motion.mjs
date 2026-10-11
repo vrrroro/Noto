@@ -44,13 +44,22 @@ await page.evaluateOnNewDocument(() => localStorage.setItem('scm.theme', 'light'
 // the wordmark (and whether the page itself stays in colour), the dot's fall
 // and squash, when the ripple starts and its radius, and when it all ends.
 await page.evaluateOnNewDocument(() => {
-  const s = (window.__intro = { mono: '', pageGrey: false, minY: 0, maxSx: 1, maxR: 0, fall: 0, settled: 0, rippleAt: 0, monoGone: 0, frames: 0 });
+  const s = (window.__intro = { mono: '', pageGrey: false, minY: 0, maxSx: 1, maxR: 0, fall: 0, settled: 0, rippleAt: 0, monoGone: 0, frames: 0, impacts: [], lastY: 0, parts: null, partsR: 0 });
   const tick = (now) => {
     s.frames += 1;
     const dot = document.querySelector('.l-mark-dot');
     const mono = document.querySelector('.l-mark-mono');
     if (document.querySelector('.l-mono')) s.pageGrey = true;
     if (mono && !s.mono) s.mono = getComputedStyle(mono).filter;
+    // "sorted." and the nav's Sign in / Create account: grey copies laid exactly over them.
+    const copies = [...document.querySelectorAll('.l-mono-copy')];
+    if (copies.length && !s.parts) {
+      s.parts = copies.map((c) => {
+        const a = c.previousElementSibling.getBoundingClientRect(), b = c.getBoundingClientRect();
+        return { name: c.textContent.trim(), grey: getComputedStyle(c).filter, off: Math.abs(a.left + a.right - b.left - b.right) / 2 + Math.abs(a.top + a.bottom - b.top - b.bottom) / 2 };
+      });
+    }
+    for (const c of copies) s.partsR = Math.max(s.partsR, parseFloat(getComputedStyle(c).getPropertyValue('--l-r')) || 0);
     if (mono && !s.rippleAt && parseFloat(getComputedStyle(mono).getPropertyValue('--l-r')) > 0) s.rippleAt = now;
     if (mono) s.maxR = Math.max(s.maxR, parseFloat(getComputedStyle(mono).getPropertyValue('--l-r')) || 0);
     if (!mono && s.mono && !s.monoGone) s.monoGone = now;
@@ -60,6 +69,8 @@ await page.evaluateOnNewDocument(() => {
       if (y < -innerHeight * 0.5 && y > s.minY && !s.fall && s.minY < 0) s.fall = now; // first frame it moves down
       s.minY = Math.min(s.minY, y);
       s.maxSx = Math.max(s.maxSx, sx);
+      if (dot.style.translate && y > -0.5 && s.lastY <= -0.5) s.impacts.push(now); // lands
+      s.lastY = y;
       if (s.fall && !s.settled && !dot.style.translate) s.settled = now;
     }
     // Stops once it is all over (or after ~6 s, so it can never keep the page busy).
@@ -74,7 +85,7 @@ const top = (sel) => page.$eval(sel, (e) => e.getBoundingClientRect().top + scro
 const navState = () => page.$eval('.l-nav', (e) => ({ glass: e.classList.contains('is-scrolled') }));
 
 // 0. Wordmark: the word rises in grey (the page stays in colour), the dot
-// falls, squashes and settles, and only then its ripple brings the word's colour back;
+// falls, squashes and bounces, and as it lands after its first bounce its ripple brings the word's colour back;
 // scrolling spreads the letters; no yellow anywhere
 await page.waitForFunction(() => window.__intro.settled && window.__intro.monoGone, { timeout: 6000 }).catch(() => {});
 const firstLoad = await page.evaluate(() => ({ ...window.__intro, word: document.querySelector('.l-mark-word').getBoundingClientRect().width }));
@@ -85,13 +96,20 @@ check(
   `from ${firstLoad.minY.toFixed(0)}px, squash ${firstLoad.maxSx.toFixed(2)}, settled in ${(firstLoad.settled - firstLoad.fall).toFixed(0)} ms`,
 );
 check(
-  'Intro: the word stays grey until the dot has finished bouncing; then one quick ripple (under a second) from the dot covers it and the grey copy is removed',
-  firstLoad.settled > 0 && firstLoad.rippleAt >= firstLoad.settled && firstLoad.rippleAt - firstLoad.settled < 100 &&
+  'Intro: the word stays grey through the first bounce; as the dot lands again one quick ripple (under a second) from it covers the word, then the grey copy is removed',
+  firstLoad.impacts.length >= 2 && firstLoad.rippleAt >= firstLoad.impacts[1] && firstLoad.rippleAt - firstLoad.impacts[1] < 100 && firstLoad.rippleAt < firstLoad.settled &&
     firstLoad.monoGone - firstLoad.rippleAt > 600 && firstLoad.monoGone - firstLoad.rippleAt < 1000 &&
     firstLoad.maxR > firstLoad.word * 0.9 && firstLoad.monoGone > 0 && !(await page.$('.l-mark-mono')),
-  `ripple starts ${(firstLoad.rippleAt - firstLoad.settled).toFixed(0)} ms after the dot settles (${(firstLoad.rippleAt - firstLoad.fall).toFixed(0)} ms after the fall), takes ${(firstLoad.monoGone - firstLoad.rippleAt).toFixed(0)} ms, reaches ${firstLoad.maxR.toFixed(0)}px`,
+  `landings at ${firstLoad.impacts.map((t) => (t - firstLoad.fall).toFixed(0)).join(', ')} ms; ripple starts ${(firstLoad.rippleAt - firstLoad.fall).toFixed(0)} ms after the fall, takes ${(firstLoad.monoGone - firstLoad.rippleAt).toFixed(0)} ms, reaches ${firstLoad.maxR.toFixed(0)}px`,
 );
 await page.hover('.l-mark-dot'); await sleep(300);
+check(
+  'Intro: "sorted." and the Sign in and Create account buttons start grey too (copies laid exactly over them) and the same ripple colours them, then the copies are removed',
+  firstLoad.parts?.length === 3 && firstLoad.parts.every((p) => p.grey === 'grayscale(1)' && p.off < 0.5) &&
+    ['sorted.', 'Sign in', 'Create account'].every((n) => firstLoad.parts.some((p) => p.name === n)) &&
+    Math.abs(firstLoad.partsR - firstLoad.maxR) < 1 && (await page.evaluate(() => !document.querySelector('.l-mono-copy, .l-mono-src'))),
+  JSON.stringify({ parts: firstLoad.parts, r: [firstLoad.partsR, firstLoad.maxR] }),
+);
 check(
   'Intro: plays once; pointing at the dot does not replay it',
   await page.evaluate(() => !document.querySelector('.l-mark-mono') && !document.querySelector('.l-mark-dot').style.translate),

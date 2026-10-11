@@ -224,7 +224,7 @@ To run the local dev server against the deployed backend, run `deploy.ps1` once 
 | End-to-end browser run (headless Chrome, demo mode, includes password reset) | `cd e2e && npm test` (with `npm run dev` running) | 43 / 43 checks passing (2026-10-11) |
 | Live API against the deployed stack (Cognito sign-in, self-service sign-up, password reset, API, DynamoDB, S3, isolation) | `node e2e/live-api.mjs` | 46 / 46 passing (2026-10-11) |
 | Live website in headless Chrome (sign-in, CRUD, S3 upload/download, sign-out) | `node e2e/live-site.mjs` | 17 / 17 passing (2026-10-11) |
-| Landing page motion (wordmark, palette, Day/Night and orbs, HUD, glider, in-page jumps, AWS tiles, scroll pin, card stack, timeline, dialog, reduced motion) | `node e2e/landing-motion.mjs` | 47 / 47 passing (2026-10-11, local and live) |
+| Landing page motion (wordmark, palette, Day/Night and orbs, HUD, glider, in-page jumps, AWS tiles, scroll pin, card stack, timeline, dialog, reduced motion) | `node e2e/landing-motion.mjs` | 48 / 48 passing (2026-10-11, local and live) |
 | Responsive layout (landing and app pages at 10 screen shapes, phones to ultra-wide, portrait and landscape) | `node e2e/responsive.mjs` | 12 / 12 passing (2026-10-11) |
 | Infrastructure lint | `cfn-lint infrastructure/template.yaml` | 0 findings |
 

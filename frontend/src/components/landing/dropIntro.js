@@ -2,16 +2,20 @@
 // grey (the rest of the page is in colour), the dot falls like a drop of
 // water and bounces with real physics: gravity, a squash while it is in
 // contact (longer for harder hits), a stretch while it flies, energy lost on
-// every bounce, and a short wobble as it settles. Only once it has finished
-// bouncing and lies still (under a second) does one quick ripple spread from it
-// across the word and give the letters their colour back, the same circle
-// reveal as the Day/Night switch. About two seconds.
+// every bounce, and a short wobble as it settles. When it lands again after
+// its first bounce, one quick ripple spreads from it across the word and gives
+// the letters their colour back (the same circle reveal as the Day/Night
+// switch) while it finishes bouncing. About 1.5 seconds. The headline's
+// "sorted." and, on desktop, the nav's Sign in and Create account start grey
+// too, and the same ripple carries on out to them.
 //
-// The grey is a copy of the four letters laid exactly over the real ones
-// (same classes, so they rise in step), greyed with a filter, with a hole in
-// its mask that grows from the dot until the copy is gone. It plays once per
-// page load, never under reduced motion (NotoMark only calls it when motion
-// is allowed).
+// The word's grey is a copy of the four letters laid exactly over the real
+// ones (same classes, so they rise in step), greyed with a filter, with a hole
+// in its mask that grows from the dot until the copy is gone. The other parts
+// each get a grey copy laid over them the same way, but there the real part is
+// masked to the inside of the circle as well, so nothing shows twice (the
+// buttons' tinted backgrounds and glows). It plays once per page load, never
+// under reduced motion (NotoMark only calls it when motion is allowed).
 
 const START_DELAY = 250; // ms: the letters are part-way up when the dot falls
 const FALL_S = 0.3; // seconds from above the screen to the baseline
@@ -21,9 +25,46 @@ const MAX_SQUASH = 0.38; // squash on the first, hardest impact
 const MAX_STRETCH = 0.22; // stretch at full falling speed
 const WOBBLE = { k: 1400, c: 40 }; // the shape's spring after each launch and at rest
 // The ripple: the Day/Night switch's circle reveal (switchTheme), from the
-// dot. It starts once the dot has stopped bouncing and sweeps the word's
-// colour back quickly.
+// dot. It starts as the dot lands after its first bounce and sweeps the
+// word's colour back quickly.
 const RIPPLE = { duration: 750, easing: 'cubic-bezier(0.45, 0, 0.25, 1)' };
+// The other parts that start grey and take their colour from the same ripple.
+const ALSO_GREY = ['.l-hero .l-h1 em', '.l-nav-islands .l-signin', '.l-nav-islands .l-nav-cta'];
+
+// A grey copy of `el`, laid exactly over it (an absolutely placed sibling,
+// moved until the two boxes share a centre: an inline word's box is its
+// font's height while the copy's is its line's, and the letters sit in the
+// middle of both); the real one is hidden until
+// the ripple reaches it (.l-mono-src).
+function greyPart(el) {
+  const copy = el.cloneNode(true);
+  copy.classList.add('l-mono-copy');
+  copy.setAttribute('aria-hidden', 'true');
+  copy.setAttribute('tabindex', '-1');
+  copy.inert = true;
+  copy.style.left = '0px';
+  copy.style.top = '0px';
+  el.after(copy);
+  el.classList.add('l-mono-src');
+  const part = { el, copy, anims: [] };
+  alignPart(part);
+  return part;
+}
+
+function alignPart({ el, copy }) {
+  const a = el.getBoundingClientRect();
+  const b = copy.getBoundingClientRect();
+  copy.style.left = `${parseFloat(copy.style.left) + (a.left + a.right - b.left - b.right) / 2}px`;
+  copy.style.top = `${parseFloat(copy.style.top) + (a.top + a.bottom - b.top - b.bottom) / 2}px`;
+}
+
+function restorePart({ el, copy, anims }) {
+  for (const a of anims) a.cancel();
+  copy.remove();
+  el.classList.remove('l-mono-src');
+  el.style.removeProperty('--rx');
+  el.style.removeProperty('--ry');
+}
 
 let played = false;
 
@@ -39,6 +80,7 @@ export function playDropIntro(dot) {
   const originals = [...word.querySelectorAll('.l-mark-mask')];
   for (const mask of originals) overlay.append(mask.cloneNode(true));
   word.append(overlay);
+  const parts = ALSO_GREY.flatMap((sel) => [...document.querySelectorAll(sel)]).map(greyPart);
   // The copies' rise must run on the same clock as the real letters' (theirs
   // may start a frame or a remount later): pairs of [real, copy] animations.
   const pairs = () =>
@@ -82,16 +124,31 @@ export function playDropIntro(dot) {
   }
   apply(s.y, 1, 1);
 
-  // x, y: the dot's centre on screen; the ripple grows until it covers the copy.
+  let impacts = 0; // landings so far
+
+  // x, y: the dot's centre on screen. One circle, the same on screen for
+  // every grey layer, grows until it has covered the word's copy and every
+  // other part; each layer's mask is placed from its own box.
   function startRipple(x, y) {
-    const box = overlay.getBoundingClientRect();
-    x -= box.left;
-    y -= box.top;
-    const radius = Math.hypot(Math.max(x, box.width - x), Math.max(y, box.height - y)) + 8;
-    overlay.style.setProperty('--rx', `${x.toFixed(1)}px`);
-    overlay.style.setProperty('--ry', `${y.toFixed(1)}px`);
-    ripple = overlay.animate({ '--l-r': ['0px', `${radius.toFixed(0)}px`] }, { ...RIPPLE, fill: 'forwards' });
-    ripple.finished.then(() => overlay.remove()).catch(() => {});
+    for (const part of parts) alignPart(part);
+    const layers = [overlay, ...parts.flatMap((p) => [p.el, p.copy])];
+    const boxes = layers.map((el) => el.getBoundingClientRect());
+    const radius = Math.max(...boxes.map((b) => Math.hypot(Math.max(x - b.left, b.right - x), Math.max(y - b.top, b.bottom - y)))) + 8;
+    const grow = (el, box) => {
+      el.style.setProperty('--rx', `${(x - box.left).toFixed(1)}px`);
+      el.style.setProperty('--ry', `${(y - box.top).toFixed(1)}px`);
+      return el.animate({ '--l-r': ['0px', `${radius.toFixed(0)}px`] }, { ...RIPPLE, fill: 'forwards' });
+    };
+    ripple = grow(overlay, boxes[0]);
+    parts.forEach((p, i) => {
+      p.anims = [grow(p.el, boxes[1 + i * 2]), grow(p.copy, boxes[2 + i * 2])];
+    });
+    ripple.finished
+      .then(() => {
+        overlay.remove();
+        parts.forEach(restorePart);
+      })
+      .catch(() => {});
   }
 
   function step(dt) {
@@ -109,6 +166,7 @@ export function playDropIntro(dot) {
         s.launch = speed * RESTITUTION;
         s.sq = 0;
         s.sv = 0;
+        impacts += 1;
         return;
       }
     } else if (s.phase === 'contact') {
@@ -161,13 +219,16 @@ export function playDropIntro(dot) {
     const sy = 1 - s.sq * 0.9 + stretch;
     apply(s.y, sx, sy);
 
-    // Still at last: the bouncing is over, and the colour comes back from the dot.
+    // The colour comes back from the dot as it lands after its first bounce
+    // (or once it is still, should it never bounce).
+    if (impacts >= 2 && !ripple) startRipple(cx, floor - h / 2);
+
     const settled = s.phase === 'rest' && Math.abs(s.sq) < 0.002 && Math.abs(s.sv) < 0.05;
     if (settled) {
       finished = true;
       dot.style.removeProperty('translate');
       dot.style.removeProperty('scale');
-      startRipple(cx, floor - h / 2);
+      if (!ripple) startRipple(cx, floor - h / 2);
       return;
     }
     raf = requestAnimationFrame(frame);
@@ -181,6 +242,7 @@ export function playDropIntro(dot) {
     cancelAnimationFrame(raf);
     ripple?.cancel();
     overlay.remove();
+    parts.forEach(restorePart);
     dot.style.removeProperty('translate');
     dot.style.removeProperty('scale');
     played = false;
