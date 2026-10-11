@@ -191,7 +191,9 @@ try {
   await waitText(`Deleted “${SUBJECT}”`);
   check('Delete subject', true);
 
-  await page.locator('button.nav-button::-p-text(Sign out)').click();
+  // Sign out lives in the account menu (the user box in the sidebar).
+  await page.locator('.account-btn').click();
+  await page.locator('.account-menu .is-signout').click();
   await page.waitForSelector('#login-email');
   await page.goto(SITE + '/notes');
   await page.waitForSelector('#login-email');

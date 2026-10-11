@@ -155,6 +155,15 @@ try {
   // menu instead of Sign in / Create account), and "/" is still the dashboard.
   const themeLabel = await page.$$eval('.nav-button', (els) => els.map((e) => e.textContent).find((t) => t.includes('Theme')));
   check('Theme switch offers only Day and Night', /Day|Night/.test(themeLabel) && !/System/.test(themeLabel), themeLabel);
+  // A long name or email is cut inside the sidebar, never widening it over the page.
+  const sideOverflow = await page.evaluate(() => {
+    const side = document.querySelector('.sidebar').getBoundingClientRect();
+    const email = document.querySelector('.account-btn .user-email');
+    email.textContent = 'a-very-long-address-for-testing-overflow@example-university.edu';
+    const widest = Math.max(...[...document.querySelectorAll('.sidebar-footer > *, .sidebar-footer .account-btn')].map((e) => e.getBoundingClientRect().right));
+    return widest - side.right;
+  });
+  check('A long account email stays inside the sidebar', sideOverflow <= 0, `${sideOverflow.toFixed(0)}px past the sidebar`);
   await click('.account-btn');
   const accountItems = await page.$$eval('.account-menu .account-item', (els) => els.map((e) => e.textContent.trim()).join(','));
   check('The account menu offers Rename, Home and Sign out (no separate Home button)', accountItems === 'Rename,Home,Sign out' && !(await page.$('.sidebar-actions')), accountItems);

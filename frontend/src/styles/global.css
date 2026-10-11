@@ -1353,6 +1353,10 @@ select:disabled {
 
 .sidebar-footer {
   display: grid;
+  /* One column that never grows past the sidebar: a long email in the
+     account button is cut with an ellipsis instead of widening the column
+     (and every row in it) over the page. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 2px;
   padding-top: var(--space-sm);
   border-top: 1px solid var(--hairline);
@@ -1362,6 +1366,7 @@ select:disabled {
    small menu upwards: Rename, Home and Sign out. */
 .account {
   position: relative;
+  min-width: 0;
 }
 
 .account-btn {
