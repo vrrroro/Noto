@@ -24,7 +24,7 @@ For detail, read `PROJECT_CONTEXT.md` next, then `CLAUDE.md` (the project rules)
 - Optional extras are done too: search, filters, sorting, dark mode, upload progress, a public landing page.
 - Still open: sign-up with a real email through the UI, the alert email, CloudFront, console screenshots.
 - Landing page round 4 (grey intro and colour ripple, spaced-out steps, copy and nav fixes) is on branch `feature/landing-round4`, pushed but not merged or deployed.
-- Round 11 (colour ripple starts as the ball lands after its first bounce and also colours "sorted." and the nav buttons; quicker bounce and ripple; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).
+- Round 11 (colour ripple starts as the ball lands after its first bounce and also colours "sorted."; quicker bounce and ripple; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).
 - Round 10 (HUD brand 40% faster, ball on the baseline, capsule centred; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).
 - Round 9 (HUD brand plays once the hero wordmark is off screen; Night orbs in negative; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).
 - Round 8 (responsive pass across 10 screen shapes, phones to ultra-wide; checklist in `LANDING_TASKS.md`) is merged into `main` and deployed with `deploy.ps1 -FrontendOnly` (2026-10-11).

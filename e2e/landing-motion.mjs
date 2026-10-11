@@ -51,7 +51,7 @@ await page.evaluateOnNewDocument(() => {
     const mono = document.querySelector('.l-mark-mono');
     if (document.querySelector('.l-mono')) s.pageGrey = true;
     if (mono && !s.mono) s.mono = getComputedStyle(mono).filter;
-    // "sorted." and the nav's Sign in / Create account: grey copies laid exactly over them.
+    // "sorted.": a grey copy laid exactly over it.
     const copies = [...document.querySelectorAll('.l-mono-copy')];
     if (copies.length && !s.parts) {
       s.parts = copies.map((c) => {
@@ -104,9 +104,8 @@ check(
 );
 await page.hover('.l-mark-dot'); await sleep(300);
 check(
-  'Intro: "sorted." and the Sign in and Create account buttons start grey too (copies laid exactly over them) and the same ripple colours them, then the copies are removed',
-  firstLoad.parts?.length === 3 && firstLoad.parts.every((p) => p.grey === 'grayscale(1)' && p.off < 0.5) &&
-    ['sorted.', 'Sign in', 'Create account'].every((n) => firstLoad.parts.some((p) => p.name === n)) &&
+  'Intro: "sorted." starts grey too (a copy laid exactly over it) and the same ripple colours it, then the copy is removed; the nav buttons stay in colour',
+  firstLoad.parts?.length === 1 && firstLoad.parts[0].name === 'sorted.' && firstLoad.parts[0].grey === 'grayscale(1)' && firstLoad.parts[0].off < 0.5 &&
     Math.abs(firstLoad.partsR - firstLoad.maxR) < 1 && (await page.evaluate(() => !document.querySelector('.l-mono-copy, .l-mono-src'))),
   JSON.stringify({ parts: firstLoad.parts, r: [firstLoad.partsR, firstLoad.maxR] }),
 );

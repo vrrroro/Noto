@@ -1207,11 +1207,9 @@
   mask-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent calc(var(--l-r) - 1px), #000 var(--l-r));
 }
 
-/* The other parts that start grey with the word (dropIntro.js): "sorted."
-   and the nav's Sign in and Create account. Each has a grey copy laid over
-   it with a hole that grows from the dot, while the real one shows only
-   inside that circle, so nothing is drawn twice. The buttons' glow comes back
-   gently once the ripple has passed (it is off while the real one is masked). */
+/* The other part that starts grey with the word (dropIntro.js): "sorted.".
+   It has a grey copy laid over it with a hole that grows from the dot, while
+   the real one shows only inside that circle, so nothing is drawn twice. */
 .l-mono-copy {
   position: absolute;
   margin: 0;
@@ -1224,11 +1222,6 @@
 .l-mono-src {
   -webkit-mask-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), #000 calc(var(--l-r) - 1px), transparent var(--l-r));
   mask-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), #000 calc(var(--l-r) - 1px), transparent var(--l-r));
-}
-
-.l-underglow.l-mono-src,
-.l-underglow.l-mono-copy {
-  box-shadow: none;
 }
 
 .l-hero-side {

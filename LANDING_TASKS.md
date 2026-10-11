@@ -540,6 +540,9 @@ Owner's list. Ends with a merge into `main`, a push and an Amplify deploy.
   fades back in once the ripple has passed. Landing motion now 48 checks (the three parts start
   grey, copies aligned, the ripple reaches them, copies removed). Responsive 12/12, demo E2E 43/43,
   unit 21/21.
+- [x] **R11-6. Not the nav buttons (owner's follow-up).** Sign in and Create account no longer start
+  grey; the ripple colours only the wordmark and "sorted.". Landing motion checks "sorted." is the
+  only extra grey part (48/48).
 - [x] **R11-2. Tests and release.** The landing motion intro checks now require the ripple to start
   after the ball settles, the ball to settle within 1.2 s and the ripple to take under a second
   (47/47). Merged into `main`, pushed, deployed with `deploy.ps1 -FrontendOnly`.

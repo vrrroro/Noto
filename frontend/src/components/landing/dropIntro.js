@@ -6,16 +6,15 @@
 // its first bounce, one quick ripple spreads from it across the word and gives
 // the letters their colour back (the same circle reveal as the Day/Night
 // switch) while it finishes bouncing. About 1.5 seconds. The headline's
-// "sorted." and, on desktop, the nav's Sign in and Create account start grey
-// too, and the same ripple carries on out to them.
+// "sorted." starts grey too, and the same ripple carries on out to it.
 //
 // The word's grey is a copy of the four letters laid exactly over the real
 // ones (same classes, so they rise in step), greyed with a filter, with a hole
-// in its mask that grows from the dot until the copy is gone. The other parts
-// each get a grey copy laid over them the same way, but there the real part is
-// masked to the inside of the circle as well, so nothing shows twice (the
-// buttons' tinted backgrounds and glows). It plays once per page load, never
-// under reduced motion (NotoMark only calls it when motion is allowed).
+// in its mask that grows from the dot until the copy is gone. "sorted." gets a
+// grey copy laid over it the same way, but there the real word is masked to
+// the inside of the circle as well, so nothing shows twice. It plays once per
+// page load, never under reduced motion (NotoMark only calls it when motion is
+// allowed).
 
 const START_DELAY = 250; // ms: the letters are part-way up when the dot falls
 const FALL_S = 0.3; // seconds from above the screen to the baseline
@@ -29,7 +28,7 @@ const WOBBLE = { k: 1400, c: 40 }; // the shape's spring after each launch and a
 // word's colour back quickly.
 const RIPPLE = { duration: 750, easing: 'cubic-bezier(0.45, 0, 0.25, 1)' };
 // The other parts that start grey and take their colour from the same ripple.
-const ALSO_GREY = ['.l-hero .l-h1 em', '.l-nav-islands .l-signin', '.l-nav-islands .l-nav-cta'];
+const ALSO_GREY = ['.l-hero .l-h1 em'];
 
 // A grey copy of `el`, laid exactly over it (an absolutely placed sibling,
 // moved until the two boxes share a centre: an inline word's box is its
